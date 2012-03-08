@@ -1,0 +1,5 @@
+This repository is currently broken as I've just pulled the micro cloud related code from the bosh repository.
+
+To get it working again:
+- switch to the new stemcell builder
+- change the console code to use the http-based agent
