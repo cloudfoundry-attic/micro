@@ -3,3 +3,7 @@ This repository is currently broken as I've just pulled the micro cloud related 
 To get it working again:
 - switch to the new stemcell builder
 - change the console code to use the http-based agent
+
+
+To file a bug against Cloud Foundry Open Source and its components, sign up and use our
+bug tracking system: http://cloudfoundry.atlassian.net
