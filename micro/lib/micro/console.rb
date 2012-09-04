@@ -329,6 +329,7 @@ module VCAP
         end
         %w{/var/vcap/sys/run /var/vcap/store /var/vcap/jobs
            /var/vcap/packages
+           /var/vcap/monit/job
         }.each do |dir|
           FileUtils.rm_rf(dir)
         end
