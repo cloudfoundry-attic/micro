@@ -1,16 +1,26 @@
 source :rubygems
 
-gem 'highline'
-gem 'rest-client'
-gem "blobstore_client", "~> 0.3"
-gem "yajl-ruby", :require => "yajl"
+gem "highline"
 gem "monit_api"
+gem "nats", "=0.4.22"
+gem "netaddr"
+gem "blobstore_client", "~> 0.3.13"
+gem "posix-spawn"
+gem "rake"
+gem "rack-test"
+gem "ruby-atmos-pure"
+gem "sigar", ">=0.7.2"
+gem "bosh_encryption", ">=0.0.3"
+gem "sinatra"
+gem "thin"
+gem "uuidtools"
+gem "yajl-ruby", :require => "yajl"
+gem 'agent_client'
+gem 'bosh_common'
+
+gem 'rest-client'
 gem "statemachine"
 gem "progressbar"
-
-gem "uuidtools"
-gem "netaddr"
-gem "posix-spawn"
 
 gem 'vmc'
 

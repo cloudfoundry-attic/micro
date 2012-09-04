@@ -5,6 +5,7 @@ require 'tempfile'
 require 'ostruct'
 require 'posix-spawn'
 require 'monit_api'
+require 'agent_client'
 
 module Bosh
   module Agent
@@ -12,26 +13,17 @@ module Bosh
   end
 end
 
-require 'agent/ext'
-require 'agent/util'
-require 'agent/config'
-require 'agent/errors'
-require 'agent/version'
-require 'agent/message/base'
-require 'agent/message/apply'
-require 'agent/platform'
-require 'agent/monit'
-require 'agent/state'
-require 'agent/template'
-require 'agent/platform'
-require 'agent/platform/ubuntu'
-require 'agent/platform/ubuntu/logrotate'
+require 'agent'
 
 
 module VCAP
   module Micro
     class Agent
       APPLY_SPEC = '/var/vcap/micro/apply_spec.yml'
+
+      AGENT_CLIENT_URI = 'http://localhost:6969/'
+      AGENT_CLIENT_USER = 'vcap'
+      AGENT_CLIENT_PASSWORD = 'vcap'
 
       def self.apply(identity)
         agent = self.new(identity)
@@ -55,9 +47,12 @@ module VCAP
             },
           "agent_id" => "micro",
           "base_dir" => "/var/vcap",
-          "platform_name" => "ubuntu",
-          "blobstore_options" => { "blobstore_path" => "/var/vcap/data/cache" },
-          "blobstore_provider" => "local"
+          "platform_name" => "microcloud",
+          "blobstore_options" => {
+            "blobstore_path" => "/var/vcap/micro_bosh/data/cache"
+          },
+          "blobstore_provider" => "local",
+          "infrastructure_name" => "vsphere"
         }
         logdir = File.dirname(settings['logging']['file'])
         FileUtils.mkdir_p(logdir) unless Dir.exist?(logdir)
@@ -74,6 +69,9 @@ module VCAP
 
       def initialize(identity)
         @identity = identity
+        @agent_client = Bosh::Agent::Client.create(AGENT_CLIENT_URI,
+          'user' => AGENT_CLIENT_USER,
+          'password' => AGENT_CLIENT_PASSWORD)
       end
 
       def setup
@@ -124,7 +122,8 @@ module VCAP
       end
 
       def apply
-        Bosh::Agent::Message::Apply.process([@spec])
+        @agent_client.run_task(:apply, @spec)
+
         monitor_start
       end
 
