@@ -26,7 +26,8 @@ usage unless File.exist?(manifest) && File.exist?(tarball)
 
 opts = {
   "logging" => {"level" => "DEBUG"},
-  "base_dir"  => File.expand_path("/var/vcap")
+  "base_dir" => "/var/vcap",
+  "platform_name" => "microcloud"
 }
 
 ngc = VCAP::Micro::Compiler.new(opts).compile(manifest, tarball)
