@@ -15,8 +15,10 @@ gem "posix-spawn"
 gem 'vmc'
 
 group :test do
-  gem "rcov_analyzer"
+  gem "rcov_analyzer", :platforms => :ruby_18
   gem "rspec", :require => ["spec", "spec/interop/test"]
-  gem "rcov"
+  gem "rcov", :platforms => :ruby_18
   gem "ci_reporter"
+  gem "simplecov", :platforms => :ruby_19
+  gem "simplecov-rcov", :platforms => :ruby_19
 end
