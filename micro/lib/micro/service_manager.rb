@@ -125,7 +125,7 @@ module VCAP::Micro
     end
 
     def monit_prefix(path)
-      "/var/vcap/monit/job/micro_#{path}"
+      "/var/vcap/monit/job/micro.micro_#{path}"
     end
 
     def monitrc(group)
