@@ -249,10 +249,15 @@ module VCAP
       # Comma separated list of dns servers
       def dns(dns_string)
         servers = dns_string.split(/,/).map { |s| s.gsub(/\s+/, '') }
-        File.open(RESOLV_CONF, 'w') do |f|
+        open('/etc/dnsmasq.d/server', 'w') do |f|
           servers.each do |s|
-            f.puts("nameserver #{s}")
+            f.puts("server=#{s}")
           end
+        end
+        restart_dnsmasq
+
+        File.open(RESOLV_CONF, 'w') do |f|
+          f.puts("nameserver 127.0.0.1")
         end
       end
 

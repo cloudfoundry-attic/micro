@@ -4,7 +4,8 @@ module VCAP::Micro
     # no reverse for now
     FILES = {
       "dnsmasq.conf.erb" => "dnsmasq.conf",
-      "dnsmasq.erb" => "dhcp3/dhclient-enter-hooks.d/dnsmasq"
+      "dnsmasq.erb" => "dhcp3/dhclient-enter-hooks.d/dnsmasq",
+      "local_resolvconf.erb" => "dhcp3/dhclient-enter-hooks.d/local_resolvconf"
     }
 
     def initialize(ip, domain)
