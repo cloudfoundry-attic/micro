@@ -1,4 +1,4 @@
-Micro Cloud Foundry version 1.2
+Micro Cloud Foundry version 1.3
 ===============================
 
 This is the third release of Micro Cloud Foundry.
@@ -40,7 +40,7 @@ by signing in with your CloudFoundry.com credentials.
 Default configuration:
 
 Micro Cloud Foundry
-VM:       1GB RAM / 16GB disk / 2 VCPUs
+VM:       2GB RAM / 16GB disk / 2 VCPUs
 -----------------------------------------------
 MySQL:    2GB storage, max 256MB storage per instance
 Postgres: 2GB storage, max 256MB storage per instance
@@ -54,33 +54,38 @@ Runtimes
 +--------+-------------+-----------+
 | Name   | Description | Version   |
 +--------+-------------+-----------+
-| java   | Java 6      | 1.6       |
-| ruby18 | Ruby 1.8    | 1.8.7     |
-| ruby19 | Ruby 1.9    | 1.9.2p180 |
 | node   | Node.js     | 0.4.12    |
 | node06 | Node.js     | 0.6.8     |
+| node08 | Node.js     | 0.8.2     |
+| ruby18 | Ruby 1.8    | 1.8.7     |
+| ruby19 | Ruby 1.9    | 1.9.2p180 |
+| java   | Java 6      | 1.6       |
+| java7  | Java 7      | 1.7       |
 +--------+-------------+-----------+
 
 Frameworks
-+----------+
-| Name     |
-+----------+
-| rails3   |
-| sinatra  |
-| grails   |
-| node     |
-| java_web |
-| lift     |
-| spring   |
-+----------+
++------------+
+| Name       |
++------------+
+| node       |
+| rack       |
+| spring     |
+| play       |
+| java_web   |
+| grails     |
+| rails3     |
+| standalone |
+| lift       |
+| sinatra    |
++------------+
 
 Services
 +------------+---------+---------------------------------------+
 | Service    | Version | Description                           |
 +------------+---------+---------------------------------------+
-| mongodb    | 1.8     | MongoDB NoSQL store                   |
+| mongodb    | 2.0     | MongoDB NoSQL store                   |
 | mysql      | 5.1     | MySQL database service                |
 | postgresql | 9.0     | PostgreSQL database service (vFabric) |
-| rabbitmq   | 2.4     | RabbitMQ messaging service            |
+| rabbitmq   | 2.4     | RabbitMQ message queue                |
 | redis      | 2.2     | Redis key-value store service         |
 +------------+---------+---------------------------------------+
