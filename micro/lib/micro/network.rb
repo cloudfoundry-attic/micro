@@ -92,6 +92,7 @@ module VCAP
             event :timeout, :failed
             event :fail, :failed
             event :started, :up
+            event :restart, :starting
           end
           state :failed do
             event :restart, :starting
@@ -176,12 +177,6 @@ module VCAP
 
       # async
       def restart
-        # warn unless it is the first time we run, i.e. no previous state
-        if starting? && !@previous
-          $stderr.puts("network already restarting".red)
-          @logger.error("network already restarting: #{caller.join("\n")}")
-          return
-        end
         @state.restart
         Thread.new do
           restart_with_timeout
