@@ -220,6 +220,7 @@ module VCAP
         end
         @identity.save
         DNS.new(ip, @identity.subdomain).generate
+        @network.restart
         unless initial
           say("Reconfiguring Micro Cloud Foundry with new settings...")
           Bosh::Agent::Monit.stop_services(60) # is it enough to stop only cc?
@@ -255,6 +256,7 @@ module VCAP
             net['dns'] =     ask("DNS:     ").to_s
             # TODO validate network
             @network.static(net)
+            DNS.new(net['address'], @identity.subdomain).generate
           end
         end
         press_return_to_continue unless initial
