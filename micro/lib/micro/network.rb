@@ -3,6 +3,8 @@ require 'socket'
 require 'resolv'
 require 'statemachine'
 require 'timeout'
+require 'fileutils'
+require 'tempfile'
 
 module VCAP
   module Micro
@@ -154,12 +156,36 @@ module VCAP
       def online!
         FileUtils.rm_f(OFFLINE_FILE)
         FileUtils.rm_f(OFFLINE_CONF)
+
+        # Uncomment upstream DNS servers in /etc/dnsmasq.d/server
+        temp = Tempfile.new('server')
+        open('/etc/dnsmasq.d/server').each_line do |line|
+          temp.write(line.sub(/^# /, ''))
+        end
+        temp.flush
+        FileUtils.mv temp.path, '/etc/dnsmasq.d/server'
+
         restart_dnsmasq
       end
 
       def offline!
         FileUtils.touch(OFFLINE_FILE)
         FileUtils.cp(OFFLINE_TEMPLATE, OFFLINE_CONF)
+
+        # Comment out upstream DNS servers in /etc/dnsmasq.d/server
+        # to prevent DNS loops.
+        temp = Tempfile.new('server')
+        open('/etc/dnsmasq.d/server').each_line do |line|
+          if line[/^# /]
+            new_line = line
+          else
+            new_line = "# #{line}"
+          end
+          temp.write new_line
+        end
+        temp.flush
+        FileUtils.mv temp.path, '/etc/dnsmasq.d/server'
+
         restart_dnsmasq
       end
 
@@ -246,7 +272,7 @@ module VCAP
         servers = dns_string.split(/,/).map { |s| s.gsub(/\s+/, '') }
         open('/etc/dnsmasq.d/server', 'w') do |f|
           servers.each do |s|
-            f.puts("server=#{s}")
+            f.puts "#{offline? ? '# ' : ''}server=#{s}"
           end
         end
         restart_dnsmasq

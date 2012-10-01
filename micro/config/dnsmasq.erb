@@ -3,7 +3,11 @@ if [ "$reason" = "BOUND" ]; then
 
   for ns in $new_domain_name_servers
   do
-    echo "server=$ns"
+    if [ -e "/var/vcap/micro/offline" ]; then
+      echo "# server=$ns"
+    else
+      echo "server=$ns"
+    fi
   done > /etc/dnsmasq.d/server
 
   service dnsmasq restart
