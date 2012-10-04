@@ -15,6 +15,7 @@ module VCAP
       OFFLINE_FILE = "/var/vcap/micro/offline"
       OFFLINE_CONF = "/etc/dnsmasq.d/offline.conf"
       OFFLINE_TEMPLATE = "/var/vcap/micro/config/offline.conf"
+      DNSMASQ_UPSTREAM = '/etc/dnsmasq.d/server'
 
       def self.local_ip(route = A_ROOT_SERVER)
         retries ||= 0
@@ -158,12 +159,14 @@ module VCAP
         FileUtils.rm_f(OFFLINE_CONF)
 
         # Uncomment upstream DNS servers in /etc/dnsmasq.d/server
-        temp = Tempfile.new('server')
-        open('/etc/dnsmasq.d/server').each_line do |line|
-          temp.write(line.sub(/^# /, ''))
+        if File.exist?(DNSMASQ_UPSTREAM)
+          temp = Tempfile.new('server')
+          open(DNSMASQ_UPSTREAM).each_line do |line|
+            temp.write(line.sub(/^# /, ''))
+          end
+          temp.flush
+          FileUtils.mv temp.path, DNSMASQ_UPSTREAM
         end
-        temp.flush
-        FileUtils.mv temp.path, '/etc/dnsmasq.d/server'
 
         restart_dnsmasq
       end
@@ -174,17 +177,19 @@ module VCAP
 
         # Comment out upstream DNS servers in /etc/dnsmasq.d/server
         # to prevent DNS loops.
-        temp = Tempfile.new('server')
-        open('/etc/dnsmasq.d/server').each_line do |line|
-          if line[/^# /]
-            new_line = line
-          else
-            new_line = "# #{line}"
+        if File.exist?(DNSMASQ_UPSTREAM)
+          temp = Tempfile.new('server')
+          open(DNSMASQ_UPSTREAM).each_line do |line|
+            if line[/^# /]
+              new_line = line
+            else
+              new_line = "# #{line}"
+            end
+            temp.write new_line
           end
-          temp.write new_line
+          temp.flush
+          FileUtils.mv temp.path, DNSMASQ_UPSTREAM
         end
-        temp.flush
-        FileUtils.mv temp.path, '/etc/dnsmasq.d/server'
 
         restart_dnsmasq
       end
