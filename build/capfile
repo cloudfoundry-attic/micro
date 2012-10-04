@@ -1,0 +1,316 @@
+require 'base64'
+require 'net/ftp'
+require 'openssl'
+require 'uri'
+
+require 'atmos'
+require 'capistrano_colors'
+
+# Capistrano recipe for building and testing Micro Cloud Foundry from Jenkins.
+
+# Pass these command line arguments to capistrano to set variables.
+#
+# -s vmrun= \
+# -s vm_initial_password= \
+# -s micro_password= \
+# -s domain= \
+# -s admin_user= \
+# -s admin_password= \
+# -s normal_user= \
+# -s normal_password= \
+# -s http_proxy= \
+# -s atmos_url= \
+# -s atmos_uid= \
+# -s atmos_secret= \
+# -s cdn_ftp_host= \
+# -s cdn_ftp_user= \
+# -s cdn_ftp_password=
+
+# ENV['BUILD_SERVER'] and ENV['TEST_SERVER'] must also be set.
+
+module ShareableUrl
+
+  def digest(input)
+    OpenSSL::HMAC.digest('sha1', secret_decoded, input)
+  end
+
+  def secret_decoded
+    Base64.strict_decode64 secret
+  end
+
+  def signature(path, expires)
+    input = ['GET', path, uid, expires].join("\n")
+
+    Base64.strict_encode64(digest(input))
+  end
+
+  def shareable_url(path, expires)
+    path = "/#{path}"  unless path[0] == '/'
+    path = "/rest#{path}"  unless path[%r{^/rest}]
+
+    result = URI(uri.to_s)
+    result.path = path
+
+    result.query = URI.encode_www_form([
+      [:uid, uid],
+      [:expires, expires],
+      [:signature, signature(path, expires)]
+      ])
+
+    result.to_s
+  end
+
+end
+
+class Atmos::Store
+  include ShareableUrl
+end
+
+Atmos::Parser::parser = Atmos::Parser::NOKOGIRI
+
+load 'deploy'
+
+role :build, ENV['BUILD_SERVER']
+role :test, ENV['TEST_SERVER']
+
+set :user, 'mmb'
+
+ssh_options[:forward_agent] = true
+ssh_options[:keys] = '/var/lib/jenkins/.ssh/id_rsa'
+
+# Send data to virtual console 1 on a VM as if it had been typed there.
+def vm_console_send(vmx_path, data, password, options={})
+  options = {
+    :vmrun => 'vmrun',
+    :user => 'root',
+    :remote_ruby => '/var/vcap/bosh/bin/ruby',
+    }.merge(options)
+
+  header = <<-eos
+open('/dev/tty1', 'w') do |o|
+  DATA.each_char do |c|
+    o.ioctl(0x5412, c)
+    sleep(rand(100) / 300.0)
+  end
+end
+__END__
+eos
+
+  local_script = '/tmp/script.rb'
+  remote_script = '/tmp/script.rb'
+
+  open(local_script, 'w') { |f| f << header << data }
+
+  run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} CopyFileFromHostToGuest \"#{vmx_path}\" #{local_script} #{remote_script}"
+
+  run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} runProgramInGuest \"#{vmx_path}\" #{options[:remote_ruby]} #{remote_script}"
+end
+
+def vm_ip(vmx_path, password, options={})
+  options = {
+    :vmrun => 'vmrun',
+    :user => 'root',
+    :interface => 'eth0',
+    }.merge(options)
+
+  run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} runScriptInGuest \"#{vmx_path}\" /bin/sh \"/sbin/ifconfig #{options[:interface]} > /tmp/ifconfig\""
+
+  run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} CopyFileFromGuestToHost \"#{vmx_path}\" /tmp/ifconfig /tmp/ifconfig"
+
+  `cat /tmp/ifconfig`[/inet addr:(\S+) /,1]
+end
+
+def run_commands(commands)
+  run commands.join(' && ')
+end
+
+desc 'Clean up build debris.'
+task :clean, :roles => :build do
+  # TODO add /tmp
+  run_commands([
+    "#{sudo} rm -rf /var/tmp/bosh/agent-*",
+    'rm -rf ~/cf-release/dev_releases/*',
+    "#{sudo} rm -rf ~/bosh/agent/mcf/*",
+  ])
+end
+
+desc 'Update cf-release.'
+task :update_cfrelease, :roles => :build do
+  run_commands([
+    'cd ~/cf-release',
+    './update',
+  ])
+end
+
+desc 'Create Micro Cloud Foundry bosh release.'
+task :create_release, :roles => :build do
+  run_commands([
+    '. ~/.bash_profile',
+    'cd ~/cf-release',
+    'bosh create release --force --with-tarball',
+  ])
+end
+
+desc 'Update micro.'
+task :update_micro, :roles => :build do
+  run_commands([
+    'cd ~/micro',
+    'git pull',
+  ])
+end
+
+desc 'Update bosh agent.'
+task :update_bosh_agent, :roles => :build do
+  run_commands([
+    '. ~/.bash_profile',
+    'cd ~/bosh/agent',
+    'git pull',
+    'bundle update',
+  ])
+end
+
+desc 'Describe the latest commit in cf-release on the build machine.'
+task :desc_cf_release, :roles => :build do
+  output = capture('git --git-dir ~/cf-release/.git describe --tags').chomp
+  output.gsub! /^v/, 'r'
+  output.gsub! /-(\d+)-[\da-z]+$/, 'p\\1'
+  output
+end
+
+desc 'Run vcap-yeti tests.'
+task :bvt, :roles => :test do
+  # Set the nameserver of the test machine to the Micro Cloud VM.
+  resolv_conf_backup = '~/resolv.conf.backup'
+
+  run "cp /etc/resolv.conf #{resolv_conf_backup}"
+  run "echo 'nameserver #{micro_vm_ip}' > /tmp/resolv.conf"
+  run "#{sudo} cp /tmp/resolv.conf /etc/resolv.conf"
+
+  run_commands([
+    '. ~/.bash_profile',
+    "vmc --trace target http://api.#{domain}/",
+    "vmc --trace register '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}'",
+    "vmc --trace register #{normal_user} --password '#{normal_password}' --verify '#{normal_password}'",
+    "export VCAP_BVT_TARGET=#{domain}",
+    "export VCAP_BVT_ADMIN_USER='#{admin_user}'",
+    "export VCAP_BVT_ADMIN_USER_PASSWD='#{admin_password}'",
+    "export VCAP_BVT_USER='#{normal_user}'",
+    "export VCAP_BVT_USER_PASSWD='#{normal_password}'",
+    'cd ~/vcap-yeti',
+    'env',
+    './update.sh',
+    'rm -rf ~/.bvt',
+    'bundle exec rake full[1]'
+    ])
+
+    run "#{sudo} cp #{resolv_conf_backup} /etc/resolv.conf"
+end
+
+desc 'Upload a zip file to Atmos.'
+task :distribute do
+  namespace = "nightly/#{zip_name}"
+
+  p "sending #{zip_local_path} to Atmos #{namespace}"
+
+  store = Atmos::Store.new(
+    :url => atmos_url,
+    :uid => atmos_uid,
+    :secret => atmos_secret)
+
+  store.create(
+    :mimetype => 'application/zip',
+    :data => open(zip_local_path),
+    :namespace => namespace
+    )
+
+  p store.shareable_url("/namespace/#{namespace}", Time.now.to_i + 604800)
+end
+
+desc 'Upload a zip file to the Akamai CDN.'
+task :release do
+  p "sending #{zip_local_path} to CDN #{cdn_ftp_host}"
+
+  ftp = Net::FTP.new(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password)
+  p ftp.putbinaryfile(zip_local_path)
+  ftp.close
+end
+
+desc 'Build and test the latest Micro Cloud Foundry.'
+task :build, :roles => :build do
+  clean
+  update_cfrelease
+  create_release
+  update_bosh_agent
+  update_micro
+
+  set :build_time, Time.now.strftime('%Y%m%d.%H%M%S')
+  release_desc = desc_cf_release
+  set :version, "1.3_#{release_desc}_#{build_time}"
+
+  run_commands([
+    '. ~/.bash_profile',
+    "export BUILD_TIME=#{build_time}",
+    "export MCF_VERSION=#{version}",
+    'export UBUNTU_ISO=~/ubuntu-10.04.4-server-amd64.iso',
+    'export UBUNTU_MIRROR=http://localhost:9999/ubuntu',
+    'LATEST_RELEASE=`ls -t ~/cf-release/dev_releases/micro-*-dev.tgz | head -1`',
+    'cd ~/bosh/agent',
+    'rake stemcell2:mcf[vsphere,~/cf-release/micro/manifest.yml,$LATEST_RELEASE]'
+    ])
+
+  build_host = find_servers_for_task(current_task)[0]
+
+  set :zip_name, "micro-#{version}.zip"
+
+  set :zip_local_path, "/tmp/#{zip_name}"
+
+  zip_path = "mmb@#{build_host}:bosh/agent/mcf/#{build_time}/#{zip_name}"
+
+  run_locally "scp #{zip_path} /tmp"
+
+  distribute
+
+  puts run_locally "cd /tmp && unzip -o #{zip_name}"
+
+  vmx = '/tmp/micro/micro.vmx'
+
+  run_locally "#{vmrun} start #{vmx} nogui"
+
+  sleep 30
+
+  config_commands = <<-eos
+1
+#{micro_password}
+#{micro_password}
+1
+#{http_proxy}
+#{domain}
+#{admin_user}
+quit
+y
+eos
+
+  vm_console_send vmx, config_commands, vm_initial_password
+
+  # Give MCF time to boot.
+
+  sleep 300
+
+  # Turn on online mode.
+  vm_console_send vmx, "\n6\n", micro_password
+
+  set :micro_vm_ip, vm_ip(vmx, micro_password)
+
+  p micro_vm_ip
+
+  bvt
+
+  release  unless version[/p/]
+
+  # Archive build?
+
+  # Cleanup.
+
+  # run_locally "#{vmrun} stop #{vmx} nogui"
+  # rm -rf /tmp/micro
+end
