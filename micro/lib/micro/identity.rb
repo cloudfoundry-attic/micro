@@ -5,7 +5,7 @@ module VCAP
   module Micro
     class Identity
       attr_accessor :admins, :ip, :nonce, :version
-      attr_reader :name, :cloud, :version, :api_host, :proxy, :latest_version
+      attr_reader :name, :cloud, :version, :api_host, :proxy
 
       DEFAULT_API_HOST = "mcapi.cloudfoundry.com"
       URL = "https://%s/api/v1/micro"
@@ -170,8 +170,6 @@ module VCAP
         response = Yajl::Parser.new.parse(json)
 
         if response
-          # latest is the file name - micro-1.0.0_rc2.tgz
-          @latest_version = Version.file2version(response["latest"])
           @version = response["version"] if response["version"]
           values = response.collect {|k,v| "#{k} = #{v}"}.join("\n")
           @logger.info("got following response from DNS update:\n#{values}")
