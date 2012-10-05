@@ -54,7 +54,7 @@ module VCAP
         # TODO add a timeout so the console will be auto-refreshed
         while true
           clear
-          say("              Welcome to VMware Micro Cloud Foundry version #{VCAP::Micro::Version::VERSION}\n\n")
+          say("Welcome to VMware Micro Cloud Foundry version #{VCAP::Micro::Version::VERSION}\n\n")
           status
           menu
         end
@@ -74,10 +74,6 @@ module VCAP
       def status
         if @identity.api_host != Identity::DEFAULT_API_HOST
           say("Using API host: #{@identity.api_host}\n".yellow)
-        end
-        if Version.should_update?(@identity.version)
-          url = "http://cloudfoundry.com/micro"
-          say("Version #{@identity.latest_version} is available for download at #{url}\n".yellow)
         end
         if @identity.configured?
           say("Current Configuration:")
