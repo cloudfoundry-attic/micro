@@ -60,7 +60,7 @@ module VCAP
         props = spec['properties']
         props['dea']['max_memory'] = max
         props['cc']['admin_account_capacity']['memory']= max
-        props['cc']['default_account_capacity']['memory'] = max/2
+        props['cc']['default_account_capacity']['memory'] = max
         spec
       end
 
