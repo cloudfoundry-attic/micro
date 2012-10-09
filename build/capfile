@@ -1,3 +1,4 @@
+require 'json'
 require 'net/ftp'
 
 require 'capistrano_colors'
@@ -28,8 +29,62 @@ role :test, ENV['TEST_SERVER']
 
 set :user, 'mmb'
 
-ssh_options[:forward_agent] = true
 ssh_options[:keys] = '/var/lib/jenkins/.ssh/id_rsa'
+
+# Track MCF versions that have been uploaded to the CDN.
+class VersionStore
+
+  def initialize(path)
+    @path = path
+    @releases = []
+    @nightlies = []
+
+    read  if File.exist?(path)
+  end
+
+  # Read the store from disk.
+  def read
+    open(path) do |f|
+      data = JSON.parse(f.read)
+
+      @releases = data.fetch('release', [])
+      @nightlies = data.fetch('nightly', [])
+    end
+  end
+
+  # Write the contents of the store to disk in JSON.
+  def write
+    open(path, 'w') do |f|
+      f.flock(File::LOCK_EX)
+      f.write to_json
+      f.flock(File::LOCK_UN)
+    end
+  end
+
+  # Return true if the store contains a release tag.
+  def has_release?(tag)
+    @releases.index { |r| r[/^micro-#{tag}-/] }
+  end
+
+  def to_h
+    {
+      'release' => @releases.uniq,
+      'nightly' => @nightlies.uniq
+    }
+  end
+
+  def to_json
+    to_h.to_json
+  end
+
+  def pretty
+    JSON.pretty_generate(to_h)
+  end
+
+  attr_accessor :path
+  attr_accessor :releases
+  attr_accessor :nightlies
+end
 
 # Send data to virtual console 1 on a VM as if it had been typed there.
 def vm_console_send(vmx_path, data, password, options={})
@@ -87,12 +142,22 @@ task :clean, :roles => :build do
   ])
 end
 
-desc 'Update cf-release.'
-task :update_cfrelease, :roles => :build do
-  run_commands([
-    'cd ~/cf-release',
-    './update',
-  ])
+desc 'Get the latest cf-release tag.'
+task :latest_cf_release_tag, :roles => :build do
+  run 'git --git-dir ~/cf-release/.git fetch'
+
+  output = capture('git --git-dir ~/cf-release/.git show-ref --tags')
+
+  tags = []
+
+  output.lines do |line|
+    match = %r{refs/tags/v(\d+)$}.match(line)
+    if match
+      tags << match[1].to_i
+    end
+  end
+
+  "v#{tags.sort.last}"
 end
 
 desc 'Create Micro Cloud Foundry bosh release.'
@@ -129,6 +194,25 @@ task :desc_cf_release, :roles => :build do
   output
 end
 
+desc 'Checkout the latest cf-release master on the build machine.'
+task :checkout_cf_release_master, :roles => :build do
+  run_commands([
+    'cd ~/cf-release',
+    'git checkout master',
+    './update'
+  ])
+end
+
+desc 'Checkout a cf-release tag on the build machine.'
+task :checkout_cf_release_tag, :roles => :build do
+  run_commands([
+    'cd ~/cf-release',
+    'git fetch',
+    "git checkout -b #{tag}branch #{tag}",
+    'git submodule update --init --recursive'
+  ])
+end
+
 desc 'Run vcap-yeti tests.'
 task :bvt, :roles => :test do
   # Set the nameserver of the test machine to the Micro Cloud VM.
@@ -162,30 +246,47 @@ desc 'Distribute a nightly version of the Micro Cloud.'
 task :dist_nightly do
   p "sending #{zip_local_path} to CDN #{cdn_ftp_host}/micro/nightly"
 
-  ftp = Net::FTP.new(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password)
-  p ftp.putbinaryfile(zip_local_path, "micro/nightly/#{zip_name}")
-  ftp.close
+  Net::FTP.open(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password) do |ftp|
+    ftp.putbinaryfile(zip_local_path, "micro/nightly/#{zip_name}")
+  end
+
+  p "http://download3.vmware.com/cloudfoundry/micro/nightly/#{zip_name}"
 end
 
 desc 'Distribute a release version of the Micro Cloud.'
 task :dist_release do
   p "sending #{zip_local_path} to CDN #{cdn_ftp_host}/micro/release"
 
-  ftp = Net::FTP.new(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password)
-  p ftp.putbinaryfile(zip_local_path, "micro/release/#{zip_name}")
-  ftp.close
+  Net::FTP.open(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password) do |ftp|
+    ftp.putbinaryfile(zip_local_path, "micro/release/#{zip_name}")
+  end
+
+  p "http://download3.vmware.com/cloudfoundry/micro/release/#{zip_name}"
 end
 
 desc 'Build and test the latest Micro Cloud Foundry.'
 task :build, :roles => :build do
   clean
-  update_cfrelease
+
+  set :tag, latest_cf_release_tag
+
+  version_store = VersionStore.new('/var/lib/jenkins/versions.json')
+
+  if version_store.has_release?(tag)
+    checkout_cf_release_master
+    release_desc = "#{tag}+"
+    is_release_version = false
+  else
+    checkout_cf_release_tag
+    release_desc = tag
+    is_release_version = true
+  end
+
   create_release
   update_bosh_agent
   update_micro
 
   set :build_time, Time.now.strftime('%Y%m%d.%H%M%S')
-  release_desc = desc_cf_release
   set :version, "#{release_desc}-#{build_time}"
 
   run_commands([
@@ -244,10 +345,20 @@ eos
 
   bvt
 
-  if version[/p/]
-    dist_nigthly
-  else
+  if is_release_version
     dist_release
+    version_store.releases.insert(0, zip_name)
+  else
+    dist_nigthly
+    version_store.nightlies.insert(0, zip_name)
+  end
+
+  version_store.write
+
+  p "sending #{version_store.path} to CDN #{cdn_ftp_host}/micro/versions.json"
+  p version_store.pretty
+  Net::FTP.open(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password) do |ftp|
+    ftp.putbinaryfile(version_store.path, "micro/versions.json")
   end
 
   # Archive build?
