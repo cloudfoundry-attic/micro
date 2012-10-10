@@ -6,12 +6,12 @@
 Welcome to Micro Cloud Foundry (TM)
 
 For installation and setup documentation, go to:
-http://support.cloudfoundry.com/entries/20316811
+http://docs.cloudfoundry.com/infrastructure/micro/installing-mcf.html
 
 Default configuration:
-VM:       1 GB RAM / 16 GB disk
+VM:       2 GB RAM / 16 GB disk
 MySQL:    2GB storage, max 256MB storage per instance
 Postgres: 2GB storage, max 256MB storage per instance
 MongoDB:  256MB per instance
 Redis:    256MB per instance
-
+RabbitMQ:
