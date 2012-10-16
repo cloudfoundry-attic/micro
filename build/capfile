@@ -132,6 +132,10 @@ def run_commands(commands)
   run commands.join(' && ')
 end
 
+def is_release_version(filename)
+  filename[/^micro-v\d+-/]
+end
+
 desc 'Clean up build debris.'
 task :clean, :roles => :build do
   # TODO add /tmp
@@ -213,8 +217,8 @@ task :checkout_cf_release_tag, :roles => :build do
   ])
 end
 
-desc 'Run vcap-yeti tests.'
-task :bvt, :roles => :test do
+desc 'Prepare the test VM and Micro Cloud for vcap-yeti tests.'
+task :bvt_setup, :roles => :test do
   # Set the nameserver of the test machine to the Micro Cloud VM.
   resolv_conf_backup = '~/resolv.conf.backup'
 
@@ -227,6 +231,13 @@ task :bvt, :roles => :test do
     "vmc --trace target http://api.#{domain}/",
     "vmc --trace register '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}'",
     "vmc --trace register #{normal_user} --password '#{normal_password}' --verify '#{normal_password}'",
+    ])
+end
+
+desc 'Run vcap-yeti tests.'
+task :bvt, :roles => :test do
+  run_commands([
+    '. ~/.bash_profile',
     "export VCAP_BVT_TARGET=#{domain}",
     "export VCAP_BVT_ADMIN_USER='#{admin_user}'",
     "export VCAP_BVT_ADMIN_USER_PASSWD='#{admin_password}'",
@@ -238,13 +249,41 @@ task :bvt, :roles => :test do
     'rm -rf ~/.bvt',
     'bundle exec rake full[1]'
     ])
+end
 
-    run "#{sudo} cp #{resolv_conf_backup} /etc/resolv.conf"
+desc 'Revert temporary changes done to the test VM.'
+task :bvt_teardown, :roles => :test do
+  resolv_conf_backup = '~/resolv.conf.backup'
+  run "#{sudo} cp #{resolv_conf_backup} /etc/resolv.conf"
+end
+
+desc 'Distribute a Micro Cloud zip file.'
+task :dist do
+  zip_name = File.basename(zip_local_path)
+
+  version_store = VersionStore.new('/var/lib/jenkins/versions.json')
+
+  if is_release_version(zip_name)
+    dist_release
+    version_store.releases.insert(0, zip_name)
+  else
+    dist_nightly
+    version_store.nightlies.insert(0, zip_name)
+  end
+
+  version_store.write
+
+  p "sending #{version_store.path} to CDN #{cdn_ftp_host}/micro/versions.json"
+  p version_store.pretty
+  Net::FTP.open(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password) do |ftp|
+    ftp.putbinaryfile(version_store.path, "micro/versions.json")
+  end
 end
 
 desc 'Distribute a nightly version of the Micro Cloud.'
 task :dist_nightly do
   p "sending #{zip_local_path} to CDN #{cdn_ftp_host}/micro/nightly"
+  zip_name = File.basename(zip_local_path)
 
   Net::FTP.open(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password) do |ftp|
     ftp.putbinaryfile(zip_local_path, "micro/nightly/#{zip_name}")
@@ -256,6 +295,7 @@ end
 desc 'Distribute a release version of the Micro Cloud.'
 task :dist_release do
   p "sending #{zip_local_path} to CDN #{cdn_ftp_host}/micro/release"
+  zip_name = File.basename(zip_local_path)
 
   Net::FTP.open(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password) do |ftp|
     ftp.putbinaryfile(zip_local_path, "micro/release/#{zip_name}")
@@ -302,9 +342,8 @@ task :build, :roles => :build do
 
   build_host = find_servers_for_task(current_task)[0]
 
-  set :zip_name, "micro-#{version}.zip"
-
-  set :zip_local_path, "/tmp/#{zip_name}"
+  set :zip_local_path, "/tmp/micro-#{version}.zip"
+  zip_name = File.basename(zip_local_path)
 
   zip_path = "mmb@#{build_host}:bosh/agent/mcf/#{build_time}/#{zip_name}"
 
@@ -343,23 +382,11 @@ eos
 
   p micro_vm_ip
 
+  bvt_setup
   bvt
+  bvt_teardown
 
-  if is_release_version
-    dist_release
-    version_store.releases.insert(0, zip_name)
-  else
-    dist_nigthly
-    version_store.nightlies.insert(0, zip_name)
-  end
-
-  version_store.write
-
-  p "sending #{version_store.path} to CDN #{cdn_ftp_host}/micro/versions.json"
-  p version_store.pretty
-  Net::FTP.open(cdn_ftp_host, cdn_ftp_user, cdn_ftp_password) do |ftp|
-    ftp.putbinaryfile(version_store.path, "micro/versions.json")
-  end
+  dist
 
   # Archive build?
 
