@@ -203,7 +203,7 @@ module VCAP
 
         if Network.lookup(subdomain) == @ip
           say("done".green)
-        elsif Network.ext_lookup(subdomain) == @ip
+        elsif Network.ext_lookup(subdomain).address == @ip
           say("External DNS updated, cached information is still being served".yellow)
         else
           say("DNS still synchronizing, continuing after waiting #{Watcher::TTL} seconds".yellow)
