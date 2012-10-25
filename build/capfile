@@ -211,8 +211,31 @@ desc 'Checkout a cf-release tag on the build machine.'
 task :checkout_cf_release_tag, :roles => :build do
   run_commands([
     'cd ~/cf-release',
-    'git fetch',
-    "git checkout -b #{tag}branch #{tag}",
+    'git checkout master',
+    'git pull',
+    "git branch -f #{tag}branch #{tag}",
+    "git checkout #{tag}branch",
+    'git submodule update --init --recursive'
+  ])
+end
+
+desc 'Checkout the latest cf-release master on the test machine.'
+task :checkout_cf_release_master_test, :roles => :test do
+  run_commands([
+    'cd ~/cf-release',
+    'git checkout master',
+    './update'
+  ])
+end
+
+desc 'Checkout a cf-release tag on the test machine.'
+task :checkout_cf_release_tag_test, :roles => :test do
+  run_commands([
+    'cd ~/cf-release',
+    'git checkout master',
+    'git pull',
+    "git branch -f #{tag}branch #{tag}",
+    "git checkout #{tag}branch",
     'git submodule update --init --recursive'
   ])
 end
@@ -231,6 +254,11 @@ task :bvt_setup, :roles => :test do
     "vmc --trace target http://api.#{domain}/",
     "vmc --trace register '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}'",
     "vmc --trace register #{normal_user} --password '#{normal_password}' --verify '#{normal_password}'",
+    'cd ~/gem_cache_warmer',
+    'vmc push -f warmer --runtime ruby19 || true',
+    'vmc delete -f warmer || true',
+    'vmc push -f warmer --runtime ruby18 || true',
+    'vmc delete -f warmer || true'
     ])
 end
 
@@ -243,8 +271,7 @@ task :bvt, :roles => :test do
     "export VCAP_BVT_ADMIN_USER_PASSWD='#{admin_password}'",
     "export VCAP_BVT_USER='#{normal_user}'",
     "export VCAP_BVT_USER_PASSWD='#{normal_password}'",
-    'cd ~/vcap-yeti',
-    'env',
+    ' cd ~/cf-release/src/tests',
     './update.sh',
     'rm -rf ~/.bvt',
     'bundle exec rake full[1]'
@@ -314,10 +341,12 @@ task :build, :roles => :build do
 
   if version_store.has_release?(tag)
     checkout_cf_release_master
+    checkout_cf_release_master_test
     release_desc = "#{tag}+"
     is_release_version = false
   else
     checkout_cf_release_tag
+    checkout_cf_release_tag_test
     release_desc = tag
     is_release_version = true
   end
