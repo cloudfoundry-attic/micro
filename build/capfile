@@ -421,6 +421,6 @@ eos
 
   # Cleanup.
 
-  # run_locally "#{vmrun} stop #{vmx} nogui"
-  # rm -rf /tmp/micro
+  run_locally "#{vmrun} stop #{vmx} nogui"
+  run_locally 'rm -rf /tmp/micro'
 end
