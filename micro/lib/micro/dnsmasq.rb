@@ -1,3 +1,5 @@
+require 'micro/network_interface'
+
 module VCAP
 
   module Micro
@@ -10,15 +12,20 @@ module VCAP
         `service dnsmasq restart`
       end
 
-      def initialize(domain, ip)
-        @domain = domain
-        @ip = ip
+      def initialize(options={})
+        @domain = options[:domain]
+        @ip = options[:ip]
 
-        @upstream_servers_path = '/etc/dnsmasq.d/server'
+        @upstream_servers = options[:upstream_servers] || []
 
-        @conf_path = '/etc/dnsmasq.conf'
-        @enter_hook_path = '/etc/dhcp3/dhclient-enter-hooks.d/dnsmasq'
-        @resolv_conf_path = '/etc/dhcp3/dhclient-enter-hooks.d/local_resolvconf'
+        @upstream_servers_path =
+          options[:upstream_servers_path] || '/etc/dnsmasq.d/server'
+        @conf_path = options[:conf_path] || '/etc/dnsmasq.conf'
+        @enter_hook_path =
+          options[:enter_hook_path] ||
+          '/etc/dhcp3/dhclient-enter-hooks.d/dnsmasq'
+        @resolv_conf_path = options[:resolv_conf_path] ||
+          '/etc/dhcp3/dhclient-enter-hooks.d/local_resolvconf'
       end
 
       # Generate the dnsmasq.conf file.
@@ -55,6 +62,44 @@ make_resolv_conf() {
 eos
       end
 
+      # Generate the upstream nameservers configuration file.
+      def gen_upstream_servers
+        upstream_servers.to_a.map { |s| "server=#{s}" }.join("\n") + "\n"
+      end
+
+      # Read the domain and ip configuration from the config files.
+      def read_domain_ip
+        open(conf_path) do |f|
+          m = f.read.match(%r{address=/([\w.-]+)/(#{NetworkInterface::IP_RE})})
+          if m
+            @domain = m[1]
+            @ip = m[2]
+          end
+        end
+      end
+
+      # Read upstream servers from config files.
+      def read_upstream_servers
+        servers = []
+
+        if File.exist?(upstream_servers_path)
+          open(upstream_servers_path).each do |line|
+            server = line[/^server=(#{NetworkInterface::IP_RE})$/, 1]
+            servers << server  if server
+          end
+        end
+
+        @upstream_servers = servers
+      end
+
+      # Read configuration from config files.
+      def read
+        read_domain_ip
+        read_upstream_servers
+
+        self
+      end
+
       # Write all config files.
       def write
         open(conf_path, 'w') do |f|
@@ -67,6 +112,10 @@ eos
 
         open(resolv_conf_path, 'w') do |f|
           f.write(gen_resolv_conf)
+        end
+
+        open(upstream_servers_path, 'w') do |f|
+          f.write(gen_upstream_servers)
         end
 
         self.class.restart
@@ -86,9 +135,9 @@ eos
 
       attr_accessor :domain
       attr_accessor :ip
+      attr_accessor :upstream_servers
 
       attr_accessor :upstream_servers_path
-
       attr_accessor :conf_path
       attr_accessor :enter_hook_path
       attr_accessor :resolv_conf_path

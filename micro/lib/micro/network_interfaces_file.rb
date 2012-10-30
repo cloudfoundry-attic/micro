@@ -35,7 +35,7 @@ eos
 
       # Build the interface section.
       def iface
-        if is_dhcp
+        if dhcp?
           "iface eth0 inet dhcp\n"
         else
           <<-eos
@@ -51,10 +51,16 @@ eos
         head + iface
       end
 
+      # Return true if this interface is static.
+      def static?
+        !dhcp?
+      end
+
       attr_accessor :ip
       attr_accessor :netmask
       attr_accessor :gateway
       attr_accessor :is_dhcp
+      alias_method(:dhcp?, :is_dhcp)
     end
 
   end

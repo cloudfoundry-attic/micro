@@ -61,4 +61,37 @@ describe VCAP::Micro::ConfigFile do
 
   end
 
+  context 'exception during write' do
+
+    it 'should preserve the original file' do
+      temp = Tempfile.new('config_file')
+
+      cf = VCAP::Micro::ConfigFile.new
+      cf.path = temp.path
+
+      cf.write do |c|
+        c.admin_email = 'foo@bar.com'
+        c.api_host = 'test.com'
+        c.cloud = 'cloud'
+        c.ip = '192.168.0.1'
+        c.name = 'apitest'
+        c.token = 'token'
+      end
+
+      orig_content = open(temp.path).read
+
+      begin
+        cf.write { |c| raise 'derp' }
+      rescue Exception
+      end
+
+      new_content = open(temp.path).read
+
+      temp.unlink
+
+      new_content.should == orig_content
+    end
+
+  end
+
 end

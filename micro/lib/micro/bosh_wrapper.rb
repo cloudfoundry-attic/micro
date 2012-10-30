@@ -114,7 +114,12 @@ module VCAP
       def apply_spec(spec)
         agent_client.run_task(:apply, spec)
 
-        start_services_and_wait
+        restart_services
+      end
+
+      # Reload monitor.
+      def reload_monitor
+        Bosh::Agent::Monit.reload
       end
 
     end

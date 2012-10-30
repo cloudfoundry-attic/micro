@@ -35,10 +35,12 @@ module VCAP
       # If a block is passed in, the config file will be yielded so that
       # changes can be made before writing.
       def write
+        yield self  if block_given?
+        output = JSON.generate(@config)
+
         open(@path, 'w') do |f|
           f.flock(File::LOCK_EX)
-          yield self  if block_given?
-          JSON.dump(@config, f)
+          f.write(output)
           f.flock(File::LOCK_UN)
         end
 
@@ -66,7 +68,7 @@ module VCAP
       end
 
       def api_host
-        @config['api_host']
+        @config['api_host'] ||= 'mcapi.cloudfoundry.com'
       end
 
       def api_host=(api_host)

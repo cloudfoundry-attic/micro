@@ -87,7 +87,7 @@ eos
 
   end
 
-  describe '.write' do
+  describe '#write' do
 
     it 'should write to a file' do
       nif = VCAP::Micro::NetworkInterfacesFile.new(:is_dhcp => true)
@@ -111,6 +111,22 @@ eos
       end
     end
 
+  end
+
+  describe '#static?' do
+
+    subject { VCAP::Micro::NetworkInterfacesFile.new(:is_dhcp => true) }
+
+    it { should_not be_static }
+    it { should be_dhcp }
+  end
+
+  describe '#dhcp?' do
+
+    subject { VCAP::Micro::NetworkInterfacesFile.new(:is_dhcp => false) }
+
+    it { should_not be_dhcp }
+    it { should be_static }
   end
 
 end
