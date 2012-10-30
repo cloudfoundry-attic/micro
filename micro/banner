@@ -14,5 +14,5 @@ MySQL:    2GB storage, max 256MB storage per instance
 Postgres: 2GB storage, max 256MB storage per instance
 MongoDB:  256MB per instance
 Redis:    256MB per instance
-RabbitMQ:
+RabbitMQ: max memory factor 0.5, max 512 clients per instance
 
