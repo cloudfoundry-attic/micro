@@ -1,0 +1,89 @@
+require 'tempfile'
+
+require 'micro/apply_spec'
+
+describe VCAP::Micro::ApplySpec do
+
+  describe '#path' do
+
+    it 'sets the path' do
+      subject.path = 'foo'
+      subject.path.should == 'foo'
+    end
+
+  end
+
+  context 'writing and reading' do
+
+    subject {
+      temp = Tempfile.new('apply_spec')
+      path = temp.path
+      temp.unlink
+
+      as = VCAP::Micro::ApplySpec.new(path)
+      as.write do |a|
+        a.admin = 'foo@bar.com'
+        a.domain = 'test.com'
+        a.http_proxy = 'http://proxy.test.com:1234'
+      end
+
+      VCAP::Micro::ApplySpec.new(path).read
+    }
+
+    its(:admin) { should == 'foo@bar.com' }
+
+    its(:domain) { should == 'test.com' }
+
+    its(:env) { should include({
+      'http_proxy' => 'http://proxy.test.com:1234',
+      'https_proxy' => 'http://proxy.test.com:1234',
+      'no_proxy' => '.test.com,127.0.0.1/8,localhost',
+      })
+    }
+
+  end
+
+  describe '#http_proxy=' do
+
+    context 'using a proxy' do
+
+      subject {
+        as = VCAP::Micro::ApplySpec.new
+        as.domain = 'test.com'
+        as.http_proxy = 'http://proxy.test.com:1234'
+        as
+      }
+
+      its(:env) {
+        should include 'http_proxy' => 'http://proxy.test.com:1234'
+      }
+
+      its(:env) {
+        should include 'https_proxy' => 'http://proxy.test.com:1234'
+      }
+
+      its(:env) {
+        should include 'no_proxy' => '.test.com,127.0.0.1/8,localhost'
+      }
+
+    end
+
+    context 'not using a proxy' do
+
+      subject {
+        as = VCAP::Micro::ApplySpec.new
+        as.http_proxy = nil
+        as
+      }
+
+      its(:env) { should_not include 'http_proxy' }
+
+      its(:env) { should_not include 'https_proxy' }
+
+      its(:env) { should_not include 'no_proxy' }
+
+    end
+
+  end
+
+end
