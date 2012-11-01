@@ -50,6 +50,15 @@ module VCAP
       end
 
       def console
+        while !tos_accepted?
+          display_file(TOS, true)
+          if agree("\nDo you agree to the Terms of Service? ")
+            FileUtils.touch(TOS_ACCEPTED)
+          else
+            say("You have to agree to the Terms of Service to use Micro Cloud Foundry".red)
+          end
+        end
+
         VCAP::Micro::Agent.start if @identity.configured?
         # TODO add a timeout so the console will be auto-refreshed
         while true
@@ -193,15 +202,6 @@ module VCAP
           # TODO sanity check of admin email
           # make sure we get a String not a HighLine::String
           email = ask("\nAdmin email: ").to_s
-
-          while !tos_accepted?
-            display_file(TOS, true)
-            if agree("\nDo you agree to the Terms of Service? ")
-              FileUtils.touch(TOS_ACCEPTED)
-            else
-              say("You have to agree to the Terms of Service to use Micro Cloud Foundry".red)
-            end
-          end
 
           @identity.clear
           @network.offline!
