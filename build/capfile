@@ -38,6 +38,7 @@ class VersionStore
     @path = path
     @releases = []
     @nightlies = []
+    @default = nil
 
     read  if File.exist?(path)
   end
@@ -49,6 +50,7 @@ class VersionStore
 
       @releases = data.fetch('release', [])
       @nightlies = data.fetch('nightly', [])
+      @default = data.fetch('default', nil)
     end
   end
 
@@ -70,6 +72,7 @@ class VersionStore
     {
       'release' => @releases.uniq,
       'nightly' => @nightlies.uniq
+      'default' => default
     }
   end
 
@@ -81,9 +84,14 @@ class VersionStore
     JSON.pretty_generate(to_h)
   end
 
+  def default
+    @default || releases[0]
+  end
+
   attr_accessor :path
   attr_accessor :releases
   attr_accessor :nightlies
+  attr_writer :default
 end
 
 # Send data to virtual console 1 on a VM as if it had been typed there.
@@ -296,6 +304,12 @@ task :dist do
   else
     dist_nightly
     version_store.nightlies.insert(0, zip_name)
+  end
+
+  # Pass in default_version as a command line argument if you want to
+  # set a default version that is not the latest release.
+  if exists?(:default_version)
+    version_store.default = default_version
   end
 
   version_store.write
