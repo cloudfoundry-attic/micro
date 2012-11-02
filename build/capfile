@@ -71,7 +71,7 @@ class VersionStore
   def to_h
     {
       'release' => @releases.uniq,
-      'nightly' => @nightlies.uniq
+      'nightly' => @nightlies.uniq,
       'default' => default
     }
   end
@@ -401,6 +401,8 @@ task :build, :roles => :build do
   sleep 30
 
   config_commands = <<-eos
+quit
+y
 1
 #{micro_password}
 #{micro_password}
@@ -408,8 +410,6 @@ task :build, :roles => :build do
 #{http_proxy}
 #{domain}
 #{admin_user}
-quit
-y
 eos
 
   vm_console_send vmx, config_commands, vm_initial_password
