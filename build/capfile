@@ -292,6 +292,19 @@ task :bvt_teardown, :roles => :test do
   run "#{sudo} cp #{resolv_conf_backup} /etc/resolv.conf"
 end
 
+desc 'Run vcap-java-client tests.'
+task :vcap_java_client_tests, :roles => :test do
+  run_commands([
+    'cd ~/vcap-java-client',
+    'git pull',
+    'git submodule update --init --recursive',
+    'cd vcap-java-client-test-apps',
+    'mvn clean install',
+    'cd ../cloudfoundry-client-lib',
+    "mvn clean test -Pintegration-test -Dcloud.version=V1 -Dtest.app.memory=256 -Dvcap.target=http://api.#{domain} -Dvcap.email=#{normal_user} -Dvcap.passwd=#{normal_password}"
+    ])
+end
+
 desc 'Distribute a Micro Cloud zip file.'
 task :dist do
   zip_name = File.basename(zip_local_path)
@@ -427,6 +440,7 @@ eos
 
   bvt_setup
   bvt
+  vcap_java_client_tests
   bvt_teardown
 
   dist
