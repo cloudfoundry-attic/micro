@@ -1,7 +1,5 @@
-Micro Cloud Foundry version 1.3
+Micro Cloud Foundry version 116
 ===============================
-
-This is the third release of Micro Cloud Foundry.
 
 IMPORTANT : You MUST have a valid CloudFoundry.com account to get the required
 Micro Cloud Foundry Token to configure the Micro Cloud Foundry VM for online
@@ -13,8 +11,8 @@ by signing in with your CloudFoundry.com credentials.
 
 - The Cloud Foundry Team
 
-* Support is strictly through the Cloud Foundry community site.
-  NOTE: You will have to create a separate account for the Support site.
+* Support is available on StackOverflow forums or by opening a private support
+  ticket.
   http://support.cloudfoundry.com
 
 * Installation and setup documentation at
@@ -32,8 +30,9 @@ by signing in with your CloudFoundry.com credentials.
   - http://start.cloudfoundry.com
   - http://blog.cloudfoundry.com
   - http://www.cloudfoundry.org
-  - On Twitter @cloudfoundry (hashtag #cfoundry)
+  - On Twitter @cloudfoundry (hashtag #cloudfoundry)
   - On Facebook at http://facebook.com/cloudfoundry
+  - On Google Plus at https://plus.google.com/114245065906861739918
 
 * File a bug at http://cloudfoundry.atlassian.net
 
