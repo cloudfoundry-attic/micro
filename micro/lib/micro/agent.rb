@@ -7,12 +7,6 @@ require 'posix-spawn'
 require 'monit_api'
 require 'agent_client'
 
-module Bosh
-  module Agent
-    BOSH_APP = BOSH_APP_USER = BOSH_APP_GROUP = "vcap"
-  end
-end
-
 require 'agent'
 
 
