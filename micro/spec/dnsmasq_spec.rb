@@ -4,7 +4,13 @@ require 'micro/dnsmasq'
 
 describe VCAP::Micro::Dnsmasq do
 
-  subject { VCAP::Micro::Dnsmasq.new('foobar.com', '192.168.0.2') }
+  subject {
+    VCAP::Micro::Dnsmasq.new(
+      :domain => 'foobar.com',
+      :ip => '192.168.0.2',
+      :upstream_servers => %w{1.2.3.4}
+    )
+  }
 
   its(:gen_conf) { should == 'address=/foobar.com/192.168.0.2' }
 
@@ -31,30 +37,42 @@ make_resolv_conf() {
   echo 'nameserver 127.0.0.1' > /etc/resolv.conf
 }
 eos
-    }
+  }
 
-  describe '.write' do
+  its(:gen_upstream_servers) { should ==  <<-eos
+server=1.2.3.4
+eos
+  }
+
+  describe '#write' do
 
     before(:all) {
       @temp_conf = Tempfile.new('dnsmasq')
       @temp_enter_hook = Tempfile.new('dnsmasq')
       @temp_resolv_conf = Tempfile.new('dnsmasq')
+      @temp_upstream_servers = Tempfile.new('dnsmasq')
     }
 
     after(:all) {
       @temp_conf.unlink
       @temp_enter_hook.unlink
       @temp_resolv_conf.unlink
+      @temp_upstream_servers.unlink
     }
 
     subject {
-      d = VCAP::Micro::Dnsmasq.new('foobar.com', '192.168.0.2')
+      d = VCAP::Micro::Dnsmasq.new(
+        :domain => 'foobar.com',
+        :ip => '192.168.0.2',
+        :upstream_servers => %w{1.2.3.4},
+
+        :conf_path => @temp_conf.path,
+        :enter_hook_path => @temp_enter_hook.path,
+        :resolv_conf_path => @temp_resolv_conf.path,
+        :upstream_servers_path => @temp_upstream_servers.path
+      )
 
       d.class.stub(:restart)
-
-      d.conf_path = @temp_conf.path
-      d.enter_hook_path = @temp_enter_hook.path
-      d.resolv_conf_path = @temp_resolv_conf.path
 
       d
     }
@@ -105,6 +123,45 @@ make_resolv_conf() {
 eos
     end
 
+    it 'should write the upstream servers file' do
+      subject.class.should_receive(:restart)
+
+      subject.write
+      @temp_upstream_servers.flush
+      open(@temp_upstream_servers.path) { |f| f.read }
+        .should == <<-eos
+server=1.2.3.4
+eos
+    end
+
+  end
+
+  describe '#read' do
+
+    subject {
+      temp_conf = Tempfile.new('dnsmasq')
+      temp_upstream_servers = Tempfile.new('dnsmasq')
+
+      temp_conf.write("address=/foobar.com/192.168.0.2\n")
+      temp_conf.flush
+
+      temp_upstream_servers.write("server=1.2.3.4\n")
+      temp_upstream_servers.flush
+
+      d = VCAP::Micro::Dnsmasq.new(
+        :conf_path => temp_conf.path,
+        :upstream_servers_path => temp_upstream_servers.path
+      ).read
+
+      temp_conf.unlink
+      temp_upstream_servers.unlink
+
+      d
+    }
+
+    its(:domain) { should == 'foobar.com' }
+    its(:ip) { should == '192.168.0.2' }
+    its(:upstream_servers) { should == %w{1.2.3.4} }
   end
 
 end

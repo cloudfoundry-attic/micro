@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VMware Micro Cloud Foundry</title>
+    <link href="assets/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="assets/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+    <link href="assets/css/mcf.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+
+    <div class="container">
+
+      <div class="page-header">
+	<h1><span class="domain"></span> <small>Micro Cloud Foundry</small></h1>
+      </div>
+
+      <div class="container-fluid">
+
+	<div class="row-fluid">
+
+	  <div class="span2">
+
+	    <div class="mcf-nav">
+	      <!--Sidebar content-->
+	      <ul class="nav nav-list well">
+
+		<li>
+		  <a href="#home" data-toggle="tab"><i class="icon-home">
+		    </i> Home</a>
+		</li>
+
+		<li class="divider"></li>
+
+		<li>
+		  <a href="#services" data-toggle="tab">
+		    <i class="icon-align-justify"></i> Services</a>
+		</li>
+
+		<li class="divider"></li>
+
+		<li class="nav-header">Network</li>
+
+		<li>
+		  <a href="#net-config" data-toggle="tab">
+		    <i class="icon-wrench"></i> Configure</a>
+		</li>
+
+		<li>
+		  <a href="#http-proxy" data-toggle="tab"><i class="icon-hand-right"></i> HTTP Proxy</a>
+		</li>
+
+		<li class="divider"></li>
+
+		<li>
+		  <a href="#domain" data-toggle="tab"><i class="icon-book"></i> Domain</a>
+		</li>
+
+		<li class="divider"></li>
+
+		<li>
+		  <a href="#account" data-toggle="tab">
+		    <i class="icon-user"></i> Account</a>
+		</li>
+
+		<li class="divider"></li>
+
+		<li>
+		  <a href="http://docs.cloudfoundry.com/infrastructure/micro/installing-mcf.html">
+		    <i class="icon-question-sign"></i> Help</a>
+		</li>
+
+		<li class="divider"></li>
+
+		<li>
+		  <a href="#shutdown-modal" data-toggle="modal">
+		    <i class="icon-off"></i> Shutdown</a>
+		</li>
+
+	      </ul>
+	    </div>
+	  </div>
+
+	  <div class="span10">
+
+	    <div class="tab-content">
+
+	      <div class="tab-pane active" id="home">
+
+		<div class="alert alert-info">
+		  <button type="button" class="close" data-dismiss="alert">x</button>
+		  This Micro Cloud Foundry news item will be loaded from JSON on Akamai.
+		</div>
+
+		<p>Internet connected mode: <span class="internet-connected">?</span></p>
+
+		<p>Internet reachable: <span class="reach-internet">?</span></p>
+
+		<p>Default gateway reachable: <span class="reach-gateway">?</span></p>
+
+		<p>Default nameserver working: <span class="resolve-default">?</span></p>
+
+		<p>Other nameserver working: <span class="resolve-other">?</span></p>
+
+		<p>Version: <span class="version" />?</p>
+
+	      </div>
+
+	      <div class="tab-pane" id="services">
+
+		<table class="table">
+
+		  <thead>
+		    <tr>
+		      <th>Name</th>
+		      <th>Health</th>
+		      <th>Enabled?</th>
+		      <th></th>
+		    </tr>
+		  </thead>
+
+		  <tbody class="services"></tbody>
+
+		</table>
+	      </div>
+
+	      <div class="tab-pane" id="net-config">
+		<form>
+		  <fieldset>
+		    <legend>Network configuration</legend>
+
+		    <p>Configure the Micro Cloud Foundry's network interface.</p>
+
+		    <p>Current network configuration:</p>
+
+		    <p>IP address: <span class="ip_address"></span></p>
+		    <p>Netmask: <span class="netmask"></span></p>
+		    <p>Gateway: <span class="gateway"></span></p>
+		    <p>Nameservers: <span class="nameservers"></span></p>
+
+		    <label class="checkbox">
+		      <input type="checkbox" id="dhcp"> DHCP
+		    </label>
+		    <label>IP address</label>
+		    <input type="text" placeholder="n.n.n.n" id="ip_address" class="static">
+		    <label>Netmask</label>
+		    <input type="text" placeholder="n.n.n.n" id="netmask" class="static">
+		    <label>Gateway</label>
+		    <input type="text" placeholder="n.n.n.n" id="gateway" class="static">
+		    <label>Nameservers</label>
+		    <input type="text" placeholder="n.n.n.n,n.n.n.n" id="nameservers" class="static">
+		    <label></label>
+		    <button type="button" class="btn" id="network-submit">Submit</button>
+		  </fieldset>
+		</form>
+	      </div>
+
+	      <div class="tab-pane" id="http-proxy">
+		<form>
+		  <fieldset>
+		    <legend>HTTP proxy configuration</legend>
+		    <p>If your network requires the use of an HTTP proxy, set it here.</p>
+		    <p>Current proxy URL: <span class="proxy"></span></p>
+		    <label>Change proxy URL</label>
+		    <input type="text" id="proxy">
+		    <label></label>
+		    <button type="button" class="btn" id="proxy-submit">Submit</button>
+		    <label></label>
+		  </fieldset>
+		</form>
+	      </div>
+
+	      <div class="tab-pane" id="domain">
+		<form>
+		  <fieldset>
+		    <legend>Domain </legend>
+		    <p>Set the domain that your Micro Cloud Foundry will use.</p>
+		    <p>Current domain name: <span class="domain"></span></p>
+		    <label>Make up a domain name. This will be resolvable only by hosts using this Micro Cloud Foundry as a nameserver.</label>
+
+		    <input type="text" placeholder="test.micro" id="domain-name">
+		    <p>or</p>
+		    <label>Use a domain token from <a href="https://micro.cloudfoundry.com/dns">cloudfoundry.com</a>. This will be resolvable from anywhere on the internet.</label>
+		    <input type="text" placeholder="token-with-words" id="token">
+		    <label></label>
+		    <button type="button" class="btn" id="domain-submit">Submit</button>
+		  </fieldset>
+		</form>
+	      </div>
+
+	      <div class="tab-pane" id="account">
+		<form>
+		  <fieldset>
+		    <legend>Modify administrator account</legend>
+		    <p>The Micro Cloud user with this email address will have administrator privileges.</p>
+		    <p>Current email: <span class="admin-email"></span></p>
+		    <label>Email</label>
+		    <input type="text" placeholder="Email" id="email">
+		    <p>This password is used for Micro Cloud Foundry shell access.</p>
+		    <label>Password</label>
+		    <input type="password" id="password">
+		    <label></label>
+		    <button id="admin-submit" type="button" class="btn">Submit</button>
+		  </fieldset>
+		</form>
+	      </div>
+
+	      <div id="shutdown-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="shutdown-modal-label" aria-hidden="true">
+		<div class="modal-header">
+		  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+		  <h3 id="shutdown-modal-label">Confirm Shutdown</h3>
+		</div>
+		<div class="modal-body">
+		  <p>Shut down the Micro Cloud virtual machine?</p>
+		</div>
+		<div class="modal-footer">
+		  <button class="btn btn-primary" id="shutdown-button">Shutdown</button>
+		  <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+		</div>
+	      </div>
+
+	    </div>
+	  </div>
+	</div>
+      </div>
+    </div>
+
+    <script src="assets/js/jquery-1.8.3.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/mcf.js"></script>
+
+  </body>
+</html>

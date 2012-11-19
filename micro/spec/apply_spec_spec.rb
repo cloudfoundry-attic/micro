@@ -43,6 +43,35 @@ describe VCAP::Micro::ApplySpec do
 
   end
 
+  context 'exception during write' do
+
+    it 'should preserve the original file' do
+      temp = Tempfile.new('apply_spec')
+
+      as = VCAP::Micro::ApplySpec.new(temp.path)
+
+      as.write do |a|
+        a.admin = 'foo@bar.com'
+        a.domain = 'test.com'
+        a.http_proxy = 'http://proxy.test.com:1234'
+      end
+
+      orig_content = open(temp.path).read
+
+      begin
+        as.write { |c| raise 'derp' }
+      rescue Exception
+      end
+
+      new_content = open(temp.path).read
+
+      temp.unlink
+
+      new_content.should == orig_content
+    end
+
+  end
+
   describe '#http_proxy=' do
 
     context 'using a proxy' do
