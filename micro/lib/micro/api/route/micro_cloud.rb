@@ -47,13 +47,15 @@ module VCAP
                   settings.bosh.restart_services
                 end
 
-                if micro_cloud.is_powered_on == false
-                  settings.bosh.stop_services_and_wait
-                  `poweroff`
-                end
-
                 if micro_cloud.internet_connected == false
                   InternetConnection.new.set_disconnected
+                elsif micro_cloud.internet_connected == true
+                  InternetConnection.new.set_connected
+                end
+
+                if micro_cloud.is_powered_on == false
+                  settings.bosh.stop_services_and_wait
+                  Micro.shell_raiser('poweroff')
                 end
               end
             end
