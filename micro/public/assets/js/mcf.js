@@ -25,6 +25,19 @@ var MCF = (function (window, $) {
         $.getJSON(jsonRoot, nextFunction);
     }
 
+    // Show and hide CSS based on boolean variables.
+    //
+    // Passing in name = test enabled = true will show elements with the
+    // CSS classes 'name' and 'enabled' and hide elements with the CSS
+    // classes 'name' and 'disabled'.
+    function boolCss(name, enabled) {
+        var showStr = enabled ? 'enabled' : 'disabled',
+            hideStr = enabled ? 'disabled' : 'enabled';
+
+        $('.' + name + '.' + showStr).show();
+        $('.' + name + '.' + hideStr).hide();
+    }
+
     function changeAdmin(vals) {
         fromRoot(function (data) {
             followLink(data, 'administrator', function (data) {
@@ -147,7 +160,7 @@ var MCF = (function (window, $) {
             });
 
             $('.proxy').text(data.http_proxy);
-            $('.internet-connected').text(data.internet_connected);
+            boolCss('internet', data.internet_connected);
             $('.version').text(data.version);
 
             refreshServices(data);
@@ -162,6 +175,14 @@ var MCF = (function (window, $) {
                 email: $('#email').val(),
                 password: $('#password').val()
             });
+        });
+
+        $('#internet-on-submit').click(function () {
+            changeMicroCloud({ internet_connected : true });
+        });
+
+        $('#internet-off-submit').click(function () {
+            changeMicroCloud({ internet_connected : false });
         });
 
         $('#network-submit').click(function () {
