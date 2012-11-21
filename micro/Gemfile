@@ -22,6 +22,7 @@ gem 'rest-client'
 gem "statemachine"
 gem "progressbar"
 
+gem 'rack-rewrite'
 gem 'ruby-graphviz'
 gem 'sinatra'
 
