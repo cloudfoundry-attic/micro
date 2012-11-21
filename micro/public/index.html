@@ -41,12 +41,18 @@
 		<li class="nav-header">Network</li>
 
 		<li>
+		  <a href="#internet" data-toggle="tab">
+		    <i class="icon-globe"></i> Internet</a>
+		</li>
+
+		<li>
 		  <a href="#net-config" data-toggle="tab">
 		    <i class="icon-wrench"></i> Configure</a>
 		</li>
 
 		<li>
-		  <a href="#http-proxy" data-toggle="tab"><i class="icon-hand-right"></i> HTTP Proxy</a>
+		  <a href="#http-proxy" data-toggle="tab">
+		    <i class="icon-hand-right"></i> HTTP Proxy</a>
 		</li>
 
 		<li class="divider"></li>
@@ -91,7 +97,11 @@
 		  This Micro Cloud Foundry news item will be loaded from JSON on Akamai.
 		</div>
 
-		<p>Internet connected mode: <span class="internet-connected">?</span></p>
+		<p>
+		  Internet connected mode:
+		  <span class="internet enabled label label-success">Connected</span>
+		  <span class="internet disabled label label-inverse">Offline</span>
+		</p>
 
 		<p>Internet reachable: <span class="reach-internet">?</span></p>
 
@@ -121,6 +131,27 @@
 		  <tbody class="services"></tbody>
 
 		</table>
+	      </div>
+
+	      <div class="tab-pane" id="internet">
+		<p>
+		  The Micro Cloud Foundry can operate connected to the internet or offline. When in offline mode, the Micro Cloud Foundry will not try to use external nameservers to resolve names.
+		</p>
+
+		<p>
+		  Current internet mode:
+		  <span class="internet enabled label label-success">Connected</span>
+		  <span class="internet disabled label label-inverse">Offline</span>
+		</p>
+
+		<form>
+		  <fieldset>
+		    <label>Change internet connected mode: </label>
+		    <button type="button" class="btn btn-success" id="internet-on-submit">Connected</button>
+		    <button type="button" class="btn btn-inverse" id="internet-off-submit">Offline</button>
+		  </fieldset>
+		</form>
+
 	      </div>
 
 	      <div class="tab-pane" id="net-config">
