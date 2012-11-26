@@ -58,8 +58,7 @@ module VCAP
 
       # Restart this network interface.
       def restart
-        Micro.shell_raiser(
-          %Q{service network-interface restart INTERFACE="#{name}"})
+        Micro.shell_raiser(%Q{/etc/init.d/networking restart})
       end
 
       attr_reader :name
