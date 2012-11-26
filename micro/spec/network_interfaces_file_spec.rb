@@ -129,4 +129,54 @@ eos
     it { should be_static }
   end
 
+  describe '#valid?' do
+
+    context 'when valid' do
+
+      specify {
+        VCAP::Micro::NetworkInterfacesFile.new(
+          :is_dhcp => true
+        ).should be_valid
+      }
+
+      specify {
+        VCAP::Micro::NetworkInterfacesFile.new(
+          :is_dhcp => true,
+          :ip => '192.168.0.2',
+          :netmask => '255.255.255.0',
+          :gateway => '192.168.0.1',
+        ).should be_valid
+      }
+
+      specify {
+        VCAP::Micro::NetworkInterfacesFile.new(
+          :is_dhcp => false,
+          :ip => '192.168.0.2',
+          :netmask => '255.255.255.0',
+          :gateway => '192.168.0.1',
+        ).should be_valid
+      }
+
+    end
+
+    context 'when invalid' do
+
+      specify {
+        VCAP::Micro::NetworkInterfacesFile.new(
+          :is_dhcp => false
+        ).should_not be_valid
+      }
+
+      specify {
+        VCAP::Micro::NetworkInterfacesFile.new(
+          :is_dhcp => false,
+          :ip => '192.168.0.2',
+          :netmask => '255.255.255.0',
+        ).should_not be_valid
+      }
+
+    end
+
+  end
+
 end

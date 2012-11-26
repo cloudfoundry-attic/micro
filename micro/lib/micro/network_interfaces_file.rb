@@ -56,6 +56,15 @@ eos
         !dhcp?
       end
 
+      # Return true if there is enough information for a valid network
+      # configuration.
+      def valid?
+        dhcp? or (
+          !ip.to_s.empty? &&
+          !netmask.to_s.empty? &&
+          !gateway.to_s.empty?)
+      end
+
       attr_accessor :ip
       attr_accessor :netmask
       attr_accessor :gateway
