@@ -44,6 +44,10 @@ module VCAP
                 :is_dhcp => network_interface.is_dhcp
               )
 
+              unless network_interface_file.valid?
+                halt 400, 'Invalid network configuration'
+              end
+
               network_interface_file.write
 
               Micro::NetworkInterface.new(network_interface.name).restart

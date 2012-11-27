@@ -5,3 +5,42 @@
 .disabled {
   display : none;
 }
+
+#terminal {
+  background-color : #333;
+  color : white;
+  font-family : monospace;
+  width : 100%;
+  margin : 0;
+  padding : 0.5em 0em 0.5em 0em;
+  height : 128px;
+  position : fixed;
+  bottom : 0;
+  z-index : -1;
+}
+
+.logger-date {
+  color : #aaa;
+  padding-left : 1em;
+}
+
+
+.logger-debug {
+  color : #aaa;
+}
+
+.logger-info {
+  color : white;
+}
+
+.logger-warn {
+  color : yellow;
+}
+
+.logger-error {
+  color : red;
+}
+
+.progress {
+  display : none;
+}
