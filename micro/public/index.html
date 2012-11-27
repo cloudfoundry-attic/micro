@@ -25,8 +25,8 @@
 	      <ul class="nav nav-list well">
 
 		<li>
-		  <a href="#home" data-toggle="tab"><i class="icon-home">
-		    </i> Home</a>
+		  <a href="#home" data-toggle="tab">
+		    <i class="icon-home"></i> Home</a>
 		</li>
 
 		<li class="divider"></li>
@@ -97,21 +97,54 @@
 		  This Micro Cloud Foundry news item will be loaded from JSON on Akamai.
 		</div>
 
-		<p>
-		  Internet connected mode:
-		  <span class="internet enabled label label-success">Connected</span>
-		  <span class="internet disabled label label-inverse">Offline</span>
-		</p>
+		<table>
 
-		<p>Internet reachable: <span class="reach-internet">?</span></p>
+		  <tr>
+		    <td>Internet connected mode:</td>
+		    <td>
+		      <span class="internet enabled label label-success">Connected</span>
+		      <span class="internet disabled label label-inverse">Offline</span>
+		    </td>
+		  </tr>
 
-		<p>Default gateway reachable: <span class="reach-gateway">?</span></p>
+		  <tr>
+		    <td>Internet reachable:</td>
+		    <td>
+		      <span class="reach-internet enabled label label-success">Yes</span>
+		      <span class="reach-internet disabled label label-inverse">No</span>
+		    </td>
+		  </tr>
 
-		<p>Default nameserver working: <span class="resolve-default">?</span></p>
+		  <tr>
+		    <td>Default gateway reachable:</td>
+		    <td>
+		      <span class="reach-gateway enabled label label-success">Yes</span>
+		      <span class="reach-gateway disabled label label-inverse">No</span>
+		    </td>
+		  </tr>
 
-		<p>Other nameserver working: <span class="resolve-other">?</span></p>
+		  <tr>
+		    <td>Default nameserver working:</td>
+		    <td>
+		      <span class="resolve-default enabled label label-success">Yes</span>
+		      <span class="resolve-default disabled label label-inverse">No</span>
+		    </td>
+		  </tr>
 
-		<p>Version: <span class="version" />?</p>
+		  <tr>
+		    <td>Other nameserver working:</td>
+		    <td>
+		      <span class="resolve-other enabled label label-success">Yes</span>
+		      <span class="resolve-ither disabled label label-inverse">No</span>
+		    </td>
+		  </tr>
+
+		  <tr>
+		    <td>Version:</td>
+		    <td><span class="version" />?</td>
+		  </tr>
+
+		</table>
 
 	      </div>
 
@@ -129,6 +162,10 @@
 		  </thead>
 
 		  <tbody class="services"></tbody>
+
+		  <div class="progress progress-striped active">
+		    <div class="bar" style="width: 0%;" id="services-bar"></div>
+		  </div>
 
 		</table>
 	      </div>
@@ -152,18 +189,20 @@
 		  </fieldset>
 		</form>
 
+		<div class="progress progress-striped active">
+		  <div class="bar" style="width: 0%;" id="internet-bar"></div>
+		</div>
+
 	      </div>
 
 	      <div class="tab-pane" id="net-config">
 		<form>
 		  <fieldset>
-		    <legend>Network configuration</legend>
-
 		    <p>Configure the Micro Cloud Foundry's network interface.</p>
 
 		    <p>Current network configuration:</p>
 
-		    <p>IP address: <span class="ip_address"></span></p>
+		    <p>IP address: <span class="ip-address"></span></p>
 		    <p>Netmask: <span class="netmask"></span></p>
 		    <p>Gateway: <span class="gateway"></span></p>
 		    <p>Nameservers: <span class="nameservers"></span></p>
@@ -172,7 +211,7 @@
 		      <input type="checkbox" id="dhcp"> DHCP
 		    </label>
 		    <label>IP address</label>
-		    <input type="text" placeholder="n.n.n.n" id="ip_address" class="static">
+		    <input type="text" placeholder="n.n.n.n" id="ip-address" class="static">
 		    <label>Netmask</label>
 		    <input type="text" placeholder="n.n.n.n" id="netmask" class="static">
 		    <label>Gateway</label>
@@ -183,12 +222,16 @@
 		    <button type="button" class="btn" id="network-submit">Submit</button>
 		  </fieldset>
 		</form>
+
+		<div class="progress progress-striped active">
+		  <div class="bar" style="width: 0%;" id="network-bar"></div>
+		</div>
+
 	      </div>
 
 	      <div class="tab-pane" id="http-proxy">
 		<form>
 		  <fieldset>
-		    <legend>HTTP proxy configuration</legend>
 		    <p>If your network requires the use of an HTTP proxy, set it here.</p>
 		    <p>Current proxy URL: <span class="proxy"></span></p>
 		    <label>Change proxy URL</label>
@@ -198,12 +241,16 @@
 		    <label></label>
 		  </fieldset>
 		</form>
+
+		<div class="progress progress-striped active">
+		  <div class="bar" style="width: 0%;" id="proxy-bar"></div>
+		</div>
+
 	      </div>
 
 	      <div class="tab-pane" id="domain">
 		<form>
 		  <fieldset>
-		    <legend>Domain </legend>
 		    <p>Set the domain that your Micro Cloud Foundry will use.</p>
 		    <p>Current domain name: <span class="domain"></span></p>
 		    <label>Make up a domain name. This will be resolvable only by hosts using this Micro Cloud Foundry as a nameserver.</label>
@@ -216,12 +263,16 @@
 		    <button type="button" class="btn" id="domain-submit">Submit</button>
 		  </fieldset>
 		</form>
+
+		<div class="progress progress-striped active">
+		  <div class="bar" style="width: 0%;" id="domain-bar"></div>
+		</div>
+
 	      </div>
 
 	      <div class="tab-pane" id="account">
 		<form>
 		  <fieldset>
-		    <legend>Modify administrator account</legend>
 		    <p>The Micro Cloud user with this email address will have administrator privileges.</p>
 		    <p>Current email: <span class="admin-email"></span></p>
 		    <label>Email</label>
@@ -233,6 +284,11 @@
 		    <button id="admin-submit" type="button" class="btn">Submit</button>
 		  </fieldset>
 		</form>
+
+		<div class="progress progress-striped active">
+		  <div class="bar" style="width: 0%;" id="admin-bar"></div>
+		</div>
+
 	      </div>
 
 	      <div id="shutdown-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="shutdown-modal-label" aria-hidden="true">
@@ -244,7 +300,7 @@
 		  <p>Shut down the Micro Cloud virtual machine?</p>
 		</div>
 		<div class="modal-footer">
-		  <button class="btn btn-primary" id="shutdown-button">Shutdown</button>
+		  <button class="btn btn-primary" id="shutdown-submit">Shutdown</button>
 		  <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 		</div>
 	      </div>
@@ -254,6 +310,8 @@
 	</div>
       </div>
     </div>
+
+    <pre class="pre-scrollable" id="terminal"></pre>
 
     <script src="assets/js/jquery-1.8.3.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
