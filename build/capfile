@@ -172,6 +172,13 @@ task :latest_cf_release_tag, :roles => :build do
   "v#{tags.sort.last}"
 end
 
+desc 'Update the bosh_cli gem.'
+task :update_bosh_cli, :roles => :build do
+  run_commands([
+    'gem update bosh_cli',
+  ])
+end
+
 desc 'Create Micro Cloud Foundry bosh release.'
 task :create_release, :roles => :build do
   run_commands([
@@ -378,6 +385,7 @@ task :build, :roles => :build do
     is_release_version = true
   end
 
+  update_bosh_cli
   create_release
   update_bosh_agent
   update_micro
