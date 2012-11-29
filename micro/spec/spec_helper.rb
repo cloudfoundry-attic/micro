@@ -10,7 +10,16 @@ $:.unshift(File.expand_path("../../../agent/lib", __FILE__))
 
 ENV['LOGFILE'] = "tmp/micro.log"
 
-require 'micro/console'
+module VCAP
+  module Micro
+    class Console
+    end
+    class Compiler
+    end
+  end
+end
+
+require 'micro/version'
 
 def with_warnings(flag)
   old_verbose, $VERBOSE = $VERBOSE, flag
