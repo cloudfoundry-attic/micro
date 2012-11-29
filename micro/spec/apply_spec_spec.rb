@@ -21,11 +21,35 @@ describe VCAP::Micro::ApplySpec do
       temp.unlink
 
       as = VCAP::Micro::ApplySpec.new(path)
-      as.write do |a|
-        a.admin = 'foo@bar.com'
-        a.domain = 'test.com'
-        a.http_proxy = 'http://proxy.test.com:1234'
-      end
+      as.admin = 'foo@bar.com'
+      as.domain = 'test.com'
+      as.http_proxy = 'http://proxy.test.com:1234'
+
+      as.properties['ccdb'] = {
+        'roles' => [
+                    { 'tag' => 'acm' },
+                    { 'tag' => 'admin' },
+                    { 'tag' => 'uaa' },
+                   ]
+      }
+      as.properties['acmdb'] = {
+        'roles' => [
+                    { 'tag' => 'admin' },
+                    { 'tag' => 'acm' },
+                   ],
+      }
+      as.properties['uaadb'] = {
+        'roles' => [
+                    { 'tag' => 'admin' },
+                   ]
+      }
+      as.properties['service_lifecycle'] = {
+        'resque' => {}
+      }
+      as.properties['vcap_redis'] = {}
+      as.properties['uaa'] = {}
+
+      as.write
 
       VCAP::Micro::ApplySpec.new(path).read
     }
@@ -49,6 +73,30 @@ describe VCAP::Micro::ApplySpec do
       temp = Tempfile.new('apply_spec')
 
       as = VCAP::Micro::ApplySpec.new(temp.path)
+
+      as.properties['ccdb'] = {
+        'roles' => [
+                    { 'tag' => 'acm' },
+                    { 'tag' => 'admin' },
+                    { 'tag' => 'uaa' },
+                   ]
+      }
+      as.properties['acmdb'] = {
+        'roles' => [
+                    { 'tag' => 'admin' },
+                    { 'tag' => 'acm' },
+                   ],
+      }
+      as.properties['uaadb'] = {
+        'roles' => [
+                    { 'tag' => 'admin' },
+                   ]
+      }
+      as.properties['service_lifecycle'] = {
+        'resque' => {}
+      }
+      as.properties['vcap_redis'] = {}
+      as.properties['uaa'] = {}
 
       as.write do |a|
         a.admin = 'foo@bar.com'

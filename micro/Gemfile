@@ -28,11 +28,12 @@ gem 'sinatra'
 
 group :test do
   gem "rcov_analyzer", :platforms => :ruby_18
-  gem "rspec", :require => ["spec", "spec/interop/test"]
+  gem "rspec", '>= 2.12.0', :require => ["spec", "spec/interop/test"]
   gem "rcov", :platforms => :ruby_18
   gem "ci_reporter"
   gem "simplecov", :platforms => :ruby_19
   gem "simplecov-rcov", :platforms => :ruby_19
+  gem 'fakeweb'
 end
 
 group :development do

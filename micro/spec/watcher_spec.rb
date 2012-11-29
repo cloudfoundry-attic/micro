@@ -29,13 +29,14 @@ describe VCAP::Micro::Watcher do
     VCAP::Micro::Network.should_receive(:lookup).exactly(1).
       times.and_return(VCAP::Micro::Watcher::A_ROOT_SERVER_IP)
 
+    VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
     w = VCAP::Micro::Watcher.new(mock_network(true), mock_identity(ip))
     w.check
   end
 
   it "should increase the sleep if there is no gateway" do
     VCAP::Micro::Network.stub(:gateway).and_return(nil)
-
+    VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
     w = VCAP::Micro::Watcher.new(mock_network(true), mock_identity("1.2.3.4"))
     w.check
     w.sleep.should == VCAP::Micro::Watcher::DEFAULT_SLEEP * 2
@@ -51,7 +52,7 @@ describe VCAP::Micro::Watcher do
 
     network = mock_network(true)
     network.should_receive(:online?).exactly(1).times
-
+    VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
     w = VCAP::Micro::Watcher.new(network, mock_identity(ip))
     w.check
   end
@@ -69,6 +70,7 @@ describe VCAP::Micro::Watcher do
     identity.should_receive(:update_ip).with(new_ip).exactly(1).times
     identity.should_receive(:subdomain).exactly(1).times.and_return("vcap.me")
 
+    VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
     w = VCAP::Micro::Watcher.new(mock_network(true), identity)
     w.check
   end
@@ -84,10 +86,11 @@ describe VCAP::Micro::Watcher do
 
     identity = mock_identity(ip)
     identity.should_receive(:update_ip).with(ip, true).exactly(1).times
-    now = Time.now.to_i
+    now = Time.now
     Time.stub(:now).and_return(now - 14500, now)
     network = mock_network(true)
     network.stub(:online?).and_return(true)
+    VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
     w = VCAP::Micro::Watcher.new(network, identity)
     w.check
   end
@@ -95,6 +98,7 @@ describe VCAP::Micro::Watcher do
   describe "ping" do
     it "should try three pings before it considers it failed" do
       ip = "127.0.0.1"
+      VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
       w = VCAP::Micro::Watcher.new(mock_network(true), mock_identity(ip))
       VCAP::Micro::Network.should_receive(:ping).with(ip).exactly(3).times.
         and_return(false)
@@ -105,6 +109,7 @@ describe VCAP::Micro::Watcher do
 
     it "should succeed if the first ping returns true" do
       ip = "127.0.0.1"
+      VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
       w = VCAP::Micro::Watcher.new(mock_network(true), mock_identity(ip))
       VCAP::Micro::Network.should_receive(:ping).with(ip).exactly(1).times.
         and_return(true)
@@ -114,6 +119,7 @@ describe VCAP::Micro::Watcher do
 
     it "should succeed if the second ping returns true" do
       ip = "127.0.0.1"
+      VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
       w = VCAP::Micro::Watcher.new(mock_network(true), mock_identity(ip))
       VCAP::Micro::Network.should_receive(:ping).with(ip).exactly(2).times.
         and_return(false, true)
@@ -124,6 +130,7 @@ describe VCAP::Micro::Watcher do
 
     it "should succeed if the third ping returns true" do
       ip = "127.0.0.1"
+      VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
       w = VCAP::Micro::Watcher.new(mock_network(true), mock_identity(ip))
       VCAP::Micro::Network.should_receive(:ping).with(ip).exactly(3).times.
         and_return(false, false, true)
@@ -137,12 +144,14 @@ describe VCAP::Micro::Watcher do
   describe "pause" do
     it "should be false by default" do
       ip = "127.0.0.1"
+      VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
       w = VCAP::Micro::Watcher.new(mock_network(true), mock_identity(ip))
       w.paused.should be_false
     end
 
     it "should reset the sleep value on resume" do
       ip = "127.0.0.1"
+      VCAP::Micro::Console.stub(:logger).and_return(mock('logger').as_null_object)
       w = VCAP::Micro::Watcher.new(mock_network(true), mock_identity(ip))
       w.pause
       w.resume

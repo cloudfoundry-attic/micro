@@ -1,4 +1,14 @@
 if [ "$reason" = "BOUND" ]; then
   echo "address=/martin.cloudfoundry.me/$new_ip_address" > /etc/dnsmasq.conf
+
+  for ns in $new_domain_name_servers
+  do
+    if [ -e "/var/vcap/micro/offline" ]; then
+      echo "# server=$ns"
+    else
+      echo "server=$ns"
+    fi
+  done > /etc/dnsmasq.d/server
+
   service dnsmasq restart
 fi
