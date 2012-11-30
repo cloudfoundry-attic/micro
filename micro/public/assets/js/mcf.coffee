@@ -63,12 +63,16 @@ class Mcf
                                         callback, data
 
         from_root: (callback) ->
-                $.getJSON(@json_root, callback)
+                $.ajax({
+                  url: @json_root,
+                  dataType: 'json',
+                  success: callback,
+                  error: @ajax_error
+                })
 
         # Follow a hyperlink in the hypermedia API.
         follow_link: (data_in, rel, callback, data_next) ->
                 link = data_in._links[rel]
-
                 $.ajax
                         url: link.href
                         type: link.method
@@ -85,6 +89,7 @@ class Mcf
 
         # Enable or disable a service.
         toggle_service: (name, enabled) =>
+                $("#button_#{name}").attr('class', 'btn').text("Pending").unbind()
                 @from_root (micro_cloud) =>
                         @follow_link micro_cloud, 'services',
                                 (services) =>
@@ -93,6 +98,7 @@ class Mcf
                                                 =>
                                                         @logger.info "#{name} service #{if enabled then 'enabled' else 'disabled'}"
                                                         @refresh_services(micro_cloud)
+
                                                 { enabled : enabled }
 
         # Shut down the Micro Cloud VM.
@@ -110,7 +116,7 @@ class Mcf
                 $('.gateway').text(@gateway)
 
         set_internet_connected: (@internet_connected) ->
-                bool_css 'internet', @internet_connected
+                util.bool_css 'internet', @internet_connected
 
         set_ip_address: (@ip_address) ->
                 $('.ip-address').text(@ip_address)
@@ -128,16 +134,16 @@ class Mcf
                 $('.proxy').text(@proxy)
 
         set_reach_gateway: (@reach_gateway) ->
-                bool_css 'reach-gateway', @reach_gateway
+                util.bool_css 'reach-gateway', @reach_gateway
 
         set_reach_internet: (@reach_internet) ->
-                bool_css 'reach-internet', @reach_internet
+                util.bool_css 'reach-internet', @reach_internet
 
         set_resolve_default: (@resolve_default) ->
-                bool_css 'resolve-default', @resolve_default
+                util.bool_css 'resolve-default', @resolve_default
 
         set_resolve_other: (@resolve_other) ->
-                bool_css 'resolve-other', @resolve_other
+                util.bool_css 'resolve-other', @resolve_other
 
         set_version: (@version) ->
                 $('.version').text(@version)
@@ -146,6 +152,9 @@ class Mcf
         ajax_error: (xhr) =>
                 if xhr.status == 400 and xhr.responseText?
                         @logger.error xhr.responseText
+                $('#global-error').toggle()
+
+window.Mcf = Mcf
 
 class ServicesTable
 
@@ -190,7 +199,7 @@ class ServicesTableRow
                 )
 
         button: ->
-                $('<a />').attr('href', '#').addClass(
+                $('<a />').attr({href: '#', id: "button_#{@name}"}).addClass(
                         "btn #{@button_class()}"
                 ).append($('<i />').addClass(@icon())).append(
                         " #{@button_text()}").click( =>
@@ -231,17 +240,17 @@ class McfDate
 
         # Format this date.
         to_s: -> [
-                leading_zero_pad(@js_date.getMonth() + 1, 2)
+                util.leading_zero_pad(@js_date.getMonth() + 1, 2)
                 '-'
-                leading_zero_pad(@js_date.getDate(), 2)
+                util.leading_zero_pad(@js_date.getDate(), 2)
                 ' '
-                leading_zero_pad(@js_date.getHours(), 2)
+                util.leading_zero_pad(@js_date.getHours(), 2)
                 ':'
-                leading_zero_pad(@js_date.getMinutes(), 2)
+                util.leading_zero_pad(@js_date.getMinutes(), 2)
                 ':'
-                leading_zero_pad(@js_date.getSeconds(), 2)
+                util.leading_zero_pad(@js_date.getSeconds(), 2)
                 '.'
-                leading_zero_pad(@js_date.getMilliseconds(), 3)
+                util.leading_zero_pad(@js_date.getMilliseconds(), 3)
                 ].join ''
 
 class Logger
@@ -305,29 +314,35 @@ class ProgressBar
 # Passing in name = test enabled = true will show elements with the CSS classes
 # 'name' and 'enabled' and hide elements with the CSS classes 'name' and
 # 'disabled'.
-bool_css = (name, enabled) ->
-        if enabled
-                show_str = 'enabled'
-                hide_str = 'disabled'
-        else
-                show_str = 'disabled'
-                hide_str = 'enabled'
 
-        $(".#{name}.#{show_str}").show()
-        $(".#{name}.#{hide_str}").hide()
+class Util
+  bool_css : (name, enabled) ->
+          if enabled
+                  show_str = 'enabled'
+                  hide_str = 'disabled'
+          else
+                  show_str = 'disabled'
+                  hide_str = 'enabled'
 
-# Add a leading zero to numbers with less than the desired number of digits.
-leading_zero_pad = (n, digits) ->
-        s = n.toString()
+          $(".#{name}.#{show_str}").show()
+          $(".#{name}.#{hide_str}").hide()
 
-        zeroes = ('0' for x in [0...Math.max(0, digits - s.length)]).join('')
+  # Add a leading zero to numbers with less than the desired number of digits.
+  leading_zero_pad : (n, digits) ->
+          s = n.toString()
 
-        "#{zeroes}#{s}"
+          zeroes = ('0' for x in [0...Math.max(0, digits - s.length)]).join('')
 
-$(document).ready ->
+          "#{zeroes}#{s}"
+
+window.util = new Util
+
+initialize_micro_cloudfoundry = ->
         mcf = new Mcf('/api')
 
         mcf.load_data()
+        $('.close-alert').live 'click', ->
+          $(this).closest('.alert').hide()
 
         $('#dhcp').change ->
                 $('.static').prop('disabled', @checked)
@@ -395,3 +410,5 @@ $(document).ready ->
         $('#shutdown-submit').click ->
                 mcf.shutdown()
                 $('#shutdown-modal').modal('hide')
+
+window.initialize_micro_cloudfoundry = initialize_micro_cloudfoundry

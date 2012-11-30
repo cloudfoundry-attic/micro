@@ -87,8 +87,12 @@
 	  </div>
 
 	  <div class="span10">
+      <div class="alert alert-error" id="global-error">
+          <button type="button" class="close close-alert">x</button>
+          An error has occurred
+      </div>
 
-	    <div class="tab-content">
+      <div class="tab-content">
 
 	      <div class="tab-pane active" id="home">
 
@@ -316,6 +320,8 @@
     <script src="assets/js/jquery-1.8.3.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
     <script src="assets/js/mcf.js"></script>
-
+    <script>
+        initialize_micro_cloudfoundry()
+    </script>
   </body>
 </html>

@@ -17,6 +17,7 @@ gem "uuidtools"
 gem "yajl-ruby", :require => "yajl"
 gem 'agent_client'
 gem 'bosh_common'
+gem 'coffee-script'
 
 gem 'rest-client'
 gem "statemachine"
@@ -38,4 +39,5 @@ end
 
 group :development do
   gem 'shotgun'
+  gem 'jasmine'
 end

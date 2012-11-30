@@ -44,3 +44,7 @@
 .progress {
   display : none;
 }
+
+#global-error {
+    display: none;
+}
