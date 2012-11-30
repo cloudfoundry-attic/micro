@@ -255,6 +255,29 @@ task :checkout_cf_release_tag_test, :roles => :test do
   ])
 end
 
+desc 'Run micro rspec specs.'
+task :micro_spec, :roles => :test do
+  run_commands([
+    '. ~/.bash_profile',
+    'cd ~/micro/micro',
+    'git pull',
+    'bundle install',
+    'rake spec'
+  ])
+end
+
+desc 'Run micro jasmine specs.'
+task :jasmine_spec, :roles => :test do
+  run_commands([
+    '. ~/.bash_profile',
+    'cd ~/micro/micro',
+    'git pull',
+    'bundle install',
+    'export DISPLAY=:99',
+    'bundle exec rake assets:precompile jasmine:ci'
+  ])
+end
+
 desc 'Prepare the test VM and Micro Cloud for vcap-yeti tests.'
 task :bvt_setup, :roles => :test do
   # Set the nameserver of the test machine to the Micro Cloud VM.
