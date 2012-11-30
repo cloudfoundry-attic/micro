@@ -175,6 +175,7 @@ end
 desc 'Update the bosh_cli gem.'
 task :update_bosh_cli, :roles => :build do
   run_commands([
+    '. ~/.bash_profile',
     'gem update bosh_cli',
   ])
 end
