@@ -4,7 +4,7 @@ require 'erb'
 require 'rspec/core/rake_task'
 
 desc "Run specs"
-task "spec" => ["bundler:install:test", "test:spec"]
+task "spec" => ["test:spec"]
 
 desc "Run specs using RCov"
 task "spec:rcov" => ["bundler:install:test", "test:spec:rcov"]
