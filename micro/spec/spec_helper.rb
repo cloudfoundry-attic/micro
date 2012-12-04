@@ -5,6 +5,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup(:default, :test)
 require 'rspec'
+require 'rack/test'
 
 $:.unshift(File.expand_path("../../../agent/lib", __FILE__))
 
