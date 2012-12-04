@@ -59,6 +59,9 @@ module VCAP
 
                   new_domain_name = config_file.subdomain
                 else
+                  unless Domain.new(domain_name.name).valid?
+                    halt 400, 'Domain is invalid'
+                  end
                   config_file.write do |c|
                     c.name, c.cloud = domain_name.name.split('.', 2)
                     c.ip = ip
@@ -78,7 +81,7 @@ module VCAP
                   as.domain = config_file.subdomain
                 end
 
-                settings.bosh.apply_spec(spec.spec)
+                BoshWrapper.new.apply_spec(spec.spec)
               elsif domain_name.synched
                 config_file = ConfigFile.new
 
