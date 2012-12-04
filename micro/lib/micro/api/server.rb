@@ -15,8 +15,6 @@ module VCAP
 
         helpers Engine::ExpectHelper
 
-        set :bosh, Micro::BoshWrapper.new
-
         Route.constants.each do |c|
           o = Route.const_get(c)
           register o  if o.is_a?(Module)

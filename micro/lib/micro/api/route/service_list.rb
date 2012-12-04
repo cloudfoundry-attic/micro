@@ -16,7 +16,7 @@ module VCAP
 
               services = []
 
-              groups.status(settings.bosh.status).each do |name, data|
+              groups.status(BoshWrapper.new.status).each do |name, data|
 
                 service = MediaType::Service.new(
                   :name => name,

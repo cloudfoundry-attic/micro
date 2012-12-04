@@ -45,7 +45,7 @@ module VCAP
                       s.admin = administrator.email
                     end
 
-                    settings.bosh.apply_spec(spec.spec)
+                    BoshWrapper.new.apply_spec(spec.spec)
                   else
                     halt 400, 'Cannot set administrator email when connected to the internet'
                   end

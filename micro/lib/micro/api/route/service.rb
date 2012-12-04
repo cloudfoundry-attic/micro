@@ -15,7 +15,7 @@ module VCAP
               groups = MonitoredProcessGroups.new.read
 
               group_status = groups.group(name).status_hash(
-                settings.bosh.status)
+                BoshWrapper.new.status)
 
               service = MediaType::Service.new(
                 :name => name,
