@@ -45,10 +45,10 @@ describe VCAP::Micro::Proxy do
   end
 
   it "should have the proxy url when set" do
-    JSON = "tmp/proxy.json"
-    p = VCAP::Micro::Proxy.new(JSON)
+    json = "tmp/proxy.json"
+    p = VCAP::Micro::Proxy.new(json)
     p.url = URL
     p.save
-    File.exist?(JSON).should be_true
+    File.exist?(json).should be_true
   end
 end
