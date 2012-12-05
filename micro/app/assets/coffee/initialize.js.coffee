@@ -10,7 +10,7 @@ window.initialize_micro_cloudfoundry = ->
 
   $('#admin-submit').click ->
     bar = new ProgressBar $('#admin-bar')
-    bar.update_for 100000
+    bar.start_indeterminate()
 
     mcf.update_admin {
     email: $('#email').val()
@@ -21,7 +21,7 @@ window.initialize_micro_cloudfoundry = ->
 
   $('#domain-submit').click ->
     bar = new ProgressBar $('#domain-bar')
-    bar.update_for 100000
+    bar.start_indeterminate()
     mcf.update_domain {
     name: $('#domain-name').val()
     token: $('#token').val()
@@ -31,7 +31,7 @@ window.initialize_micro_cloudfoundry = ->
 
   $('#internet-on-submit').click ->
     bar = new ProgressBar $('#internet-bar')
-    bar.update_for 3000
+    bar.start_indeterminate()
     mcf.update_micro_cloud {
     internet_connected: true
     }, ->
@@ -40,7 +40,7 @@ window.initialize_micro_cloudfoundry = ->
 
   $('#internet-off-submit').click ->
     bar = new ProgressBar $('#internet-bar')
-    bar.update_for 3000
+    bar.start_indeterminate()
     mcf.update_micro_cloud {
     internet_connected: false
     }, ->
@@ -49,7 +49,7 @@ window.initialize_micro_cloudfoundry = ->
 
   $('#network-submit').click ->
     bar = new ProgressBar $('#network-bar')
-    bar.update_for 8000
+    bar.start_indeterminate()
     mcf.update_network {
     name: 'eth0'
     ip_address: $('#ip-address').val()
@@ -63,7 +63,7 @@ window.initialize_micro_cloudfoundry = ->
 
   $('#proxy-submit').click ->
     bar = new ProgressBar $('#proxy-bar')
-    bar.update_for 50000
+    bar.start_indeterminate()
     mcf.update_micro_cloud { http_proxy: $('#proxy').val() }, ->
       bar.hide()
       mcf.load_data()

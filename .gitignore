@@ -1,4 +1,4 @@
 *~
-*.js
+micro/public/assets/js/*.js
 .idea
 micro/tmp

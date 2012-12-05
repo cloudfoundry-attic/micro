@@ -1,13 +1,3 @@
-describe(".leading_zero_pad", function () {
-    it("doesn't do anything if the number is long enough", function () {
-        expect(util.leading_zero_pad(42, 1)).toEqual("42")
-    });
-
-    it("pads things that are too short", function () {
-        expect(util.leading_zero_pad(42, 3)).toEqual("042")
-    });
-});
-
 describe("Mcf", function () {
     describe(".load_data", function () {
         var mcf;
@@ -27,28 +17,26 @@ describe("Mcf", function () {
         });
 
     });
-});
 
-describe("Services", function () {
-   describe("stopping", function() {
-       var mcf;
-       beforeEach(function () {
-           mcf = new Mcf;
-       });
+  describe(".toggle_service", function() {
+    var mcf;
+    beforeEach(function () {
+      mcf = new Mcf;
+    });
 
-        it("should gray out the button", function () {
-            $('#jasmine_content').html('<a href="#" id="button_foosvc" class="btn btn-danger"><i class="icon-stop"></i> Stop</a>');
+    it("should gray out the button", function () {
+      $('#jasmine_content').html('<a href="#" id="button_foosvc" class="btn btn-danger"><i class="icon-stop"></i> Stop</a>');
 
-            var last_service = $('#jasmine_content a:last-child');
-            //var unbindSpy = jasmine.createSpy('foo');  // can be used anywhere
-            spyOn($.fn, 'unbind');
+      var last_service = $('#jasmine_content a:last-child');
+      //var unbindSpy = jasmine.createSpy('foo');  // can be used anywhere
+      spyOn($.fn, 'unbind');
 
-            last_service.click(function() { mcf.toggle_service("foosvc", true); });
-            last_service.click();
-            expect(last_service.attr('class')).toEqual("btn");
-            expect($.fn.unbind).toHaveBeenCalled();
-            expect($.fn.unbind.mostRecentCall.object.id).toEqual(last_service.id);
-            expect(last_service.text()).toEqual("Pending")
-       });
-   });
+      last_service.click(function() { mcf.toggle_service("foosvc", true); });
+      last_service.click();
+      expect(last_service.attr('class')).toEqual("btn");
+      expect($.fn.unbind).toHaveBeenCalled();
+      expect($.fn.unbind.mostRecentCall.object.id).toEqual(last_service.id);
+      expect(last_service.text()).toEqual("Pending")
+    });
+  });
 });
