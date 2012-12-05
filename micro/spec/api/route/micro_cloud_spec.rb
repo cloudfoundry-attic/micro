@@ -1,25 +1,7 @@
 require 'spec_helper'
 
-# Hack until bosh_agent becomes a gem.
-module VCAP
-
-  module Micro
-
-    class BoshWrapper
-    end
-
-  end
-
-end
-
-require 'micro/api'
-
 describe 'micro cloud resource' do
   include Rack::Test::Methods
-
-  class VCAP::Micro::Api::Server
-    use VCAP::Micro::Api::Engine::Rack::MediaTypeSerial
-  end
 
   def app
     VCAP::Micro::Api::Server

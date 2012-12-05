@@ -13,11 +13,19 @@ ENV['LOGFILE'] = "tmp/micro.log"
 
 module VCAP
   module Micro
+    class BoshWrapper
+    end
     class Console
     end
     class Compiler
     end
   end
+end
+
+require 'micro/api'
+
+class VCAP::Micro::Api::Server
+  use VCAP::Micro::Api::Engine::Rack::MediaTypeSerial
 end
 
 require 'micro/version'
