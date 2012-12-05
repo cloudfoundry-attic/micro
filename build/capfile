@@ -470,6 +470,8 @@ eos
 
   p micro_vm_ip
 
+  micro_spec
+  jasmine_spec
   bvt_setup
   bvt
   vcap_java_client_tests

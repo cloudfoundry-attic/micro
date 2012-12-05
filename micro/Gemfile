@@ -1,38 +1,39 @@
 source :rubygems
 
-gem "highline"
-gem "monit_api"
-gem "nats", "=0.4.22"
-gem "netaddr"
-gem "blobstore_client", "~> 0.3.13"
-gem "posix-spawn"
-gem "rake"
-gem "rack-test"
-gem "ruby-atmos-pure"
-gem "sigar", ">=0.7.2"
-gem "bosh_encryption", ">=0.0.3"
-gem "sinatra"
-gem "thin"
-gem "uuidtools"
-gem "yajl-ruby", :require => "yajl"
+gem 'highline'
+gem 'nats', '=0.4.22'
+gem 'netaddr'
+gem 'blobstore_client', '~> 0.3.13'
+gem 'posix-spawn'
+gem 'rake'
+gem 'rack-test'
+gem 'ruby-atmos-pure'
+gem 'sigar', ">=0.7.2"
+gem 'sinatra'
+gem 'thin'
+gem 'uuidtools'
+gem 'yajl-ruby', require: 'yajl'
 gem 'agent_client'
 gem 'bosh_common'
 gem 'coffee-script'
-
 gem 'rest-client'
-gem "statemachine"
-gem "progressbar"
-
+gem 'statemachine'
+gem 'progressbar'
 gem 'rack-rewrite'
 gem 'ruby-graphviz'
 gem 'sinatra'
 
+git 'git://github.com/cloudfoundry/bosh.git' do
+  gem 'monit_api'
+  gem 'bosh_encryption'
+end
+
 group :test do
-  gem "rspec", '>= 2.12.0', :require => ["spec", "spec/interop/test"]
-  gem "rcov", :platforms => :ruby_18
-  gem "ci_reporter"
-  gem "simplecov", :platforms => :ruby_19
-  gem "simplecov-rcov", :platforms => :ruby_19
+  gem 'rspec', '>= 2.12.0', require: %w(spec spec/interop/test)
+  gem 'rcov', platforms: :ruby_18
+  gem 'ci_reporter'
+  gem 'simplecov', platforms: :ruby_19
+  gem 'simplecov-rcov', platforms: :ruby_19
   gem 'fakeweb'
 end
 
