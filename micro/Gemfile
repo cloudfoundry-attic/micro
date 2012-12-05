@@ -1,4 +1,5 @@
 source :rubygems
+#ruby '1.9.2'
 
 gem 'highline'
 gem 'nats', '=0.4.22'
@@ -15,7 +16,6 @@ gem 'uuidtools'
 gem 'yajl-ruby', require: 'yajl'
 gem 'agent_client'
 gem 'bosh_common'
-gem 'coffee-script'
 gem 'rest-client'
 gem 'statemachine'
 gem 'progressbar'
@@ -26,6 +26,12 @@ gem 'sinatra'
 git 'git://github.com/cloudfoundry/bosh.git' do
   gem 'monit_api'
   gem 'bosh_encryption'
+end
+
+group :assets do
+  gem 'sprockets'
+  gem 'coffee-script'
+  gem 'uglifier'
 end
 
 group :test do

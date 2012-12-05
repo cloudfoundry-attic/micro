@@ -4,7 +4,6 @@ $:.unshift(File.join(File.dirname(__FILE__), 'lib'))
 $:.unshift '/var/vcap/bosh/agent/lib'
 
 require 'rack/rewrite'
-
 require 'micro'
 
 use VCAP::Micro::Api::Engine::Rack::MediaTypeSerial

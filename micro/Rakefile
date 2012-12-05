@@ -15,12 +15,13 @@ task "spec:ci" => ["bundler:install:test", "test:spec:ci"]
 namespace "assets" do
   desc "Precompile assets"
   task "precompile" do
-    Bundler.require
-    js_path = File.expand_path("../public/assets/js/*.coffee", __FILE__)
-    Dir[js_path].each do |file|
-      content = CoffeeScript.compile File.read(file)
-      File.open(file.gsub('.coffee', '.js'), "w") { |f| f.write(content) }
-    end
+    Bundler.require :assets
+    sprokets = Sprockets::Environment.new
+    sprokets.append_path 'app/assets/coffee'
+    #sprokets.js_compressor = Uglifier.new if ENV['RACK_ENV'] == 'production'
+    outfile = Pathname.new File.expand_path("../public/assets/js/mcf.js", __FILE__)
+    FileUtils.mkdir_p outfile.dirname
+    sprokets['mcf.js'].write_to(outfile)
   end
 end
 

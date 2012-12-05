@@ -1,0 +1,166 @@
+#= require_self
+#= require logger
+#= require mcf_date
+#= require util
+#= require progress_bar
+#= require services_table
+#= require services_table_row
+#= require disabled_service_row
+#= require enabled_service_row
+#= require util
+#= require initialize
+
+# Main Micro Cloud Foundry class.
+window.Mcf = class Mcf
+
+  constructor: (@json_root) ->
+    @logger = new Logger($('#terminal'))
+
+  # Load all data from the API.
+  load_data: =>
+    @logger.info 'refreshing data'
+
+    @from_root (micro_cloud) =>
+      @follow_link micro_cloud, 'administrator',
+      (admin) => @set_admin_email(admin.email)
+
+      @follow_link micro_cloud, 'domain_name',
+      (domain) => @set_domain(domain.name)
+
+      @follow_link micro_cloud, 'network_interface',
+      (ni) =>
+        @set_gateway ni.gateway
+        @set_ip_address ni.ip_address
+        @set_is_dhcp ni.is_dhcp
+        @set_nameservers ni.nameservers
+        @set_netmask ni.netmask
+
+      @follow_link micro_cloud, 'network_health',
+      (nh) =>
+        @set_reach_gateway nh.reach_gateway
+        @set_reach_internet nh.reach_internet
+        @set_resolve_default(
+          nh.resolve_default)
+        @set_resolve_other nh.resolve_other
+
+      @refresh_services micro_cloud
+
+      @set_internet_connected micro_cloud.internet_connected
+      @set_proxy micro_cloud.http_proxy
+      @set_version micro_cloud.version
+
+  # Update administrator data using the API.
+  update_admin: (data, callback) =>
+    @update_second_level 'administrator', data, callback
+
+  # Update domain data using the API.
+  update_domain: (data, callback) =>
+    @update_second_level 'domain_name', data, callback
+
+  # Update micro cloud data using the API.
+  update_micro_cloud: (data, callback) ->
+    @from_root (micro_cloud) =>
+      @follow_link micro_cloud, 'edit', callback, data
+
+  # Update network data using the API.
+  update_network: (data, callback) =>
+    @update_second_level 'network_interface', data, callback
+
+  # Frequently used code path for an edit link on level below the
+  # root.
+  update_second_level: (rel, data, callback) ->
+    @from_root (micro_cloud) =>
+      @follow_link micro_cloud, rel,
+      (child) => @follow_link child, 'edit',
+      callback, data
+
+  from_root: (callback) ->
+    $.ajax
+      url: @json_root,
+      dataType: 'json',
+      success: callback,
+      error: @ajax_error
+
+  # Follow a hyperlink in the hypermedia API.
+  follow_link: (data_in, rel, callback, data_next) ->
+    link = data_in._links[rel]
+    $.ajax
+      url: link.href
+      type: link.method
+      data: JSON.stringify data_next
+      contentType: if data_next then link.type else null
+      success: callback
+      error: @ajax_error
+
+  # Rebuild the services table.
+  refresh_services: (root_data) ->
+    @follow_link root_data, 'services',
+    (data) => (new ServicesTable(@toggle_service)).render(
+      data, $('tbody.services'))
+
+  # Enable or disable a service.
+  toggle_service: (name, enabled) =>
+    $("#button_#{name}").attr('class', 'btn').text("Pending").unbind()
+    @from_root (micro_cloud) =>
+      @follow_link micro_cloud, 'services',
+      (services) =>
+        [match] = (service for service in services.services when service.name == name)
+        @follow_link match, 'edit',
+        =>
+          @logger.info "#{name} service #{if enabled then 'enabled' else 'disabled'}"
+          @refresh_services(micro_cloud)
+
+        { enabled: enabled }
+
+  # Shut down the Micro Cloud VM.
+  shutdown: ->
+    @logger.info 'shutting down'
+    @update_micro_cloud { is_powered_on: false }
+
+  set_admin_email: (@admin_email) ->
+    $('.admin-email').text(@admin_email)
+
+  set_domain: (@domain) ->
+    $('.domain').text(@domain)
+
+  set_gateway: (@gateway) ->
+    $('.gateway').text(@gateway)
+
+  set_internet_connected: (@internet_connected) ->
+    util.bool_css 'internet', @internet_connected
+
+  set_ip_address: (@ip_address) ->
+    $('.ip-address').text(@ip_address)
+
+  set_is_dhcp: (@is_dhcp) ->
+    $('#dhcp').prop('checked', @is_dhcp).trigger('change')
+
+  set_nameservers: (@nameservers) ->
+    $('.nameservers').text(@nameservers.join(', '))
+
+  set_netmask: (@netmask) ->
+    $('.netmask').text(@netmask)
+
+  set_proxy: (@proxy) ->
+    $('.proxy').text(@proxy)
+
+  set_reach_gateway: (@reach_gateway) ->
+    util.bool_css 'reach-gateway', @reach_gateway
+
+  set_reach_internet: (@reach_internet) ->
+    util.bool_css 'reach-internet', @reach_internet
+
+  set_resolve_default: (@resolve_default) ->
+    util.bool_css 'resolve-default', @resolve_default
+
+  set_resolve_other: (@resolve_other) ->
+    util.bool_css 'resolve-other', @resolve_other
+
+  set_version: (@version) ->
+    $('.version').text(@version)
+
+  # Handle an AJAX error.
+  ajax_error: (xhr) =>
+    if xhr.status == 400 and xhr.responseText?
+      @logger.error xhr.responseText
+    $('#global-error').toggle()

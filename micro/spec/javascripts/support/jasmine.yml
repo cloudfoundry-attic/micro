@@ -11,8 +11,8 @@
 #   - dist/**/*.js
 #
 src_files:
-    - public/assets/js/jquery-1.8.3.min.js
-    - public/assets/js/mcf.js
+    - "public/assets/js/vendor/jquery-1.8.3.min.js"
+    - "public/assets/js/mcf.js"
 
 # stylesheets
 #
@@ -22,11 +22,11 @@ src_files:
 # EXAMPLE:
 #
 # stylesheets:
-#   - css/style.css
-#   - stylesheets/*.css
+#   - "css/style.css"
+#   - "stylesheets/*.css"
 #
 stylesheets:
-  - public/assets/css/*.css
+  - "public/assets/css/*.css"
 
 # helpers
 #
@@ -36,10 +36,10 @@ stylesheets:
 # EXAMPLE:
 #
 # helpers:
-#   - helpers/**/*.js
+#   - "helpers/**/*.js"
 #
 helpers:
-  - helpers/**/*.js
+  - "helpers/**/*.js"
 
 # spec_files
 #
@@ -49,9 +49,10 @@ helpers:
 # EXAMPLE:
 #
 # spec_files:
-#   - **/*[sS]pec.js
+#   - "**/*[sS]pec.js"
 #
 spec_files:
+  - "**/*[sS]pec.js"
 
 # src_dir
 #
@@ -60,7 +61,7 @@ spec_files:
 #
 # EXAMPLE:
 #
-# src_dir: public
+# src_dir: "public"
 #
 src_dir:
 
@@ -71,6 +72,6 @@ src_dir:
 #
 # EXAMPLE:
 #
-# spec_dir: spec/javascripts
+# spec_dir: "spec/javascripts"
 #
 spec_dir:
