@@ -3,10 +3,13 @@ describe("initialize", function () {
     var mcf;
 
     beforeEach(function () {
-      $('#jasmine_content').html('<button id="admin-submit" type="button" class="btn">Submit</button>' +
+      $('#jasmine_content').html(
+        '<button id="admin-submit" type="button" class="btn">Submit</button>' +
+        '<div id="global-error" style="display: none"></div>' +
         '<input id="email" value="some_email"> ' +
         '<input id="password" value="some_password"> ' +
-        '<div class="progress progress-striped active"><div class="bar" style="width: 0;" id="admin-bar"></div></div>');
+        '<div class="progress progress-striped active"><div class="bar" style="width: 0;" id="admin-bar"></div></div>'
+      );
       mcf = new Mcf('/api');
       initialize_micro_cloudfoundry(mcf);
     });
@@ -30,7 +33,7 @@ describe("initialize", function () {
 
       it("should updates the users email and password", function () {
         $('#admin-submit').click();
-        expect(mcf.update_admin).toHaveBeenCalledWith({email:"some_email", password:"some_password"}, jasmine.any(Function));
+        expect(mcf.update_admin).toHaveBeenCalledWith({email:"some_email", password:"some_password"}, jasmine.any(Function), jasmine.any(Function));
       });
     });
 
@@ -68,7 +71,9 @@ describe("initialize", function () {
     var mcf;
 
     beforeEach(function () {
-      $('#jasmine_content').html('<button id="domain-submit" type="button" class="btn">Submit</button>' +
+      $('#jasmine_content').html(
+        '<button id="domain-submit" type="button" class="btn">Submit</button>' +
+        '<div id="global-error" style="display: none"></div>' +
         '<input id="domain-name" value="some_name"> ' +
         '<input id="token" value="some_token"> ' +
         '<div class="progress progress-striped active"><div class="bar" style="width: 0;" id="domain-bar"></div></div>');
@@ -95,7 +100,7 @@ describe("initialize", function () {
 
       it("should updates the domains name and token", function () {
         $('#domain-submit').click();
-        expect(mcf.update_domain).toHaveBeenCalledWith({name:"some_name", token:"some_token"}, jasmine.any(Function));
+        expect(mcf.update_domain).toHaveBeenCalledWith({name:"some_name", token:"some_token"}, jasmine.any(Function), jasmine.any(Function));
       });
     });
 
@@ -124,8 +129,33 @@ describe("initialize", function () {
     });
 
     describe("when the updating is a failure", function () {
-      xit("re-enables the submit button", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'update_domain').andCallFake(function (data, callback, error_callback) {
+          error_callback();
+        });
+        spyOn(mcf, 'load_data');
       });
+
+      it("shows an error alert", function () {
+        $('#domain-submit').click();
+        expect($('#global-error')).toBeVisible();
+      });
+
+      it("hides the bar", function () {
+        $('#domain-submit').click();
+        expect($('#domain-bar')).not.toBeVisible();
+      });
+
+      it("re-enables the submit button", function () {
+        $('#domain-submit').click();
+        expect($('#domain-submit')).not.toBeDisabled();
+      });
+
+      it("does not reload the data", function () {
+        $('#domain-submit').click();
+        expect(mcf.load_data).not.toHaveBeenCalled();
+      });
+
     });
   });
 
@@ -133,7 +163,9 @@ describe("initialize", function () {
     var mcf;
 
     beforeEach(function () {
-      $('#jasmine_content').html('<button id="internet-on-submit" type="button" class="btn">Submit</button>' +
+      $('#jasmine_content').html(
+        '<button id="internet-on-submit" type="button" class="btn">Submit</button>' +
+        '<div id="global-error" style="display: none"></div>' +
         '<div class="progress progress-striped active"><div class="bar" style="width: 0;" id="internet-bar"></div></div>');
       mcf = new Mcf('/api');
       initialize_micro_cloudfoundry(mcf);
@@ -158,7 +190,7 @@ describe("initialize", function () {
 
       it("should updates internet connected to true", function () {
         $('#internet-on-submit').click();
-        expect(mcf.update_micro_cloud).toHaveBeenCalledWith({internet_connected:true}, jasmine.any(Function));
+        expect(mcf.update_micro_cloud).toHaveBeenCalledWith({internet_connected:true}, jasmine.any(Function), jasmine.any(Function));
       });
     });
 
@@ -196,7 +228,9 @@ describe("initialize", function () {
     var mcf;
 
     beforeEach(function () {
-      $('#jasmine_content').html('<button id="internet-off-submit" type="button" class="btn">Submit</button>' +
+      $('#jasmine_content').html(
+        '<button id="internet-off-submit" type="button" class="btn">Submit</button>' +
+        '<div id="global-error" style="display: none"></div>' +
         '<div class="progress progress-striped active"><div class="bar" style="width: 0;" id="internet-bar"></div></div>');
       mcf = new Mcf('/api');
       initialize_micro_cloudfoundry(mcf);
@@ -221,7 +255,7 @@ describe("initialize", function () {
 
       it("should updates internet internet_connected to false", function () {
         $('#internet-off-submit').click();
-        expect(mcf.update_micro_cloud).toHaveBeenCalledWith({ internet_connected: false }, jasmine.any(Function));
+        expect(mcf.update_micro_cloud).toHaveBeenCalledWith({ internet_connected: false }, jasmine.any(Function), jasmine.any(Function));
       });
     });
 
@@ -259,7 +293,9 @@ describe("initialize", function () {
     var mcf;
 
     beforeEach(function () {
-      $('#jasmine_content').html('<button id="network-submit" type="button" class="btn">Submit</button>' +
+      $('#jasmine_content').html(
+        '<button id="network-submit" type="button" class="btn">Submit</button>' +
+        '<div id="global-error" style="display: none"></div>' +
         '<input id="ip-address" value="some_ip"> ' +
         '<input id="gateway" value="some_gateway"> ' +
         '<input id="netmask" value="some_netmask"> ' +
@@ -296,7 +332,7 @@ describe("initialize", function () {
           netmask: "some_netmask", 
           nameservers: ["first nameserver", "second nameserver"], 
           is_dhcp: true
-          }, jasmine.any(Function));
+          }, jasmine.any(Function), jasmine.any(Function));
       });
     });
 
@@ -334,7 +370,9 @@ describe("initialize", function () {
     var mcf;
 
     beforeEach(function () {
-      $('#jasmine_content').html('<button id="proxy-submit" type="button" class="btn">Submit</button>' +
+      $('#jasmine_content').html(
+        '<button id="proxy-submit" type="button" class="btn">Submit</button>' +
+        '<div id="global-error" style="display: none"></div>' +
         '<input id="proxy" value="some_proxy"> ' +
         '<div class="progress progress-striped active"><div class="bar" style="width: 0;" id="proxy-bar"></div></div>');
       mcf = new Mcf('/api');
@@ -360,7 +398,7 @@ describe("initialize", function () {
 
       it("should updates network config", function () {
         $('#proxy-submit').click();
-        expect(mcf.update_micro_cloud).toHaveBeenCalledWith({ http_proxy: "some_proxy", }, jasmine.any(Function)); });
+        expect(mcf.update_micro_cloud).toHaveBeenCalledWith({ http_proxy: "some_proxy", }, jasmine.any(Function), jasmine.any(Function)); });
     });
 
     describe("when the updating is successful", function () {

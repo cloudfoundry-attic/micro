@@ -21,27 +21,27 @@ window.Mcf = class Mcf
     @logger.info 'refreshing data'
 
     @from_root (micro_cloud) =>
-      @follow_link micro_cloud, 'administrator',
-      (admin) => @set_admin_email(admin.email)
+      @follow_link micro_cloud, 'administrator', null,
+        (admin) => @set_admin_email(admin.email)
 
-      @follow_link micro_cloud, 'domain_name',
-      (domain) => @set_domain(domain.name)
+      @follow_link micro_cloud, 'domain_name', null,
+        (domain) => @set_domain(domain.name)
 
-      @follow_link micro_cloud, 'network_interface',
-      (ni) =>
-        @set_gateway ni.gateway
-        @set_ip_address ni.ip_address
-        @set_is_dhcp ni.is_dhcp
-        @set_nameservers ni.nameservers
-        @set_netmask ni.netmask
+      @follow_link micro_cloud, 'network_interface', null,
+        (ni) =>
+          @set_gateway ni.gateway
+          @set_ip_address ni.ip_address
+          @set_is_dhcp ni.is_dhcp
+          @set_nameservers ni.nameservers
+          @set_netmask ni.netmask
 
-      @follow_link micro_cloud, 'network_health',
-      (nh) =>
-        @set_reach_gateway nh.reach_gateway
-        @set_reach_internet nh.reach_internet
-        @set_resolve_default(
-          nh.resolve_default)
-        @set_resolve_other nh.resolve_other
+      @follow_link micro_cloud, 'network_health', null,
+        (nh) =>
+          @set_reach_gateway nh.reach_gateway
+          @set_reach_internet nh.reach_internet
+          @set_resolve_default(
+            nh.resolve_default)
+          @set_resolve_other nh.resolve_other
 
       @refresh_services micro_cloud
 
@@ -50,37 +50,63 @@ window.Mcf = class Mcf
       @set_version micro_cloud.version
 
   # Update administrator data using the API.
-  update_admin: (data, callback) =>
-    @update_second_level 'administrator', data, callback
+  update_admin: (data, callback, error_callback) =>
+    @update_second_level 'administrator', data, callback, error_callback
 
   # Update domain data using the API.
-  update_domain: (data, callback) =>
-    @update_second_level 'domain_name', data, callback
+  update_domain: (data, callback, error_callback) =>
+    @update_second_level 'domain_name', data, callback, error_callback
 
   # Update micro cloud data using the API.
-  update_micro_cloud: (data, callback) ->
+  update_micro_cloud: (data, callback, error_callback) ->
     @from_root (micro_cloud) =>
-      @follow_link micro_cloud, 'edit', callback, data
+      @follow_link micro_cloud, 'edit', data, callback, error_callback
 
   # Update network data using the API.
-  update_network: (data, callback) =>
-    @update_second_level 'network_interface', data, callback
+  update_network: (data, callback, error_callback) =>
+    @update_second_level 'network_interface', data, callback, error_callback
+
+  # Rebuild the services table.
+  refresh_services: (root_data) ->
+    @follow_link root_data, 'services', null,
+      (data) => (new ServicesTable(@toggle_service)).render(
+        data, $('tbody.services'))
+
+  # Enable or disable a service.
+  toggle_service: (name, enabled) =>
+    $("#button_#{name}").attr('class', 'btn').text("Pending").unbind()
+    @from_root (micro_cloud) =>
+      @follow_link micro_cloud, 'services', null,
+        (services) =>
+          [match] = (service for service in services.services when service.name == name)
+          @follow_link match, 'edit', =>
+            @logger.info "#{name} service #{if enabled then 'enabled' else 'disabled'}"
+            @refresh_services(micro_cloud)
+
+          { enabled: enabled }
+
+  # Shut down the Micro Cloud VM.
+  shutdown: ->
+    @logger.info 'shutting down'
+    @update_micro_cloud { is_powered_on: false }
+
+
 
   # Frequently used code path for an edit link on level below the
   # root.
-  update_second_level: (rel, data, callback) ->
+  update_second_level: (rel, data, callback, error_callback = @show_error_pane) ->
     @from_root (micro_cloud) =>
-      @follow_link micro_cloud, rel, ((child) => @follow_link child, 'edit', callback, data)
+      @follow_link micro_cloud, rel, null, ((child) => @follow_link child, 'edit', data, callback, error_callback)
 
   from_root: (callback) ->
     $.ajax
       url: @json_root,
       dataType: 'json',
       success: callback,
-      error: @ajax_error
+      error: @handle_error(@show_error_pane)
 
   # Follow a hyperlink in the hypermedia API.
-  follow_link: (data_in, rel, callback, data_next) ->
+  follow_link: (data_in, rel, data_next, callback, error_callback = @show_error_pane) ->
     link = data_in._links[rel]
     $.ajax
       url: link.href
@@ -88,32 +114,7 @@ window.Mcf = class Mcf
       data: JSON.stringify data_next
       contentType: if data_next then link.type else null
       success: callback
-      error: @ajax_error
-
-  # Rebuild the services table.
-  refresh_services: (root_data) ->
-    @follow_link root_data, 'services',
-    (data) => (new ServicesTable(@toggle_service)).render(
-      data, $('tbody.services'))
-
-  # Enable or disable a service.
-  toggle_service: (name, enabled) =>
-    $("#button_#{name}").attr('class', 'btn').text("Pending").unbind()
-    @from_root (micro_cloud) =>
-      @follow_link micro_cloud, 'services',
-      (services) =>
-        [match] = (service for service in services.services when service.name == name)
-        @follow_link match, 'edit',
-        =>
-          @logger.info "#{name} service #{if enabled then 'enabled' else 'disabled'}"
-          @refresh_services(micro_cloud)
-
-        { enabled: enabled }
-
-  # Shut down the Micro Cloud VM.
-  shutdown: ->
-    @logger.info 'shutting down'
-    @update_micro_cloud { is_powered_on: false }
+      error: @handle_error(error_callback)
 
   set_admin_email: (@admin_email) ->
     $('.admin-email').text(@admin_email)
@@ -157,8 +158,12 @@ window.Mcf = class Mcf
   set_version: (@version) ->
     $('.version').text(@version)
 
+  show_error_pane: ->  $('#global-error').show()
+
   # Handle an AJAX error.
-  ajax_error: (xhr) =>
-    if xhr.status == 400 and xhr.responseText?
-      @logger.error xhr.responseText
-    $('#global-error').toggle()
+  handle_error: (callback) =>
+    (xhr) =>
+      if xhr.status == 400 and xhr.responseText?
+        @logger.error xhr.responseText
+
+      callback()

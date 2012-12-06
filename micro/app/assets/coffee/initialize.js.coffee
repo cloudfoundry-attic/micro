@@ -6,8 +6,13 @@ window.initialize_micro_cloudfoundry = (mcf) ->
     bar.start_indeterminate()
     $(this).attr 'disabled', 'disabled'
     mcf[method] data, =>
-      bar.hide()
       mcf.load_data()
+      bar.hide()
+      $(this).attr 'disabled', null
+    , =>
+      console.log($("#jasmine_content").size())
+      mcf.show_error_pane()
+      bar.hide()
       $(this).attr 'disabled', null
 
   $('#admin-submit').on 'click', ->
