@@ -70,9 +70,7 @@ window.Mcf = class Mcf
   # root.
   update_second_level: (rel, data, callback) ->
     @from_root (micro_cloud) =>
-      @follow_link micro_cloud, rel,
-      (child) => @follow_link child, 'edit',
-      callback, data
+      @follow_link micro_cloud, rel, ((child) => @follow_link child, 'edit', callback, data)
 
   from_root: (callback) ->
     $.ajax
