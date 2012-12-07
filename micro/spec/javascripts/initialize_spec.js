@@ -61,8 +61,33 @@ describe("initialize", function () {
       });
     });
 
+
     describe("when the updating is a failure", function () {
-      xit("re-enables the submit button", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'update_admin').andCallFake(function (data, callback, error_callback) {
+          error_callback();
+        });
+        spyOn(mcf, 'load_data');
+      });
+
+      it("shows an error alert", function () {
+        $('#admin-submit').click();
+        expect($('#global-error')).toBeVisible();
+      });
+
+      it("hides the bar", function () {
+        $('#admin-submit').click();
+        expect($('#domain-bar')).not.toBeVisible();
+      });
+
+      it("re-enables the submit button", function () {
+        $('#admin-submit').click();
+        expect($('#domain-submit')).not.toBeDisabled();
+      });
+
+      it("does not reload the data", function () {
+        $('#admin-submit').click();
+        expect(mcf.load_data).not.toHaveBeenCalled();
       });
     });
   });
@@ -219,7 +244,31 @@ describe("initialize", function () {
     });
 
     describe("when the updating is a failure", function () {
-      xit("re-enables the submit button", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'update_micro_cloud').andCallFake(function (data, callback, error_callback) {
+          error_callback();
+        });
+        spyOn(mcf, 'load_data');
+      });
+
+      it("shows an error alert", function () {
+        $('#internet-on-submit').click();
+        expect($('#global-error')).toBeVisible();
+      });
+
+      it("hides the bar", function () {
+        $('#internet-on-submit').click();
+        expect($('#internet-bar')).not.toBeVisible();
+      });
+
+      it("re-enables the submit button", function () {
+        $('#internet-on-submit').click();
+        expect($('#internet-on-submit')).not.toBeDisabled();
+      });
+
+      it("does not reload the data", function () {
+        $('#internet-on-submit').click();
+        expect(mcf.load_data).not.toHaveBeenCalled();
       });
     });
   });
@@ -284,7 +333,31 @@ describe("initialize", function () {
     });
 
     describe("when the updating is a failure", function () {
-      xit("re-enables the submit button", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'update_micro_cloud').andCallFake(function (data, callback, error_callback) {
+          error_callback();
+        });
+        spyOn(mcf, 'load_data');
+      });
+
+      it("shows an error alert", function () {
+        $('#internet-off-submit').click();
+        expect($('#global-error')).toBeVisible();
+      });
+
+      it("hides the bar", function () {
+        $('#internet-off-submit').click();
+        expect($('#internet-bar')).not.toBeVisible();
+      });
+
+      it("re-enables the submit button", function () {
+        $('#internet-off-submit').click();
+        expect($('#internet-off-submit')).not.toBeDisabled();
+      });
+
+      it("does not reload the data", function () {
+        $('#internet-off-submit').click();
+        expect(mcf.load_data).not.toHaveBeenCalled();
       });
     });
   });
@@ -361,12 +434,36 @@ describe("initialize", function () {
     });
 
     describe("when the updating is a failure", function () {
-      xit("re-enables the submit button", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'update_network').andCallFake(function (data, callback, error_callback) {
+          error_callback();
+        });
+        spyOn(mcf, 'load_data');
+      });
+
+      it("shows an error alert", function () {
+        $('#network-submit').click();
+        expect($('#global-error')).toBeVisible();
+      });
+
+      it("hides the bar", function () {
+        $('#network-submit').click();
+        expect($('#network-bar')).not.toBeVisible();
+      });
+
+      it("re-enables the submit button", function () {
+        $('#internet-off-submit').click();
+        expect($('#network-submit')).not.toBeDisabled();
+      });
+
+      it("does not reload the data", function () {
+        $('#network-submit').click();
+        expect(mcf.load_data).not.toHaveBeenCalled();
       });
     });
   });
 
-  describe(".network_submit", function () {
+  describe(".proxy_submit", function () {
     var mcf;
 
     beforeEach(function () {
@@ -426,7 +523,31 @@ describe("initialize", function () {
     });
 
     describe("when the updating is a failure", function () {
-      xit("re-enables the submit button", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'update_micro_cloud').andCallFake(function (data, callback, error_callback) {
+          error_callback();
+        });
+        spyOn(mcf, 'load_data');
+      });
+
+      it("shows an error alert", function () {
+        $('#proxy-submit').click();
+        expect($('#global-error')).toBeVisible();
+      });
+
+      it("hides the bar", function () {
+        $('#proxy-submit').click();
+        expect($('#proxy-bar')).not.toBeVisible();
+      });
+
+      it("re-enables the submit button", function () {
+        $('#proxy-submit').click();
+        expect($('#proxy-submit')).not.toBeDisabled();
+      });
+
+      it("does not reload the data", function () {
+        $('#proxy-submit').click();
+        expect(mcf.load_data).not.toHaveBeenCalled();
       });
     });
   });
