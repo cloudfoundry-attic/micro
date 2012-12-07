@@ -79,11 +79,9 @@ window.Mcf = class Mcf
       @follow_link micro_cloud, 'services', null,
         (services) =>
           [match] = (service for service in services.services when service.name == name)
-          @follow_link match, 'edit', =>
+          @follow_link match, 'edit', { enabled: enabled }, =>
             @logger.info "#{name} service #{if enabled then 'enabled' else 'disabled'}"
             @refresh_services(micro_cloud)
-
-          { enabled: enabled }
 
   # Shut down the Micro Cloud VM.
   shutdown: ->
