@@ -162,6 +162,7 @@ window.Mcf = class Mcf
   handle_error: (callback) =>
     (xhr) =>
       if xhr.status == 400 and xhr.responseText?
+        $('#global-error-text').text(xhr.responseText)
         @logger.error xhr.responseText
 
       callback()
