@@ -291,8 +291,8 @@ task :bvt_setup, :roles => :test do
   run_commands([
     '. ~/.bash_profile',
     "vmc --trace target http://api.#{domain}/",
-    "vmc --trace register '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}'",
-    "vmc --trace register #{normal_user} --password '#{normal_password}' --verify '#{normal_password}'",
+    "vmc --trace register '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}' || true", # 204 error see https://www.pivotaltracker.com/story/show/40873227
+    "vmc --trace register #{normal_user} --password '#{normal_password}' --verify '#{normal_password}' || true",
     'cd ~/gem_cache_warmer',
     'vmc push -f warmer --runtime ruby19 || true',
     'vmc delete -f warmer || true',
@@ -305,7 +305,7 @@ desc 'Run vcap-yeti tests.'
 task :bvt, :roles => :test do
   run_commands([
     '. ~/.bash_profile',
-    "export VCAP_BVT_TARGET=#{domain}",
+    "export VCAP_BVT_TARGET=api.#{domain}",
     "export VCAP_BVT_ADMIN_USER='#{admin_user}'",
     "export VCAP_BVT_ADMIN_USER_PASSWD='#{admin_password}'",
     "export VCAP_BVT_USER='#{normal_user}'",
