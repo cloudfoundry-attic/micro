@@ -194,6 +194,8 @@ task :update_micro, :roles => :build do
   run_commands([
     'cd ~/micro',
     'git pull',
+    'cd micro',
+    'bundle exec rake assets:precompile'
   ])
 end
 
