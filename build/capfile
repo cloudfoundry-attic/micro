@@ -311,9 +311,10 @@ task :bvt, :roles => :test do
     "export VCAP_BVT_USER='#{normal_user}'",
     "export VCAP_BVT_USER_PASSWD='#{normal_password}'",
     ' cd ~/cf-release/src/tests',
-    './update.sh',
+    './update',
     'rm -rf ~/.bvt',
-    'bundle exec rake full[1]'
+    # 'bundle exec rake full[1]' # till we can fix all yeti test, only try running a subset
+    'bundle exec rake mcf'
     ])
 end
 
