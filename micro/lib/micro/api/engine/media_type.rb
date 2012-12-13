@@ -1,7 +1,3 @@
-require 'json'
-
-require 'graphviz'
-
 module VCAP
 
   module Micro

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'micro/console'
 
 describe VCAP::Micro::Console do
   let(:input) { StringIO.new }

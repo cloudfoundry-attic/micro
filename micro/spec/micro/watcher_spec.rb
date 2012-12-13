@@ -1,6 +1,4 @@
 require 'spec_helper'
-require 'micro/watcher'
-require 'micro/network'
 
 describe VCAP::Micro::Watcher do
   def mock_network(state)

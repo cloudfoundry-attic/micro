@@ -1,6 +1,4 @@
-require 'tempfile'
-
-require 'micro/apply_spec'
+require 'spec_helper'
 
 describe VCAP::Micro::ApplySpec do
 

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'micro/memory'
 
 describe VCAP::Micro::Memory do
   it "should return nil on a missing memory file" do

@@ -1,5 +1,3 @@
-require 'highline'
-require 'progressbar'
 require 'logger'
 
 require 'micro/network'
@@ -238,8 +236,4 @@ module VCAP
       end
     end
   end
-end
-
-if $0 == __FILE__
-  VCAP::Micro::Console.run
 end

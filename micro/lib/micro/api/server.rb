@@ -1,5 +1,3 @@
-require 'sinatra/base'
-
 module VCAP
 
   module Micro

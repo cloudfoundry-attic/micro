@@ -1,4 +1,4 @@
-require 'micro/monitored_process'
+require 'spec_helper'
 
 describe VCAP::Micro::MonitoredProcess do
 

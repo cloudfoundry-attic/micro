@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'micro/settings'
 
 describe VCAP::Micro::Network do
 

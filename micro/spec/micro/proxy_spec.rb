@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'micro/proxy'
 
 describe VCAP::Micro::Proxy do
 

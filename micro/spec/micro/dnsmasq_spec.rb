@@ -1,6 +1,4 @@
-require 'tempfile'
-
-require 'micro/dnsmasq'
+require 'spec_helper'
 
 describe VCAP::Micro::Dnsmasq do
 

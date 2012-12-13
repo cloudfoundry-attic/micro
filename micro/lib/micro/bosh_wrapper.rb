@@ -1,9 +1,5 @@
-require 'agent'
-
 module VCAP
-
   module Micro
-
     class BoshWrapper
 
       # Wrapper for Bosh agent and agent client.

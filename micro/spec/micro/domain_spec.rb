@@ -1,4 +1,4 @@
-require 'micro/domain'
+require 'spec_helper'
 
 describe VCAP::Micro::Domain do
 

@@ -1,7 +1,6 @@
 require 'netaddr'
 require 'socket'
 require 'resolv'
-require 'statemachine'
 require 'timeout'
 require 'fileutils'
 require 'tempfile'

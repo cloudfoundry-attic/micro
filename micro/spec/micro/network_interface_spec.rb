@@ -1,4 +1,4 @@
-require 'micro/network_interface'
+require 'spec_helper'
 
 describe VCAP::Micro::NetworkInterface do
 

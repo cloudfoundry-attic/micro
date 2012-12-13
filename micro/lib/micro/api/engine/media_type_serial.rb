@@ -1,5 +1,3 @@
-require 'rack'
-
 module VCAP
 
   module Micro

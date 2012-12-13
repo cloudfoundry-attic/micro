@@ -1,6 +1,4 @@
-require 'fakeweb'
-
-require 'micro/dns_api_client'
+require 'spec_helper'
 
 describe VCAP::Micro::DnsApiClient do
 

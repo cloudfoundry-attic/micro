@@ -1,6 +1,4 @@
-require 'blobstore_client'
 require 'yaml'
-require "yajl"
 
 module VCAP
   module Micro

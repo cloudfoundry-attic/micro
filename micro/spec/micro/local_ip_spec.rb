@@ -1,4 +1,4 @@
-require 'micro/local_ip'
+require 'spec_helper'
 
 describe VCAP::Micro do
 

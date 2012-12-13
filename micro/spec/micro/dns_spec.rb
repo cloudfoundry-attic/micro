@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require 'micro/dns'
-
 describe VCAP::Micro::DNS do
 
   before(:each) do

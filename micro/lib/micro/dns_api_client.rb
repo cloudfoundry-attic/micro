@@ -1,11 +1,5 @@
-require 'rest-client'
-require 'json'
-
 module VCAP
-
   module Micro
-
-    # Client for the Micro Cloud Foundry dynamic DNS API.
     class DnsApiClient
 
       def initialize(options={})
@@ -15,7 +9,7 @@ module VCAP
 
       # Get a RestClient::Resource to the DNS API.
       def client
-        RestClient.proxy = @http_proxy  if @http_proxy
+        RestClient.proxy = @http_proxy if @http_proxy
         headers = { :content_type => 'application/json' }
         RestClient::Resource.new(@root_url, :headers => headers)
       end

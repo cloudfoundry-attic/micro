@@ -3,12 +3,9 @@ require 'spec_helper'
 describe 'micro cloud resource' do
   include Rack::Test::Methods
 
-  def app
-    VCAP::Micro::Api::Server
-  end
+  let(:app) { VCAP::Micro::Api::Server }
 
   describe 'name' do
-
     it 'returns 200 when the domain name is valid' do
       apply_spec = double('apply_spec').as_null_object
       bosh_wrapper = double('bosh_wrapper').as_null_object
@@ -42,6 +39,5 @@ describe 'micro cloud resource' do
       last_response.status.should == 400
       last_response.body.should == 'Domain is invalid'
     end
-
   end
 end

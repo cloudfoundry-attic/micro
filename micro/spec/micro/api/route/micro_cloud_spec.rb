@@ -3,9 +3,7 @@ require 'spec_helper'
 describe 'micro cloud resource' do
   include Rack::Test::Methods
 
-  def app
-    VCAP::Micro::Api::Server
-  end
+  let(:app) { VCAP::Micro::Api::Server }
 
   describe 'http_proxy' do
 

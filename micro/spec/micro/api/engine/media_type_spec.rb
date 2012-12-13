@@ -1,5 +1,4 @@
-require 'micro/api/engine'
-require 'micro/api/media_type'
+require 'spec_helper'
 
 describe VCAP::Micro::Api::Engine::MediaType do
 
@@ -56,10 +55,10 @@ describe VCAP::Micro::Api::Engine::MediaType do
   describe '#link' do
 
     context 'when the link has a valid rel' do
-      subject {
+      subject do
         mt = TestMediaType3.new
         mt.link(:rel1, 'test')
-      }
+      end
 
       its(:_links) { should include(
         {
@@ -91,7 +90,7 @@ describe VCAP::Micro::Api::Engine::MediaType do
 
   describe '#json_create' do
 
-    subject {
+    subject do
       json = {
         :json_class => 'TestMediaType3',
         :data => {
@@ -102,8 +101,8 @@ describe VCAP::Micro::Api::Engine::MediaType do
         }
       }.to_json
 
-      JSON.parse!(json)
-    }
+      JSON.parse(json)
+    end
 
     it { should be_a TestMediaType3 }
 

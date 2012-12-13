@@ -4,7 +4,6 @@ require 'logger'
 require 'openssl'
 require 'tmpdir'
 require 'tempfile'
-require 'yajl'
 require 'yaml'
 
 require 'agent/config'
@@ -13,7 +12,6 @@ require 'agent/errors'
 require 'agent/message/base'
 require 'agent/message/compile_package'
 require 'agent/util'
-require 'blobstore_client'
 
 module VCAP
   module Micro

@@ -1,6 +1,4 @@
-require 'micro/monitored_process'
-require 'micro/monitored_process_group'
-require 'micro/service_config'
+require 'spec_helper'
 
 describe VCAP::Micro::MonitoredProcessGroup do
 

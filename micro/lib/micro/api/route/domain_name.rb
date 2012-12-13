@@ -1,11 +1,7 @@
 module VCAP
-
   module Micro
-
     module Api
-
       module Route
-
         # Routes for domain name.
         module DomainName
 
@@ -101,15 +97,9 @@ module VCAP
                 end
               end
             end
-
           end
-
         end
-
       end
-
     end
-
   end
-
 end

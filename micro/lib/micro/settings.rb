@@ -1,4 +1,3 @@
-
 module VCAP
   module Micro
     class Settings

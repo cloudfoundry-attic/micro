@@ -1,5 +1,3 @@
-require 'yajl'
-
 module VCAP
   module Micro
     class Proxy

@@ -1,6 +1,4 @@
 require 'spec_helper'
-require 'micro/proxy'
-require 'micro/identity'
 
 describe VCAP::Micro::Identity do
 

@@ -1,14 +1,6 @@
-
 require 'logger'
-require 'blobstore_client'
 require 'tempfile'
 require 'ostruct'
-require 'posix-spawn'
-require 'monit_api'
-require 'agent_client'
-
-require 'agent'
-
 
 module VCAP
   module Micro

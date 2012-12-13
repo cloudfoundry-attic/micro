@@ -1,8 +1,4 @@
-require 'tempfile'
-
-require 'micro/monitored_process'
-require 'micro/monitored_process_group'
-require 'micro/monitored_process_groups'
+require 'spec_helper'
 
 describe VCAP::Micro::MonitoredProcessGroups do
 

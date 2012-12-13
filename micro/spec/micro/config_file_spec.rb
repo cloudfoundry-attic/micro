@@ -1,6 +1,4 @@
-require 'tempfile'
-
-require 'micro/config_file'
+require 'spec_helper'
 
 describe VCAP::Micro::ConfigFile do
 

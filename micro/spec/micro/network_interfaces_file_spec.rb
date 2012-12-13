@@ -1,6 +1,4 @@
-require 'tempfile'
-
-require 'micro/network_interfaces_file'
+require 'spec_helper'
 
 describe VCAP::Micro::NetworkInterfacesFile do
 

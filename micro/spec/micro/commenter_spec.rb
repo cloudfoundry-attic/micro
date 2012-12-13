@@ -1,6 +1,4 @@
-require 'tempfile'
-
-require 'micro/commenter'
+require 'spec_helper'
 
 describe VCAP::Micro::Commenter do
 

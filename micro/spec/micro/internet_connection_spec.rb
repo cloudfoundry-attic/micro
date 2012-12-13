@@ -1,7 +1,4 @@
-require 'tempfile'
-
-require 'micro/dnsmasq'
-require 'micro/internet_connection'
+require 'spec_helper'
 
 describe VCAP::Micro::InternetConnection do
 

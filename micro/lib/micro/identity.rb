@@ -1,6 +1,3 @@
-require 'rest-client'
-require 'yajl'
-
 module VCAP
   module Micro
     class Identity
