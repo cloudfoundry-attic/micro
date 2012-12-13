@@ -26,6 +26,23 @@ GEM
       multi_json (~> 1.1.0)
       ruby-atmos-pure (~> 1.0.5)
       uuidtools (~> 2.1.2)
+    bosh_agent (0.6.7)
+      blobstore_client (~> 0.3.13)
+      bosh_common (>= 0.5.1)
+      bosh_encryption (>= 0.0.3)
+      highline
+      monit_api
+      nats (= 0.4.22)
+      netaddr
+      posix-spawn
+      rack-test
+      rake
+      ruby-atmos-pure
+      sigar (>= 0.7.2)
+      sinatra
+      thin
+      uuidtools
+      yajl-ruby
     bosh_common (0.5.1)
     builder (3.1.4)
     childprocess (0.3.6)
@@ -54,6 +71,7 @@ GEM
       rspec (>= 1.3.1)
       selenium-webdriver (>= 0.1.3)
     jasmine-core (1.3.1)
+    json (1.7.5)
     json_pure (1.7.5)
     libv8 (3.3.10.4)
     libwebsocket (0.1.7.1)
@@ -139,6 +157,7 @@ PLATFORMS
 DEPENDENCIES
   agent_client
   blobstore_client (~> 0.3.13)
+  bosh_agent
   bosh_common
   bosh_encryption!
   ci_reporter
@@ -147,6 +166,7 @@ DEPENDENCIES
   fakeweb
   highline
   jasmine
+  json
   monit_api!
   nats (= 0.4.22)
   netaddr

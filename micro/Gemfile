@@ -13,7 +13,8 @@ gem 'sigar', ">=0.7.2"
 gem 'sinatra'
 gem 'thin'
 gem 'uuidtools'
-gem 'yajl-ruby', require: 'yajl'
+gem 'yajl-ruby', require: 'yajl/json_gem'
+gem 'json'
 gem 'agent_client'
 gem 'bosh_common'
 gem 'rest-client'
@@ -27,6 +28,8 @@ git 'git://github.com/cloudfoundry/bosh.git' do
   gem 'monit_api'
   gem 'bosh_encryption'
 end
+
+gem 'bosh_agent'
 
 group :assets do
   gem 'sprockets'

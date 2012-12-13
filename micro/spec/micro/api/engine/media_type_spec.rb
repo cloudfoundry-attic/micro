@@ -102,7 +102,7 @@ describe VCAP::Micro::Api::Engine::MediaType do
         }
       }.to_json
 
-      JSON.parse(json)
+      JSON.parse!(json)
     }
 
     it { should be_a TestMediaType3 }

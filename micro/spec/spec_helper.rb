@@ -69,6 +69,14 @@ def with_constants(constants, &block)
   end
 end
 
+class String
+  def strip_heredoc
+    string = scan(/^[ \t]*(?=\S)/).min
+    indent = string ? string.size : 0
+    gsub(/^[ \t]{#{indent}}/, '')
+  end
+end
+
 # e.g. path_to_foo.should be_same_file_as(path_to_bar)
 RSpec::Matchers.define(:be_same_file_as) do |exected_file_path|
   match do |actual_file_path|
