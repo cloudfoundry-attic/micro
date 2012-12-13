@@ -16,7 +16,7 @@ use Rack::Rewrite do
   rewrite '/', '/index.html'
 end
 
-use Rack::Static, urls: %w{/index.html /assets}, root: 'public'
+use Rack::Static, urls: %w{/index.html /tos.html /assets}, root: 'public'
 
 map '/api' do
   run VCAP::Micro::Api::Server

@@ -10,7 +10,7 @@ describe("Mcf", function () {
       $('#jasmine_content').html("<div id='global-error'></div>");
       expect($('#global-error')).not.toBeVisible();
       jasmine.Ajax.useMock();
-      mcf.load_data();
+      mcf.configured();
       request = mostRecentAjaxRequest();
       request.response({status:500, responseText:""});
 
@@ -41,6 +41,52 @@ describe("Mcf", function () {
       expect($.fn.unbind.mostRecentCall.object.id).toEqual(last_service.id);
       expect(last_service.text()).toEqual("Pending")
     });
+  });
+
+  describe(".initial_config", function() {
+    var mcf;
+
+    beforeEach(function() {
+      mcf = new Mcf;
+    });
+
+    it("configures the administrator", function() {
+      spyOn(mcf, 'update_admin');
+
+      spyOn(mcf, 'update_network').andCallFake(function (data, callback, error_callback) {
+        callback();
+      });
+
+      mcf.initial_config({foo: 'bar', password: 'password', email: 'email@email.com'});
+      expect(mcf.update_admin).toHaveBeenCalledWith({password: 'password', email: 'email@email.com'}, jasmine.any(Function));
+    });
+
+    it("configures the domain", function() {
+      spyOn(mcf, 'update_domain');
+
+      spyOn(mcf, 'update_network').andCallFake(function (data, callback, error_callback) {
+        callback();
+      });
+
+      spyOn(mcf, 'update_admin').andCallFake(function (data, callback, error_callback) {
+        callback();
+      });
+
+      mcf.initial_config({foo: 'bar', name: 'domain', token: 'token'});
+
+      expect(mcf.update_domain).toHaveBeenCalledWith({name: 'domain', token: 'token'}, jasmine.any(Function));
+    });
+
+    it("configures the network", function() {
+      spyOn(mcf, 'update_network');
+
+      mcf.initial_config({foo: 'bar', ip_address: 'ip_address', netmask: 'netmask', gateway: "gateway", nameservers: "nameservers", is_dhcp: false});
+      expect(mcf.update_network).toHaveBeenCalledWith({ip_address: 'ip_address', netmask: 'netmask', gateway: "gateway", nameservers: "nameservers", is_dhcp: false}, jasmine.any(Function));
+    });
+
+    context("when an error occurs", function() {
+    });
+
   });
 });
 

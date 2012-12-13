@@ -17,37 +17,46 @@ window.Mcf = class Mcf
     @logger = new Logger($('#terminal'))
 
   # Load all data from the API.
-  load_data: =>
+  load_data: (micro_cloud) =>
     @logger.info 'refreshing data'
 
-    @from_root (micro_cloud) =>
-      @follow_link micro_cloud, 'administrator', null,
-        (admin) => @set_admin_email(admin.email)
+    @follow_link micro_cloud, 'administrator', null,
+      (admin) => @set_admin_email(admin.email)
 
-      @follow_link micro_cloud, 'domain_name', null,
-        (domain) => @set_domain(domain.name)
+    @follow_link micro_cloud, 'domain_name', null,
+      (domain) => @set_domain(domain.name)
 
-      @follow_link micro_cloud, 'network_interface', null,
-        (ni) =>
-          @set_gateway ni.gateway
-          @set_ip_address ni.ip_address
-          @set_is_dhcp ni.is_dhcp
-          @set_nameservers ni.nameservers
-          @set_netmask ni.netmask
+    @follow_link micro_cloud, 'network_interface', null,
+      (ni) =>
+        @set_gateway ni.gateway
+        @set_ip_address ni.ip_address
+        @set_is_dhcp ni.is_dhcp
+        @set_nameservers ni.nameservers
+        @set_netmask ni.netmask
 
-      @follow_link micro_cloud, 'network_health', null,
-        (nh) =>
-          @set_reach_gateway nh.reach_gateway
-          @set_reach_internet nh.reach_internet
-          @set_resolve_default(
-            nh.resolve_default)
-          @set_resolve_other nh.resolve_other
+    @follow_link micro_cloud, 'network_health', null,
+      (nh) =>
+        @set_reach_gateway nh.reach_gateway
+        @set_reach_internet nh.reach_internet
+        @set_resolve_default(
+          nh.resolve_default)
+        @set_resolve_other nh.resolve_other
 
-      @refresh_services micro_cloud
+    @refresh_services micro_cloud
 
-      @set_internet_connected micro_cloud.internet_connected
-      @set_proxy micro_cloud.http_proxy
-      @set_version micro_cloud.version
+    @set_internet_connected micro_cloud.internet_connected
+    @set_proxy micro_cloud.http_proxy
+    @set_version micro_cloud.version
+
+  configured: ->
+    @from_root (data) =>
+      if data.is_configured
+        $('#not-configured').hide()
+        $('#configured').show()
+        @load_data(data)
+      else
+        $('#configured').hide()
+        $('#not-configured').show()
 
   # Update administrator data using the API.
   update_admin: (data, callback, error_callback) =>
@@ -166,3 +175,21 @@ window.Mcf = class Mcf
         @logger.error xhr.responseText
 
       callback()
+
+  initial_config: (data, success_callback, error_callback) ->
+    input = {}
+
+    $.each data, (key, value) ->
+      type = switch key
+        when 'password', 'email' then 'admin'
+        when 'name', 'token' then 'domain'
+        when 'ip_address', 'netmask', 'gateway', 'nameservers', 'is_dhcp' then 'network'
+        else 'other'
+      input[type] ||= {}
+      input[type][key] = value
+
+    # TODO: update to use deferred and $.when
+    @update_network input.network, =>
+      @update_admin input.admin, =>
+        @update_domain input.domain, =>
+          success_callback()

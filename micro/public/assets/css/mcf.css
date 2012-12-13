@@ -1,3 +1,13 @@
+#not-configured,
+#configured {
+  display: none;
+}
+
+#tos strong {
+  text-transform: uppercase;
+  font-weight: normal;
+}
+
 .enabled {
   display : none;
 }
@@ -58,5 +68,9 @@ body {
 }
 
 #global-error {
-    display: none;
+  display: none;
+}
+
+.help-block {
+  font-size: .75em;
 }

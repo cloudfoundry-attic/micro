@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
     <title>VMware Micro Cloud Foundry</title>
     <link href="assets/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="assets/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
@@ -11,12 +12,118 @@
     <div class="container">
 
       <div class="page-header">
-	<h1><span class="domain"></span> <small>Micro Cloud Foundry</small></h1>
+	    <h1><span class="domain"></span> <small>Micro Cloud Foundry</small></h1>
       </div>
 
       <div class="container-fluid">
 
-	<div class="row-fluid">
+      <div class="alert alert-error" id="global-error">
+        <button type="button" class="close close-alert">x</button>
+        <span id="global-error-text">An error has occurred</span>
+      </div>
+
+      <div id="not-configured">
+        <form id="initial-config">
+          <fieldset>
+            <legend>Initial setup:</legend>
+
+            <label>Password</label>
+            <input type="password" id="initial-password">
+            <span class="help-block">VM root password</span>
+
+            <label>Domain</label>
+            <div class="accordion" id="initial-domain">
+              <div class="accordion-group">
+                <div class="accordion-heading">
+                  <label class="radio" for="domain">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#initial-domain" href="#initial-domain-public-fields">
+                      <input type="radio" name="domain" id="initial-domain-public">
+                      Public Hostname
+                    </a>
+                  </label>
+                </div>
+                <div id="initial-domain-public-fields" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                    <label>Domain token</label>
+                    <input type="text" id="initial-domain-token">
+                    <span class="help-block">Go to <a href="https://micro.cloudfoundry.com/dns" target="_blank">https://micro.cloudfoundry.com/dns</a> to get a token, so that you can get a public URL.</span>
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-group">
+                <div class="accordion-heading">
+                  <label class="radio">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#initial-domain" href="#initial-domain-private-fields">
+                      <input type="radio" name="domain" id="initial-domain-private">
+                      Private Hostname
+                    </a>
+                  </label>
+                </div>
+                <div id="initial-domain-private-fields" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                    <label>Offline domain name</label>
+                    <input type="text" id="initial-domain-offline">
+
+                    <label>Email</label>
+                    <input type="email" id="initial-email">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <label>Network</label>
+            <div class="accordion" id="initial-network">
+              <div class="accordion-group">
+                <div class="accordion-heading">
+                  <label class="radio">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#initial-network" href="#initial-network-dhcp-fields">
+                      <input type="radio" name="network" id="initial-network-dhcp">
+                      DHCP
+                    </a>
+                  </label>
+                </div>
+                <div id="initial-network-dhcp-fields" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                    <span class="help-block">Your network will be configured using DHCP</span>
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-group">
+                <div class="accordion-heading">
+                  <label class="radio">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#initial-network" href="#initial-network-static-fields">
+                      <input type="radio" name="network" id="initial-network-static">
+                      Static
+                    </a>
+                  </label>
+                </div>
+                <div id="initial-network-static-fields" class="accordion-body collapse">
+                  <div class="accordion-inner">
+                    <label>IP address</label>
+                    <input type="text" placeholder="n.n.n.n" pattern="(\d{1,3}\.){3}\d{1,3}" id="initial-ip-address" class="static">
+                    <label>Netmask</label>
+                    <input type="text" placeholder="n.n.n.n" pattern="(\d{1,3}\.){3}\d{1,3}" id="initial-netmask" class="static">
+                    <label>Gateway</label>
+                    <input type="text" placeholder="n.n.n.n" pattern="(\d{1,3}\.){3}\d{1,3}" id="initial-gateway" class="static">
+                    <label>Nameservers</label>
+                    <input type="text" placeholder="n.n.n.n,n.n.n.n" id="initial-nameservers" class="static">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <p>By clicking on configure you accept to the <a href="/tos.html" target="_blank">Terms of Service</a></p>
+              <p><button type="button" class="btn btn-primary" id="initial-submit">Configure</button></p>
+              <div class="progress progress-striped active">
+                <div class="bar" style="width: 0%;" id="initial-bar"></div>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+
+	<div id="configured" class="row-fluid">
 
 	  <div class="span2">
 
@@ -87,11 +194,6 @@
 	  </div>
 
 	  <div class="span10">
-      <div class="alert alert-error" id="global-error">
-          <button type="button" class="close close-alert">x</button>
-          <span id="global-error-text">An error has occurred</span>
-      </div>
-
       <div class="tab-content">
 
 	      <div class="tab-pane active" id="home">

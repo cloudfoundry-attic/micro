@@ -1,19 +1,38 @@
 window.initialize_micro_cloudfoundry = (mcf) ->
   mcf ||= new Mcf '/api'
+  mcf.configured()
 
   submit = (progress_bar, method, data) ->
     bar = new ProgressBar $(progress_bar)
     bar.start_indeterminate()
     $(this).attr 'disabled', 'disabled'
     mcf[method] data, =>
-      mcf.load_data()
+      mcf.configured()
       bar.hide()
       $(this).attr 'disabled', null
     , =>
-      console.log($("#jasmine_content").size())
       mcf.show_error_pane()
       bar.hide()
       $(this).attr 'disabled', null
+
+  add_network = (data) ->
+    if $('#initial-network-static').is ':checked'
+      $.extend data,
+        ip: $('#initial-ip-address').val()
+        netmask: $('#initial-netmask').val()
+        gateway: $('#initial-gateway').val()
+        nameservers: $('#initial-nameservers').val()
+        is_dhcp: false
+    else if $('#initial-network-dhcp').is ':checked'
+      data.is_dhcp = true
+
+  add_domain = (data) ->
+    if $('#initial-domain-private').is ':checked'
+      $.extend data,
+        name: $('#initial-domain-offline').val()
+        email: $('#initial-email').val()
+    else if $('#initial-domain-public').is ':checked'
+      data.token = $('#initial-domain-token').val()
 
   $('#admin-submit').on 'click', ->
     submit.call this, '#admin-bar', 'update_admin',
@@ -53,4 +72,17 @@ window.initialize_micro_cloudfoundry = (mcf) ->
       nameservers: $('#nameservers').val().split(',')
       is_dhcp: $('#dhcp').is(':checked')
 
-  mcf.load_data()
+  $('#initial-submit').on 'click', ->
+    data = password: $('#initial-password').val()
+    add_domain data
+    add_network data
+    submit.call this, '#initial-bar', 'initial_config', data
+
+  $('.accordion-toggle').on 'click', ->
+    $(this).children(':radio').prop('checked', true)
+
+  $('.accordion-toggle > :radio').on 'click', ->
+      # setTimeout is a hack to make the radio buttons select when clicked
+      setTimeout =>
+        $(this).prop('checked', true)
+      , 10

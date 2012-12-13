@@ -7,3 +7,5 @@ beforeEach(function() {
     }
   });
 });
+
+context = describe;
