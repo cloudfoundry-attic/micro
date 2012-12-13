@@ -7,7 +7,7 @@ module VCAP
     # Micro Cloud config file.
     class ConfigFile
 
-      DEFAULT_PATH = '/var/vcap/micro/micro.json'
+      DEFAULT_PATH = '/var/vcap/micro/micro.json'.freeze
 
       def initialize(path=DEFAULT_PATH)
         @path = path
