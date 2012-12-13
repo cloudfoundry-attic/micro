@@ -95,36 +95,6 @@ describe VCAP::Micro::Console do
         vmc target http://api.some_subdomain
         CONSOLE
       end
-
-      it 'allows you to restart the agent by CTRL-C' do
-        VCAP::Micro::Agent.should_receive(:start).exactly(2)
-        console.should_receive(:status) { raise Interrupt.new }
-        console.should_receive(:status) { true }
-
-        input.write "yes\n"
-        input.write "5\n"
-        input.rewind
-
-        subject
-
-        console_output = output.rewind && output.read
-        console_output.should include "Are you sure you want to restart the console?"
-        console_output.should include "restarting console..."
-      end
-
-      it 'allows does not restart if you request it with CTRL-C' do
-        VCAP::Micro::Agent.should_receive(:start)
-        console.stub(:status).and_raise(Interrupt.new)
-
-        input.write "no\n"
-        input.write "4\n"
-        input.rewind
-
-        subject
-
-        output.rewind
-        output.read.should include "Are you sure you want to restart the console?"
-      end
     end
 
     it 'catches and logs exceptions' do

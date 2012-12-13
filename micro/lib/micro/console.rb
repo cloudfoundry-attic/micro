@@ -61,11 +61,6 @@ module VCAP
           status
           menu
         end
-      rescue Interrupt
-        if agree("\nAre you sure you want to restart the console?")
-          say "\nrestarting console..."
-          retry
-        end
       rescue => e
         clear
         @logger.error("caught exception: #{e.message}\n#{e.backtrace.join("\n")}")
