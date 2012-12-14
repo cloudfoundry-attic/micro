@@ -192,9 +192,11 @@ end
 desc 'Update micro.'
 task :update_micro, :roles => :build do
   run_commands([
+    '. ~/.bash_profile',
     'cd ~/micro',
     'git pull',
     'cd micro',
+    'bundle install',
     'bundle exec rake assets:precompile'
   ])
 end
@@ -277,6 +279,7 @@ task :jasmine_spec, :roles => :test do
     'git pull',
     'bundle install',
     'export DISPLAY=:99',
+    'bundle install',
     'bundle exec rake assets:precompile jasmine:ci'
   ])
 end
