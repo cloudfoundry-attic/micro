@@ -89,20 +89,3 @@ describe("Mcf", function () {
 
   });
 });
-
-//beforeEach(function () {
-//  from_root_response = {_links: {administrator: {href: "/", method: "GET", type: 'text/json'}}};
-//  admin_response = {_links: {edit: {href: "/", method: "GET", type: 'text/json'}}};
-//
-//  clearAjaxRequests();
-//  $('#admin-submit').click();
-//});
-//
-//it("hides the bar", function () {
-//
-//  expect($('#admin-bar')).toBeVisible();
-//  ajaxRequests[0].response({status: 200, responseText: JSON.stringify(from_root_response)});
-//  ajaxRequests[1].response({status: 200, responseText: JSON.stringify(admin_response)});
-//  ajaxRequests[2].response({status: 200, responseText: '{}'});
-//  expect($('#admin-bar')).not.toBeVisible();
-//});

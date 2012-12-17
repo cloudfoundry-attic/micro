@@ -2,6 +2,12 @@ window.initialize_micro_cloudfoundry = (mcf) ->
   mcf ||= new Mcf '/api'
   mcf.configured()
 
+  mcf.configured ->
+      $('#configured').show()
+      mcf.load_data()
+    , ->
+      $('#not-configured').show()
+
   submit = (progress_bar, method, data) ->
     bar = new ProgressBar $(progress_bar)
     bar.start_indeterminate()

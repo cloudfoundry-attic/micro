@@ -58,6 +58,13 @@ window.Mcf = class Mcf
         $('#configured').hide()
         $('#not-configured').show()
 
+  configured: (configured_callback, not_configured_callback) ->
+    @from_root (data) ->
+      if data.is_configured
+        configured_callback()
+      else
+        not_configured_callback()
+
   # Update administrator data using the API.
   update_admin: (data, callback, error_callback) =>
     @update_second_level 'administrator', data, callback, error_callback
