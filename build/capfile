@@ -285,17 +285,16 @@ task :bvt_setup, :roles => :test do
   run_commands([
     '. ~/.bash_profile',
     "vmc --trace target http://api.#{domain}/",
-    "(vmc --trace register '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}' || true)",
-    "(vmc --trace register #{normal_user} --password '#{normal_password}' --verify '#{normal_password}' || true)",
+    "(vmc --trace register --email '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}' || true)",
+    "(vmc --trace register --email '#{normal_user}' --password '#{normal_password}' --verify '#{normal_password}' || true)",
     ])
 
     run_commands([
       'cd ~/gem_cache_warmer',
-      'vmc push -f warmer --runtime ruby19',
-      'vmc delete -f warmer',
-      'vmc push -f warmer --runtime ruby18',
-      'vmc delete -f warmer',
-      '|| true'
+      '(vmc push -f warmer --runtime ruby19 || true)',
+      '(vmc delete -f warmer || true)',
+      '(vmc push -f warmer --runtime ruby18 || true)',
+      '(vmc delete -f warmer || true)'
     ])
 end
 
