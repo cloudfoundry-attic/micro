@@ -1,5 +1,6 @@
 require 'json'
 require 'net/ftp'
+require 'net/http'
 
 require 'capistrano_colors'
 
@@ -15,7 +16,6 @@ require 'capistrano_colors'
 # -s admin_password= \
 # -s normal_user= \
 # -s normal_password= \
-# -s http_proxy= \
 # -s cdn_ftp_host= \
 # -s cdn_ftp_user= \
 # -s cdn_ftp_password=
@@ -94,34 +94,6 @@ class VersionStore
   attr_writer :default
 end
 
-# Send data to virtual console 1 on a VM as if it had been typed there.
-def vm_console_send(vmx_path, data, password, options={})
-  options = {
-    :vmrun => 'vmrun',
-    :user => 'root',
-    :remote_ruby => '/var/vcap/bosh/bin/ruby',
-    }.merge(options)
-
-  header = <<-eos
-open('/dev/tty1', 'w') do |o|
-  DATA.each_char do |c|
-    o.ioctl(0x5412, c)
-    sleep(rand(100) / 300.0)
-  end
-end
-__END__
-eos
-
-  local_script = '/tmp/script.rb'
-  remote_script = '/tmp/script.rb'
-
-  open(local_script, 'w') { |f| f << header << data }
-
-  run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} CopyFileFromHostToGuest \"#{vmx_path}\" #{local_script} #{remote_script}"
-
-  run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} runProgramInGuest \"#{vmx_path}\" #{options[:remote_ruby]} #{remote_script}"
-end
-
 def vm_ip(vmx_path, password, options={})
   options = {
     :vmrun => 'vmrun',
@@ -134,6 +106,24 @@ def vm_ip(vmx_path, password, options={})
   run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} CopyFileFromGuestToHost \"#{vmx_path}\" /tmp/ifconfig /tmp/ifconfig"
 
   `cat /tmp/ifconfig`[/inet addr:(\S+) /,1]
+end
+
+# Follow a link in the MCF API.
+def follow_link(data_in, rel, data_next=nil)
+  link = data_in['_links'][rel]
+  link_uri = URI(link['href'])
+
+  http = Net::HTTP.new(link_uri.host, link_uri.port)
+  http.open_timeout = 300
+  http.read_timeout = 300
+
+  if link['method'] == 'get'
+    args = [link_uri.path]
+  else
+    args = [link_uri.path, data_next, { 'Content-Type' => link['type'] }]
+  end
+
+  http.send(link['method'], *args)
 end
 
 def run_commands(commands)
@@ -277,9 +267,8 @@ task :jasmine_spec, :roles => :test do
     '. ~/.bash_profile',
     'cd ~/micro/micro',
     'git pull',
-    'bundle install',
+    '(bundle check || bundle install || exit 1)',
     'export DISPLAY=:99',
-    'bundle install',
     'bundle exec rake assets:precompile jasmine:ci'
   ])
 end
@@ -296,13 +285,17 @@ task :bvt_setup, :roles => :test do
   run_commands([
     '. ~/.bash_profile',
     "vmc --trace target http://api.#{domain}/",
-    "vmc --trace register '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}' || true", # 204 error see https://www.pivotaltracker.com/story/show/40873227
-    "vmc --trace register #{normal_user} --password '#{normal_password}' --verify '#{normal_password}' || true",
-    'cd ~/gem_cache_warmer',
-    'vmc push -f warmer --runtime ruby19 || true',
-    'vmc delete -f warmer || true',
-    'vmc push -f warmer --runtime ruby18 || true',
-    'vmc delete -f warmer || true'
+    "(vmc --trace register '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}' || true)",
+    "(vmc --trace register #{normal_user} --password '#{normal_password}' --verify '#{normal_password}' || true)",
+    ])
+
+    run_commands([
+      'cd ~/gem_cache_warmer',
+      'vmc push -f warmer --runtime ruby19',
+      'vmc delete -f warmer',
+      'vmc push -f warmer --runtime ruby18',
+      'vmc delete -f warmer',
+      '|| true'
     ])
 end
 
@@ -319,7 +312,7 @@ task :bvt, :roles => :test do
     './update',
     'rm -rf ~/.bvt',
     # 'bundle exec rake full[1]' # till we can fix all yeti test, only try running a subset
-    'bundle exec rake mcf'
+    'bundle exec rake full[1]'
     ])
 end
 
@@ -381,6 +374,40 @@ task :dist_nightly do
   end
 
   p "http://download3.vmware.com/cloudfoundry/micro/nightly/#{zip_name}"
+end
+
+desc 'Initial setup of the VM being tested.'
+task :initial_setup do
+  root_uri = URI("http://#{micro_vm_ip}:9292/api/")
+
+  micro_cloud = JSON.parse(Net::HTTP.get(root_uri))
+
+  offline_resp = follow_link(micro_cloud, 'edit',
+    { internet_connected: false }.to_json)
+  p offline_resp
+  p offline_resp.body
+
+  admin = JSON.parse(follow_link(micro_cloud, 'administrator').body)
+
+  admin_edit_resp = follow_link(admin, 'edit', {
+    email: admin_user,
+    password: micro_password
+    }.to_json)
+  p admin_edit_resp
+  p admin_edit_resp.body
+
+  domain_resp = JSON.parse(follow_link(micro_cloud, 'domain_name').body)
+
+  domain_edit_resp = follow_link(domain_resp, 'edit', {
+    name: domain,
+    }.to_json)
+  p domain_edit_resp
+  p domain_edit_resp.body
+
+  online_resp = follow_link(micro_cloud, 'edit',
+    { internet_connected: true }.to_json)
+  p online_resp
+  p online_resp.body
 end
 
 desc 'Distribute a release version of the Micro Cloud.'
@@ -451,33 +478,16 @@ task :build, :roles => :build do
 
   sleep 30
 
-  config_commands = <<-eos
-quit
-y
-1
-#{micro_password}
-#{micro_password}
-1
-#{http_proxy}
-#{domain}
-#{admin_user}
-eos
-
-  vm_console_send vmx, config_commands, vm_initial_password
-
-  # Give MCF time to boot.
-
-  sleep 300
-
-  # Turn on online mode.
-  vm_console_send vmx, "\n6\n", micro_password
-
-  set :micro_vm_ip, vm_ip(vmx, micro_password)
+  set :micro_vm_ip, vm_ip(vmx, vm_initial_password)
 
   p micro_vm_ip
 
+  initial_setup
+
+  sleep 300
+
   micro_spec
-  jasmine_spec
+  # jasmine_spec
   bvt_setup
   bvt
   vcap_java_client_tests
