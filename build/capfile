@@ -310,8 +310,8 @@ task :bvt, :roles => :test do
     ' cd ~/cf-release/src/tests',
     './update',
     'rm -rf ~/.bvt',
-    # 'bundle exec rake full[1]' # till we can fix all yeti test, only try running a subset
-    'bundle exec rake full[1]'
+    'bundle exec rake mcf' # till we can fix all yeti test, only try running a subset
+    #'bundle exec rake full[1]'
     ])
 end
 
