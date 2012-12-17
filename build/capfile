@@ -486,7 +486,7 @@ task :build, :roles => :build do
   sleep 300
 
   micro_spec
-  # jasmine_spec
+  jasmine_spec
   bvt_setup
   bvt
   vcap_java_client_tests
