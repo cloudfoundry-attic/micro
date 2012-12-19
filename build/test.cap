@@ -17,9 +17,16 @@ def vm_ip(vmx_path, password, options={})
       :interface => 'eth0',
   }.merge(options)
 
-  run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} runScriptInGuest \"#{vmx_path}\" /bin/sh \"/sbin/ifconfig #{options[:interface]} > /tmp/ifconfig\""
-
-  run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} CopyFileFromGuestToHost \"#{vmx_path}\" /tmp/ifconfig /tmp/ifconfig"
+  counter = 0
+  begin
+    run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} runScriptInGuest \"#{vmx_path}\" /bin/sh \"/sbin/ifconfig #{options[:interface]} > /tmp/ifconfig\""
+    run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} CopyFileFromGuestToHost \"#{vmx_path}\" /tmp/ifconfig /tmp/ifconfig"
+  rescue
+    sleep 2
+    counter += 1
+    retry if counter < 10
+    raise
+  end
 
   `cat /tmp/ifconfig`[/inet addr:(\S+) /,1]
 end
@@ -140,6 +147,8 @@ task :initial_setup do
 
   micro_cloud = JSON.parse(Net::HTTP.get(root_uri))
 
+  # change network to static
+
   offline_resp = follow_link(micro_cloud, 'edit',
                              { internet_connected: false }.to_json)
   p offline_resp
@@ -169,15 +178,14 @@ task :initial_setup do
 end
 
 desc 'Test the latest Micro Cloud Foundry.'
-task :test do
+task :test_mcf do
+  extract_vm = "/tmp/micro"
+  vmx = "#{extract_vm}/micro.vmx"
+
   run_locally "#{vmrun} stop #{vmx} nogui || true"
-  run_locally 'rm -rf /tmp/micro'
-
-  run_locally "cd #{ENV['WORKSPACE']/} && unzip -o #{zip_name}"
-  vmx = '/tmp/micro/micro.vmx'
+  run_locally "rm -rf #{extract_vm}"
+  run_locally "cd #{ENV['WORKSPACE']/builds} && unzip -o micro.zip -d /tmp"
   run_locally "#{vmrun} start #{vmx} nogui"
-
-  sleep 30
 
   set :micro_vm_ip, vm_ip(vmx, vm_initial_password)
 
@@ -185,14 +193,12 @@ task :test do
 
   initial_setup
 
-  sleep 300
-
-  micro_spec
-  jasmine_spec
-  bvt_setup
-  bvt
-  vcap_java_client_tests
-  bvt_teardown
+  #micro_spec
+  #jasmine_spec
+  #bvt_setup
+  #bvt
+  #vcap_java_client_tests
+  #bvt_teardown
 end
 
 __END__

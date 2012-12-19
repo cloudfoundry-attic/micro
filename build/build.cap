@@ -4,6 +4,7 @@ load 'deploy'
 role :build, ENV['BUILD_SERVER']
 set :user, 'mmb'
 set :ssh_options, {:forward_agent => true}
+set :bundle_install, "(bundle check || bundle install || true)"
 
 #ssh_options[:keys] = '/var/lib/jenkins/.ssh/id_rsa'
 
@@ -24,18 +25,16 @@ end
 
 desc 'Update the bosh_cli gem.'
 task :update_gems, role: :build do
-  update_bundler = '(bundle check || bundle install || true)'
-
   run_commands([
     '. ~/.bash_profile',
 
     "cd ~/workspace/micro/micro",
-    update_bundler,
+    bundle_install,
     'bundle exec rake assets:precompile',
 
     "cd ~/workspace/bosh/agent",
     'gem update bosh_cli',
-    update_bundler
+    bundle_install
   ])
 end
 
@@ -50,8 +49,8 @@ end
 
 desc 'Build and download the stemcell'
 task :build_stemcell, role: :build do
-  set :build_time, Time.now.strftime('%Y%m%d.%H%M%S')
-  set :version, "v-#{build_time}"
+  build_time = Time.now.strftime('%Y%m%d.%H%M%S')
+  version = "v-#{build_time}"
 
   run_commands([
     '. ~/.bash_profile',
@@ -61,7 +60,7 @@ task :build_stemcell, role: :build do
     'export UBUNTU_MIRROR=http://localhost:9999/ubuntu',
     'LATEST_RELEASE=`ls -t ~/workspace/cf-release/dev_releases/bosh-release-*-dev.tgz | head -1`',
     'cd ~/workspace/bosh/agent',
-    'rake stemcell2:mcf[vsphere,~/workspace/cf-release/micro/manifest.yml,$LATEST_RELEASE]'
+    'bundle exec rake stemcell2:mcf[vsphere,~/workspace/cf-release/micro/manifest.yml,$LATEST_RELEASE]'
   ])
 
   build_host = find_servers_for_task(current_task)[0]
