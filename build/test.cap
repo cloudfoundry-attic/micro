@@ -70,9 +70,9 @@ class VersionStore
 
   def to_h
     {
-      'release' => @releases.uniq,
-      'nightly' => @nightlies.uniq,
-      'default' => default
+        'release' => @releases.uniq,
+        'nightly' => @nightlies.uniq,
+        'default' => default
     }
   end
 
@@ -96,10 +96,10 @@ end
 
 def vm_ip(vmx_path, password, options={})
   options = {
-    :vmrun => 'vmrun',
-    :user => 'root',
-    :interface => 'eth0',
-    }.merge(options)
+      :vmrun => 'vmrun',
+      :user => 'root',
+      :interface => 'eth0',
+  }.merge(options)
 
   run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} runScriptInGuest \"#{vmx_path}\" /bin/sh \"/sbin/ifconfig #{options[:interface]} > /tmp/ifconfig\""
 
@@ -138,10 +138,10 @@ desc 'Clean up build debris.'
 task :clean, :roles => :build do
   # TODO add /tmp
   run_commands([
-    "#{sudo} rm -rf /var/tmp/bosh/agent-*",
-    'rm -rf ~/cf-release/dev_releases/*',
-    "#{sudo} rm -rf ~/bosh/agent/mcf/*",
-  ])
+                   "#{sudo} rm -rf /var/tmp/bosh/agent-*",
+                   'rm -rf ~/cf-release/dev_releases/*',
+                   "#{sudo} rm -rf ~/bosh/agent/mcf/*",
+               ])
 end
 
 desc 'Get the latest cf-release tag.'
@@ -165,40 +165,40 @@ end
 desc 'Update the bosh_cli gem.'
 task :update_bosh_cli, :roles => :build do
   run_commands([
-    '. ~/.bash_profile',
-    'gem update bosh_cli',
-  ])
+                   '. ~/.bash_profile',
+                   'gem update bosh_cli',
+               ])
 end
 
 desc 'Create Micro Cloud Foundry bosh release.'
 task :create_release, :roles => :build do
   run_commands([
-    '. ~/.bash_profile',
-    'cd ~/cf-release',
-    'bosh create release --force --with-tarball',
-  ])
+                   '. ~/.bash_profile',
+                   'cd ~/cf-release',
+                   'bosh create release --force --with-tarball',
+               ])
 end
 
 desc 'Update micro.'
 task :update_micro, :roles => :build do
   run_commands([
-    '. ~/.bash_profile',
-    'cd ~/micro',
-    'git pull',
-    'cd micro',
-    'bundle install',
-    'bundle exec rake assets:precompile'
-  ])
+                   '. ~/.bash_profile',
+                   'cd ~/micro',
+                   'git pull',
+                   'cd micro',
+                   'bundle install',
+                   'bundle exec rake assets:precompile'
+               ])
 end
 
 desc 'Update bosh agent.'
 task :update_bosh_agent, :roles => :build do
   run_commands([
-    '. ~/.bash_profile',
-    'cd ~/bosh/agent',
-    'git pull',
-    'bundle update',
-  ])
+                   '. ~/.bash_profile',
+                   'cd ~/bosh/agent',
+                   'git pull',
+                   'bundle update',
+               ])
 end
 
 desc 'Describe the latest commit in cf-release on the build machine.'
@@ -211,66 +211,66 @@ end
 desc 'Checkout the latest cf-release master on the build machine.'
 task :checkout_cf_release_master, :roles => :build do
   run_commands([
-    'cd ~/cf-release',
-    'git checkout master',
-    './update'
-  ])
+                   'cd ~/cf-release',
+                   'git checkout master',
+                   './update'
+               ])
 end
 
 desc 'Checkout a cf-release tag on the build machine.'
 task :checkout_cf_release_tag, :roles => :build do
   run_commands([
-    'cd ~/cf-release',
-    'git checkout master',
-    'git pull',
-    "git branch -f #{tag}branch #{tag}",
-    "git checkout #{tag}branch",
-    'git submodule update --init --recursive'
-  ])
+                   'cd ~/cf-release',
+                   'git checkout master',
+                   'git pull',
+                   "git branch -f #{tag}branch #{tag}",
+                   "git checkout #{tag}branch",
+                   'git submodule update --init --recursive'
+               ])
 end
 
 desc 'Checkout the latest cf-release master on the test machine.'
 task :checkout_cf_release_master_test, :roles => :test do
   run_commands([
-    'cd ~/cf-release',
-    'git checkout master',
-    './update'
-  ])
+                   'cd ~/cf-release',
+                   'git checkout master',
+                   './update'
+               ])
 end
 
 desc 'Checkout a cf-release tag on the test machine.'
 task :checkout_cf_release_tag_test, :roles => :test do
   run_commands([
-    'cd ~/cf-release',
-    'git checkout master',
-    'git pull',
-    "git branch -f #{tag}branch #{tag}",
-    "git checkout #{tag}branch",
-    'git submodule update --init --recursive'
-  ])
+                   'cd ~/cf-release',
+                   'git checkout master',
+                   'git pull',
+                   "git branch -f #{tag}branch #{tag}",
+                   "git checkout #{tag}branch",
+                   'git submodule update --init --recursive'
+               ])
 end
 
 desc 'Run micro rspec specs.'
 task :micro_spec, :roles => :test do
   run_commands([
-    '. ~/.bash_profile',
-    'cd ~/micro/micro',
-    'git pull',
-    'bundle install',
-    'rake spec'
-  ])
+                   '. ~/.bash_profile',
+                   'cd ~/micro/micro',
+                   'git pull',
+                   'bundle install',
+                   'rake spec'
+               ])
 end
 
 desc 'Run micro jasmine specs.'
 task :jasmine_spec, :roles => :test do
   run_commands([
-    '. ~/.bash_profile',
-    'cd ~/micro/micro',
-    'git pull',
-    '(bundle check || bundle install || exit 1)',
-    'export DISPLAY=:99',
-    'bundle exec rake assets:precompile jasmine:ci'
-  ])
+                   '. ~/.bash_profile',
+                   'cd ~/micro/micro',
+                   'git pull',
+                   '(bundle check || bundle install || exit 1)',
+                   'export DISPLAY=:99',
+                   'bundle exec rake assets:precompile jasmine:ci'
+               ])
 end
 
 desc 'Prepare the test VM and Micro Cloud for vcap-yeti tests.'
@@ -283,36 +283,36 @@ task :bvt_setup, :roles => :test do
   run "#{sudo} cp /tmp/resolv.conf /etc/resolv.conf"
 
   run_commands([
-    '. ~/.bash_profile',
-    "vmc --trace target http://api.#{domain}/",
-    "(vmc --trace register --email '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}' || true)",
-    "(vmc --trace register --email '#{normal_user}' --password '#{normal_password}' --verify '#{normal_password}' || true)",
-    ])
+                   '. ~/.bash_profile',
+                   "vmc --trace target http://api.#{domain}/",
+                   "(vmc --trace register --email '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}' || true)",
+                   "(vmc --trace register --email '#{normal_user}' --password '#{normal_password}' --verify '#{normal_password}' || true)",
+               ])
 
-    run_commands([
-      'cd ~/gem_cache_warmer',
-      '(vmc push -f warmer --runtime ruby19 || true)',
-      '(vmc delete -f warmer || true)',
-      '(vmc push -f warmer --runtime ruby18 || true)',
-      '(vmc delete -f warmer || true)'
-    ])
+  run_commands([
+                   'cd ~/gem_cache_warmer',
+                   '(vmc push -f warmer --runtime ruby19 || true)',
+                   '(vmc delete -f warmer || true)',
+                   '(vmc push -f warmer --runtime ruby18 || true)',
+                   '(vmc delete -f warmer || true)'
+               ])
 end
 
 desc 'Run vcap-yeti tests.'
 task :bvt, :roles => :test do
   run_commands([
-    '. ~/.bash_profile',
-    "export VCAP_BVT_TARGET=api.#{domain}",
-    "export VCAP_BVT_ADMIN_USER='#{admin_user}'",
-    "export VCAP_BVT_ADMIN_USER_PASSWD='#{admin_password}'",
-    "export VCAP_BVT_USER='#{normal_user}'",
-    "export VCAP_BVT_USER_PASSWD='#{normal_password}'",
-    ' cd ~/cf-release/src/tests',
-    './update',
-    'rm -rf ~/.bvt',
-    'bundle exec rake mcf' # till we can fix all yeti test, only try running a subset
-    #'bundle exec rake full[1]'
-    ])
+                   '. ~/.bash_profile',
+                   "export VCAP_BVT_TARGET=api.#{domain}",
+                   "export VCAP_BVT_ADMIN_USER='#{admin_user}'",
+                   "export VCAP_BVT_ADMIN_USER_PASSWD='#{admin_password}'",
+                   "export VCAP_BVT_USER='#{normal_user}'",
+                   "export VCAP_BVT_USER_PASSWD='#{normal_password}'",
+                   ' cd ~/cf-release/src/tests',
+                   './update',
+                   'rm -rf ~/.bvt',
+                   'bundle exec rake mcf' # till we can fix all yeti test, only try running a subset
+               #'bundle exec rake full[1]'
+               ])
 end
 
 desc 'Revert temporary changes done to the test VM.'
@@ -324,14 +324,14 @@ end
 desc 'Run vcap-java-client tests.'
 task :vcap_java_client_tests, :roles => :test do
   run_commands([
-    'cd ~/vcap-java-client',
-    'git pull',
-    'git submodule update --init --recursive',
-    'cd vcap-java-client-test-apps',
-    'mvn clean install',
-    'cd ../cloudfoundry-client-lib',
-    "mvn clean test -Pintegration-test -Dcloud.version=V1 -Dtest.app.memory=256 -Dvcap.target=http://api.#{domain} -Dvcap.email=#{normal_user} -Dvcap.passwd=#{normal_password}"
-    ])
+                   'cd ~/vcap-java-client',
+                   'git pull',
+                   'git submodule update --init --recursive',
+                   'cd vcap-java-client-test-apps',
+                   'mvn clean install',
+                   'cd ../cloudfoundry-client-lib',
+                   "mvn clean test -Pintegration-test -Dcloud.version=V1 -Dtest.app.memory=256 -Dvcap.target=http://api.#{domain} -Dvcap.email=#{normal_user} -Dvcap.passwd=#{normal_password}"
+               ])
 end
 
 desc 'Distribute a Micro Cloud zip file.'
@@ -382,29 +382,29 @@ task :initial_setup do
   micro_cloud = JSON.parse(Net::HTTP.get(root_uri))
 
   offline_resp = follow_link(micro_cloud, 'edit',
-    { internet_connected: false }.to_json)
+                             { internet_connected: false }.to_json)
   p offline_resp
   p offline_resp.body
 
   admin = JSON.parse(follow_link(micro_cloud, 'administrator').body)
 
   admin_edit_resp = follow_link(admin, 'edit', {
-    email: admin_user,
-    password: micro_password
-    }.to_json)
+      email: admin_user,
+      password: micro_password
+  }.to_json)
   p admin_edit_resp
   p admin_edit_resp.body
 
   domain_resp = JSON.parse(follow_link(micro_cloud, 'domain_name').body)
 
   domain_edit_resp = follow_link(domain_resp, 'edit', {
-    name: domain,
-    }.to_json)
+      name: domain,
+  }.to_json)
   p domain_edit_resp
   p domain_edit_resp.body
 
   online_resp = follow_link(micro_cloud, 'edit',
-    { internet_connected: true }.to_json)
+                            { internet_connected: true }.to_json)
   p online_resp
   p online_resp.body
 end
@@ -450,15 +450,15 @@ task :build, :roles => :build do
   set :version, "#{release_desc}-#{build_time}"
 
   run_commands([
-    '. ~/.bash_profile',
-    "export BUILD_TIME=#{build_time}",
-    "export MCF_VERSION=#{version}",
-    'export UBUNTU_ISO=~/ubuntu-10.04.4-server-amd64.iso',
-    'export UBUNTU_MIRROR=http://localhost:9999/ubuntu',
-    'LATEST_RELEASE=`ls -t ~/cf-release/dev_releases/micro-*-dev.tgz | head -1`',
-    'cd ~/bosh/agent',
-    'rake stemcell2:mcf[vsphere,~/cf-release/micro/manifest.yml,$LATEST_RELEASE]'
-    ])
+                   '. ~/.bash_profile',
+                   "export BUILD_TIME=#{build_time}",
+                   "export MCF_VERSION=#{version}",
+                   'export UBUNTU_ISO=~/ubuntu-10.04.4-server-amd64.iso',
+                   'export UBUNTU_MIRROR=http://localhost:9999/ubuntu',
+                   'LATEST_RELEASE=`ls -t ~/cf-release/dev_releases/micro-*-dev.tgz | head -1`',
+                   'cd ~/bosh/agent',
+                   'rake stemcell2:mcf[vsphere,~/cf-release/micro/manifest.yml,$LATEST_RELEASE]'
+               ])
 
   build_host = find_servers_for_task(current_task)[0]
 
