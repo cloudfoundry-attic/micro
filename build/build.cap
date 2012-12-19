@@ -44,7 +44,7 @@ task :create_release, role: :build do
   run_commands([
     '. ~/.bash_profile',
     "cd ~/workspace/cf-release",
-    'bosh create release --force --with-tarball -n'
+    'bosh -n create release --force --with-tarball'
   ])
 end
 
