@@ -170,10 +170,10 @@ end
 
 desc 'Test the latest Micro Cloud Foundry.'
 task :test do
-  run_locally "#{vmrun} stop #{vmx} nogui"
+  run_locally "#{vmrun} stop #{vmx} nogui || true"
   run_locally 'rm -rf /tmp/micro'
 
-  run_locally "cd /tmp && unzip -o #{zip_name}"
+  run_locally "cd #{ENV['WORKSPACE']/} && unzip -o #{zip_name}"
   vmx = '/tmp/micro/micro.vmx'
   run_locally "#{vmrun} start #{vmx} nogui"
 
