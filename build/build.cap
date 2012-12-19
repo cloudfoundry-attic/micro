@@ -1,7 +1,4 @@
-# require 'json'
-# require 'net/ftp'
-# require 'net/http'
-# require 'capistrano_colors'
+require 'capistrano_colors'
 
 load 'deploy'
 role :build, ENV['BUILD_SERVER']
@@ -47,7 +44,7 @@ task :create_release, role: :build do
   run_commands([
     '. ~/.bash_profile',
     "cd ~/workspace/cf-release",
-    'bosh create release --force --with-tarball'
+    'bosh create release --force --with-tarball -n'
   ])
 end
 
@@ -62,7 +59,7 @@ task :build_stemcell, role: :build do
     "export MCF_VERSION=#{version}",
     'export UBUNTU_ISO=~/ubuntu-10.04.4-server-amd64.iso',
     'export UBUNTU_MIRROR=http://localhost:9999/ubuntu',
-    'LATEST_RELEASE=`ls -t ~/workspace/cf-release/dev_releases/micro-*-dev.tgz | head -1`',
+    'LATEST_RELEASE=`ls -t ~/workspace/cf-release/dev_releases/bosh-release-*-dev.tgz | head -1`',
     'cd ~/workspace/bosh/agent',
     'rake stemcell2:mcf[vsphere,~/workspace/cf-release/micro/manifest.yml,$LATEST_RELEASE]'
   ])

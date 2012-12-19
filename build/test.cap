@@ -4,95 +4,11 @@ require 'net/http'
 
 require 'capistrano_colors'
 
-# Capistrano recipe for building and testing Micro Cloud Foundry from Jenkins.
-
-# Pass these command line arguments to capistrano to set variables.
-#
-# -s vmrun= \
-# -s vm_initial_password= \
-# -s micro_password= \
-# -s domain= \
-# -s admin_user= \
-# -s admin_password= \
-# -s normal_user= \
-# -s normal_password= \
-# -s cdn_ftp_host= \
-# -s cdn_ftp_user= \
-# -s cdn_ftp_password=
-
-# ENV['BUILD_SERVER'] and ENV['TEST_SERVER'] must also be set.
-
 load 'deploy'
-
-role :build, ENV['BUILD_SERVER']
 role :test, ENV['TEST_SERVER']
-
 set :user, 'mmb'
-
 ssh_options[:keys] = '/var/lib/jenkins/.ssh/id_rsa'
 
-# Track MCF versions that have been uploaded to the CDN.
-class VersionStore
-
-  def initialize(path)
-    @path = path
-    @releases = []
-    @nightlies = []
-    @default = nil
-
-    read  if File.exist?(path)
-  end
-
-  # Read the store from disk.
-  def read
-    open(path) do |f|
-      data = JSON.parse(f.read)
-
-      @releases = data.fetch('release', [])
-      @nightlies = data.fetch('nightly', [])
-      @default = data.fetch('default', nil)
-    end
-  end
-
-  # Write the contents of the store to disk in JSON.
-  def write
-    open(path, 'w') do |f|
-      f.flock(File::LOCK_EX)
-      f.write to_json
-      f.flock(File::LOCK_UN)
-    end
-  end
-
-  # Return true if the store contains a release tag.
-  def has_release?(tag)
-    @releases.index { |r| r[/^micro-#{tag}-/] }
-  end
-
-  def to_h
-    {
-        'release' => @releases.uniq,
-        'nightly' => @nightlies.uniq,
-        'default' => default
-    }
-  end
-
-  def to_json
-    to_h.to_json
-  end
-
-  def pretty
-    JSON.pretty_generate(to_h)
-  end
-
-  def default
-    @default || releases[0]
-  end
-
-  attr_accessor :path
-  attr_accessor :releases
-  attr_accessor :nightlies
-  attr_writer :default
-end
 
 def vm_ip(vmx_path, password, options={})
   options = {
@@ -132,122 +48,6 @@ end
 
 def is_release_version(filename)
   filename[/^micro-v\d+-/]
-end
-
-desc 'Clean up build debris.'
-task :clean, :roles => :build do
-  # TODO add /tmp
-  run_commands([
-                   "#{sudo} rm -rf /var/tmp/bosh/agent-*",
-                   'rm -rf ~/cf-release/dev_releases/*',
-                   "#{sudo} rm -rf ~/bosh/agent/mcf/*",
-               ])
-end
-
-desc 'Get the latest cf-release tag.'
-task :latest_cf_release_tag, :roles => :build do
-  run 'git --git-dir ~/cf-release/.git fetch'
-
-  output = capture('git --git-dir ~/cf-release/.git show-ref --tags')
-
-  tags = []
-
-  output.lines do |line|
-    match = %r{refs/tags/v(\d+)$}.match(line)
-    if match
-      tags << match[1].to_i
-    end
-  end
-
-  "v#{tags.sort.last}"
-end
-
-desc 'Update the bosh_cli gem.'
-task :update_bosh_cli, :roles => :build do
-  run_commands([
-                   '. ~/.bash_profile',
-                   'gem update bosh_cli',
-               ])
-end
-
-desc 'Create Micro Cloud Foundry bosh release.'
-task :create_release, :roles => :build do
-  run_commands([
-                   '. ~/.bash_profile',
-                   'cd ~/cf-release',
-                   'bosh create release --force --with-tarball',
-               ])
-end
-
-desc 'Update micro.'
-task :update_micro, :roles => :build do
-  run_commands([
-                   '. ~/.bash_profile',
-                   'cd ~/micro',
-                   'git pull',
-                   'cd micro',
-                   'bundle install',
-                   'bundle exec rake assets:precompile'
-               ])
-end
-
-desc 'Update bosh agent.'
-task :update_bosh_agent, :roles => :build do
-  run_commands([
-                   '. ~/.bash_profile',
-                   'cd ~/bosh/agent',
-                   'git pull',
-                   'bundle update',
-               ])
-end
-
-desc 'Describe the latest commit in cf-release on the build machine.'
-task :desc_cf_release, :roles => :build do
-  output = capture('git --git-dir ~/cf-release/.git describe --tags').chomp
-  output.gsub! /-(\d+)-[\da-z]+$/, 'p\\1'
-  output
-end
-
-desc 'Checkout the latest cf-release master on the build machine.'
-task :checkout_cf_release_master, :roles => :build do
-  run_commands([
-                   'cd ~/cf-release',
-                   'git checkout master',
-                   './update'
-               ])
-end
-
-desc 'Checkout a cf-release tag on the build machine.'
-task :checkout_cf_release_tag, :roles => :build do
-  run_commands([
-                   'cd ~/cf-release',
-                   'git checkout master',
-                   'git pull',
-                   "git branch -f #{tag}branch #{tag}",
-                   "git checkout #{tag}branch",
-                   'git submodule update --init --recursive'
-               ])
-end
-
-desc 'Checkout the latest cf-release master on the test machine.'
-task :checkout_cf_release_master_test, :roles => :test do
-  run_commands([
-                   'cd ~/cf-release',
-                   'git checkout master',
-                   './update'
-               ])
-end
-
-desc 'Checkout a cf-release tag on the test machine.'
-task :checkout_cf_release_tag_test, :roles => :test do
-  run_commands([
-                   'cd ~/cf-release',
-                   'git checkout master',
-                   'git pull',
-                   "git branch -f #{tag}branch #{tag}",
-                   "git checkout #{tag}branch",
-                   'git submodule update --init --recursive'
-               ])
 end
 
 desc 'Run micro rspec specs.'
@@ -334,6 +134,156 @@ task :vcap_java_client_tests, :roles => :test do
                ])
 end
 
+desc 'Initial setup of the VM being tested.'
+task :initial_setup do
+  root_uri = URI("http://#{micro_vm_ip}:9292/api/")
+
+  micro_cloud = JSON.parse(Net::HTTP.get(root_uri))
+
+  offline_resp = follow_link(micro_cloud, 'edit',
+                             { internet_connected: false }.to_json)
+  p offline_resp
+  p offline_resp.body
+
+  admin = JSON.parse(follow_link(micro_cloud, 'administrator').body)
+
+  admin_edit_resp = follow_link(admin, 'edit', {
+      email: admin_user,
+      password: micro_password
+  }.to_json)
+  p admin_edit_resp
+  p admin_edit_resp.body
+
+  domain_resp = JSON.parse(follow_link(micro_cloud, 'domain_name').body)
+
+  domain_edit_resp = follow_link(domain_resp, 'edit', {
+      name: domain,
+  }.to_json)
+  p domain_edit_resp
+  p domain_edit_resp.body
+
+  online_resp = follow_link(micro_cloud, 'edit',
+                            { internet_connected: true }.to_json)
+  p online_resp
+  p online_resp.body
+end
+
+desc 'Test the latest Micro Cloud Foundry.'
+task :test do
+  run_locally "#{vmrun} stop #{vmx} nogui"
+  run_locally 'rm -rf /tmp/micro'
+
+  run_locally "cd /tmp && unzip -o #{zip_name}"
+  vmx = '/tmp/micro/micro.vmx'
+  run_locally "#{vmrun} start #{vmx} nogui"
+
+  sleep 30
+
+  set :micro_vm_ip, vm_ip(vmx, vm_initial_password)
+
+  p micro_vm_ip
+
+  initial_setup
+
+  sleep 300
+
+  micro_spec
+  jasmine_spec
+  bvt_setup
+  bvt
+  vcap_java_client_tests
+  bvt_teardown
+end
+
+__END__
+################### Download
+
+desc 'Checkout the latest cf-release master on the test machine.'
+task :checkout_cf_release_master_test, :roles => :test do
+  run_commands([
+                   'cd ~/cf-release',
+                   'git checkout master',
+                   './update'
+               ])
+end
+
+desc 'Checkout a cf-release tag on the test machine.'
+task :checkout_cf_release_tag_test, :roles => :test do
+  run_commands([
+                   'cd ~/cf-release',
+                   'git checkout master',
+                   'git pull',
+                   "git branch -f #{tag}branch #{tag}",
+                   "git checkout #{tag}branch",
+                   'git submodule update --init --recursive'
+               ])
+end
+
+################### DIST
+
+# Track MCF versions that have been uploaded to the CDN.
+class VersionStore
+
+  def initialize(path)
+    @path = path
+    @releases = []
+    @nightlies = []
+    @default = nil
+
+    read  if File.exist?(path)
+  end
+
+  # Read the store from disk.
+  def read
+    open(path) do |f|
+      data = JSON.parse(f.read)
+
+      @releases = data.fetch('release', [])
+      @nightlies = data.fetch('nightly', [])
+      @default = data.fetch('default', nil)
+    end
+  end
+
+  # Write the contents of the store to disk in JSON.
+  def write
+    open(path, 'w') do |f|
+      f.flock(File::LOCK_EX)
+      f.write to_json
+      f.flock(File::LOCK_UN)
+    end
+  end
+
+  # Return true if the store contains a release tag.
+  def has_release?(tag)
+    @releases.index { |r| r[/^micro-#{tag}-/] }
+  end
+
+  def to_h
+    {
+        'release' => @releases.uniq,
+        'nightly' => @nightlies.uniq,
+        'default' => default
+    }
+  end
+
+  def to_json
+    to_h.to_json
+  end
+
+  def pretty
+    JSON.pretty_generate(to_h)
+  end
+
+  def default
+    @default || releases[0]
+  end
+
+  attr_accessor :path
+  attr_accessor :releases
+  attr_accessor :nightlies
+  attr_writer :default
+end
+
 desc 'Distribute a Micro Cloud zip file.'
 task :dist do
   zip_name = File.basename(zip_local_path)
@@ -375,39 +325,6 @@ task :dist_nightly do
   p "http://download3.vmware.com/cloudfoundry/micro/nightly/#{zip_name}"
 end
 
-desc 'Initial setup of the VM being tested.'
-task :initial_setup do
-  root_uri = URI("http://#{micro_vm_ip}:9292/api/")
-
-  micro_cloud = JSON.parse(Net::HTTP.get(root_uri))
-
-  offline_resp = follow_link(micro_cloud, 'edit',
-                             { internet_connected: false }.to_json)
-  p offline_resp
-  p offline_resp.body
-
-  admin = JSON.parse(follow_link(micro_cloud, 'administrator').body)
-
-  admin_edit_resp = follow_link(admin, 'edit', {
-      email: admin_user,
-      password: micro_password
-  }.to_json)
-  p admin_edit_resp
-  p admin_edit_resp.body
-
-  domain_resp = JSON.parse(follow_link(micro_cloud, 'domain_name').body)
-
-  domain_edit_resp = follow_link(domain_resp, 'edit', {
-      name: domain,
-  }.to_json)
-  p domain_edit_resp
-  p domain_edit_resp.body
-
-  online_resp = follow_link(micro_cloud, 'edit',
-                            { internet_connected: true }.to_json)
-  p online_resp
-  p online_resp.body
-end
 
 desc 'Distribute a release version of the Micro Cloud.'
 task :dist_release do
@@ -419,85 +336,4 @@ task :dist_release do
   end
 
   p "http://download3.vmware.com/cloudfoundry/micro/release/#{zip_name}"
-end
-
-desc 'Build and test the latest Micro Cloud Foundry.'
-task :build, :roles => :build do
-  clean
-
-  set :tag, latest_cf_release_tag
-
-  version_store = VersionStore.new('/var/lib/jenkins/versions.json')
-
-  if version_store.has_release?(tag)
-    checkout_cf_release_master
-    checkout_cf_release_master_test
-    release_desc = "#{tag}+"
-    is_release_version = false
-  else
-    checkout_cf_release_tag
-    checkout_cf_release_tag_test
-    release_desc = tag
-    is_release_version = true
-  end
-
-  update_bosh_cli
-  create_release
-  update_bosh_agent
-  update_micro
-
-  set :build_time, Time.now.strftime('%Y%m%d.%H%M%S')
-  set :version, "#{release_desc}-#{build_time}"
-
-  run_commands([
-                   '. ~/.bash_profile',
-                   "export BUILD_TIME=#{build_time}",
-                   "export MCF_VERSION=#{version}",
-                   'export UBUNTU_ISO=~/ubuntu-10.04.4-server-amd64.iso',
-                   'export UBUNTU_MIRROR=http://localhost:9999/ubuntu',
-                   'LATEST_RELEASE=`ls -t ~/cf-release/dev_releases/micro-*-dev.tgz | head -1`',
-                   'cd ~/bosh/agent',
-                   'rake stemcell2:mcf[vsphere,~/cf-release/micro/manifest.yml,$LATEST_RELEASE]'
-               ])
-
-  build_host = find_servers_for_task(current_task)[0]
-
-  set :zip_local_path, "/tmp/micro-#{version}.zip"
-  zip_name = File.basename(zip_local_path)
-
-  zip_path = "mmb@#{build_host}:bosh/agent/mcf/#{build_time}/#{zip_name}"
-
-  run_locally "scp #{zip_path} /tmp"
-
-  puts run_locally "cd /tmp && unzip -o #{zip_name}"
-
-  vmx = '/tmp/micro/micro.vmx'
-
-  run_locally "#{vmrun} start #{vmx} nogui"
-
-  sleep 30
-
-  set :micro_vm_ip, vm_ip(vmx, vm_initial_password)
-
-  p micro_vm_ip
-
-  initial_setup
-
-  sleep 300
-
-  micro_spec
-  jasmine_spec
-  bvt_setup
-  bvt
-  vcap_java_client_tests
-  bvt_teardown
-
-  dist
-
-  # Archive build?
-
-  # Cleanup.
-
-  run_locally "#{vmrun} stop #{vmx} nogui"
-  run_locally 'rm -rf /tmp/micro'
 end
