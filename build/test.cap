@@ -28,7 +28,10 @@ def vm_ip(vmx_path, password, options={})
     raise
   end
 
-  `cat /tmp/ifconfig`[/inet addr:(\S+) /,1]
+  micro_vm_ip = `cat /tmp/ifconfig`[/inet addr:(\S+) /,1]
+  set :micro_vm_ip, micro_vm_ip
+  p micro_vm_ip
+  micro_vm_ip
 end
 
 # Follow a link in the MCF API.
@@ -57,27 +60,9 @@ def is_release_version(filename)
   filename[/^micro-v\d+-/]
 end
 
-desc 'Run micro rspec specs.'
-task :micro_spec, :roles => :test do
-  run_commands([
-                   '. ~/.bash_profile',
-                   'cd ~/micro/micro',
-                   'git pull',
-                   'bundle install',
-                   'rake spec'
-               ])
-end
-
-desc 'Run micro jasmine specs.'
-task :jasmine_spec, :roles => :test do
-  run_commands([
-                   '. ~/.bash_profile',
-                   'cd ~/micro/micro',
-                   'git pull',
-                   '(bundle check || bundle install || exit 1)',
-                   'export DISPLAY=:99',
-                   'bundle exec rake assets:precompile jasmine:ci'
-               ])
+desc "rsync code to build VM."
+task :rsync_code do
+  run_locally "rsync -e ssh -az --delete '#{ENV['WORKSPACE']}/' mmb@#{ENV['TEST_SERVER']}:~/workspace/"
 end
 
 desc 'Prepare the test VM and Micro Cloud for vcap-yeti tests.'
@@ -90,36 +75,35 @@ task :bvt_setup, :roles => :test do
   run "#{sudo} cp /tmp/resolv.conf /etc/resolv.conf"
 
   run_commands([
-                   '. ~/.bash_profile',
-                   "vmc --trace target http://api.#{domain}/",
-                   "(vmc --trace register --email '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}' || true)",
-                   "(vmc --trace register --email '#{normal_user}' --password '#{normal_password}' --verify '#{normal_password}' || true)",
-               ])
+    '. ~/.bash_profile',
+    "vmc --trace target http://api.#{domain}/",
+    "(vmc --trace register --email '#{admin_user}' --password '#{admin_password}' --verify '#{admin_password}' || true)",
+    "(vmc --trace register --email '#{normal_user}' --password '#{normal_password}' --verify '#{normal_password}' || true)",
+  ])
 
   run_commands([
-                   'cd ~/gem_cache_warmer',
-                   '(vmc push -f warmer --runtime ruby19 || true)',
-                   '(vmc delete -f warmer || true)',
-                   '(vmc push -f warmer --runtime ruby18 || true)',
-                   '(vmc delete -f warmer || true)'
-               ])
+    'cd ~/gem_cache_warmer',
+    '(vmc push -f warmer --runtime ruby19 || true)',
+    '(vmc delete -f warmer || true)',
+    '(vmc push -f warmer --runtime ruby18 || true)',
+    '(vmc delete -f warmer || true)'
+  ])
 end
 
 desc 'Run vcap-yeti tests.'
 task :bvt, :roles => :test do
   run_commands([
-                   '. ~/.bash_profile',
-                   "export VCAP_BVT_TARGET=api.#{domain}",
-                   "export VCAP_BVT_ADMIN_USER='#{admin_user}'",
-                   "export VCAP_BVT_ADMIN_USER_PASSWD='#{admin_password}'",
-                   "export VCAP_BVT_USER='#{normal_user}'",
-                   "export VCAP_BVT_USER_PASSWD='#{normal_password}'",
-                   ' cd ~/cf-release/src/tests',
-                   './update',
-                   'rm -rf ~/.bvt',
-                   'bundle exec rake mcf' # till we can fix all yeti test, only try running a subset
-               #'bundle exec rake full[1]'
-               ])
+    '. ~/.bash_profile',
+    "export VCAP_BVT_TARGET=api.#{domain}",
+    "export VCAP_BVT_ADMIN_USER='#{admin_user}'",
+    "export VCAP_BVT_ADMIN_USER_PASSWD='#{admin_password}'",
+    "export VCAP_BVT_USER='#{normal_user}'",
+    "export VCAP_BVT_USER_PASSWD='#{normal_password}'",
+    "cd '~/workspace/cf-release/src/tests'",
+    'rm -rf ~/.bvt',
+    'bundle exec rake mcf' # till we can fix all yeti test, only try running a subset
+    #'bundle exec rake full[1]'
+  ])
 end
 
 desc 'Revert temporary changes done to the test VM.'
@@ -130,15 +114,12 @@ end
 
 desc 'Run vcap-java-client tests.'
 task :vcap_java_client_tests, :roles => :test do
-  run_commands([
-                   'cd ~/vcap-java-client',
-                   'git pull',
-                   'git submodule update --init --recursive',
-                   'cd vcap-java-client-test-apps',
-                   'mvn clean install',
-                   'cd ../cloudfoundry-client-lib',
-                   "mvn clean test -Pintegration-test -Dcloud.version=V1 -Dtest.app.memory=256 -Dvcap.target=http://api.#{domain} -Dvcap.email=#{normal_user} -Dvcap.passwd=#{normal_password}"
-               ])
+  run_commands [
+    "cd '~/workspace/vcap-java-client/vcap-java-client-test-apps'",
+    'mvn clean install',
+    'cd ../cloudfoundry-client-lib',
+    "mvn clean test -Pintegration-test -Dcloud.version=V1 -Dtest.app.memory=256 -Dvcap.target=http://api.#{domain} -Dvcap.email=#{normal_user} -Dvcap.passwd=#{normal_password}"
+  ]
 end
 
 desc 'Initial setup of the VM being tested.'
@@ -177,32 +158,28 @@ task :initial_setup do
   p online_resp.body
 end
 
-desc 'Test the latest Micro Cloud Foundry.'
-task :test_mcf do
+desc 'Cleanup and Start VM'
+task :start_vm do
   extract_vm = "/tmp/micro"
   vmx = "#{extract_vm}/micro.vmx"
 
   run_locally "#{vmrun} stop #{vmx} nogui || true"
   run_locally "rm -rf #{extract_vm}"
-  run_locally "cd #{ENV['WORKSPACE']} && unzip -o micro.zip -d /tmp"
+  run_locally "unzip -o micro.zip -d /tmp"
   run_locally "#{vmrun} start #{vmx} nogui"
+end
 
-  set :micro_vm_ip, vm_ip(vmx, vm_initial_password)
+desc 'Test the latest Micro Cloud Foundry.'
+task :test_mcf do
+  rsync_code
 
-  p micro_vm_ip
-
+  start_vm
+  vm_ip(vmx, vm_initial_password)
   initial_setup
-
-  set :micro_vm_ip, vm_ip(vmx, vm_initial_password)
-
-  p micro_vm_ip
-
-  #micro_spec
-  #jasmine_spec
-  #bvt_setup
-  #bvt
-  #vcap_java_client_tests
-  #bvt_teardown
+  bvt_setup
+  bvt
+  vcap_java_client_tests
+  bvt_teardown
 end
 
 __END__
