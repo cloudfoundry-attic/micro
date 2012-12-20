@@ -10,28 +10,21 @@ set :user, 'mmb'
 ssh_options[:keys] = '/var/lib/jenkins/.ssh/id_rsa'
 
 
-def vm_ip(vmx_path, password, options={})
-  options = {
-      :vmrun => 'vmrun',
-      :user => 'root',
-      :interface => 'eth0',
-  }.merge(options)
-
-  counter = 0
+def vm_ip
+  attempts = 0
   begin
-    run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} runScriptInGuest \"#{vmx_path}\" /bin/sh \"/sbin/ifconfig #{options[:interface]} > /tmp/ifconfig\""
-    run_locally "#{options[:vmrun]} -gu #{options[:user]} -gp #{password} CopyFileFromGuestToHost \"#{vmx_path}\" /tmp/ifconfig /tmp/ifconfig"
+    run_locally "#{vmrun} -gu root -gp #{vm_initial_password} runScriptInGuest \"#{vmx}\" /bin/sh \"/sbin/ifconfig eth0 > /tmp/ifconfig\""
+    run_locally "#{vmrun} -gu root -gp #{vm_initial_password} CopyFileFromGuestToHost \"#{vmx}\" /tmp/ifconfig /tmp/ifconfig"
   rescue
     sleep 2
-    counter += 1
-    retry if counter < 10
+    attempts += 1
+    retry if attempts < 10
     raise
   end
 
   micro_vm_ip = `cat /tmp/ifconfig`[/inet addr:(\S+) /,1]
-  set :micro_vm_ip, micro_vm_ip
   p micro_vm_ip
-  micro_vm_ip
+  set :micro_vm_ip, micro_vm_ip
 end
 
 # Follow a link in the MCF API.
@@ -161,7 +154,7 @@ end
 desc 'Cleanup and Start VM'
 task :start_vm do
   extract_vm = "/tmp/micro"
-  vmx = "#{extract_vm}/micro.vmx"
+  set :vmx, "#{extract_vm}/micro.vmx"
 
   run_locally "#{vmrun} stop #{vmx} nogui || true"
   run_locally "rm -rf #{extract_vm}"
@@ -174,7 +167,7 @@ task :test_mcf do
   rsync_code
 
   start_vm
-  vm_ip(vmx, vm_initial_password)
+  vm_ip
   initial_setup
   bvt_setup
   bvt
