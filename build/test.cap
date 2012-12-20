@@ -184,7 +184,7 @@ task :test_mcf do
 
   run_locally "#{vmrun} stop #{vmx} nogui || true"
   run_locally "rm -rf #{extract_vm}"
-  run_locally "cd #{ENV['WORKSPACE']/builds} && unzip -o micro.zip -d /tmp"
+  run_locally "cd #{ENV['WORKSPACE']} && unzip -o micro.zip -d /tmp"
   run_locally "#{vmrun} start #{vmx} nogui"
 
   set :micro_vm_ip, vm_ip(vmx, vm_initial_password)
@@ -192,6 +192,10 @@ task :test_mcf do
   p micro_vm_ip
 
   initial_setup
+
+  set :micro_vm_ip, vm_ip(vmx, vm_initial_password)
+
+  p micro_vm_ip
 
   #micro_spec
   #jasmine_spec
