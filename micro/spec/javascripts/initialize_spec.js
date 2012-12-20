@@ -51,6 +51,7 @@ describe("initialize", function () {
   describe(".initial_submit", function () {
     beforeEach(function () {
       $('#jasmine_content').html(
+        '<div id="configured"></div><div id="non-configured"></div>' +
         '<div id="global-error" style="display: none"></div>' +
           '<form>' +
           '<input type="password" id="initial-password" value="password">' +
@@ -144,7 +145,7 @@ describe("initialize", function () {
         spyOn(mcf, 'initial_config').andCallFake(function (data, callback) {
           callback();
         });
-        spyOn(mcf, 'configured');
+        spyOn(mcf, 'configured').andCallThrough();
         spyOn(mcf, 'load_data');
       });
 
@@ -164,6 +165,17 @@ describe("initialize", function () {
         expect(mcf.configured).toHaveBeenCalled();
         expect(mcf.load_data).toHaveBeenCalled();
       });
+
+      it("displays the configured section", function () {
+        $('#not-configured').show();
+        expect($('#configured')).not.toBeVisible();
+
+        $('#initial-submit').click();
+        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
+
+        expect($('#configured')).toBeVisible();
+        expect($('#not-configured')).not.toBeVisible();
+      });
     });
 
     describe("when the updating is a failure", function () {
@@ -172,6 +184,7 @@ describe("initialize", function () {
           error_callback();
         });
         spyOn(mcf, 'load_data');
+        clearAjaxRequests();
       });
 
       it("shows an error alert", function () {
@@ -264,11 +277,12 @@ describe("initialize", function () {
 
     describe("when the updating is successful", function () {
       beforeEach(function () {
+        clearAjaxRequests();
         spyOn(mcf, 'update_admin').andCallFake(function (data, callback) {
           callback();
         });
 
-        spyOn(mcf, 'configured');
+        spyOn(mcf, 'configured').andCallThrough();
         spyOn(mcf, 'load_data');
       });
 
@@ -283,8 +297,8 @@ describe("initialize", function () {
       });
 
       it("loads the data", function () {
-        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         $('#admin-submit').click();
+        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         expect(mcf.configured).toHaveBeenCalled();
         expect(mcf.load_data).toHaveBeenCalled();
       });
@@ -358,11 +372,12 @@ describe("initialize", function () {
 
     describe("when the updating is successful", function () {
       beforeEach(function () {
+        clearAjaxRequests();
         spyOn(mcf, 'update_domain').andCallFake(function (data, callback) {
           callback();
         });
 
-        spyOn(mcf, 'configured');
+        spyOn(mcf, 'configured').andCallThrough();
         spyOn(mcf, 'load_data');
       });
 
@@ -377,8 +392,8 @@ describe("initialize", function () {
       });
 
       it("loads the data", function () {
-        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         $('#domain-submit').click();
+        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         expect(mcf.configured).toHaveBeenCalled();
         expect(mcf.load_data).toHaveBeenCalled();
       });
@@ -455,8 +470,9 @@ describe("initialize", function () {
           callback();
         });
 
-        spyOn(mcf, 'configured');
+        spyOn(mcf, 'configured').andCallThrough();
         spyOn(mcf, 'load_data');
+        clearAjaxRequests();
       });
 
       it("hides the bar", function () {
@@ -470,8 +486,8 @@ describe("initialize", function () {
       });
 
       it("loads the data", function () {
-        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         $('#internet-on-submit').click();
+        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         expect(mcf.update_micro_cloud).toHaveBeenCalledWith({internet_connected:true}, jasmine.any(Function), jasmine.any(Function));
 
         expect(mcf.configured).toHaveBeenCalled();
@@ -548,8 +564,9 @@ describe("initialize", function () {
         spyOn(mcf, 'update_micro_cloud').andCallFake(function (data, callback) {
           callback();
         });
-        spyOn(mcf, 'configured');
+        spyOn(mcf, 'configured').andCallThrough();
         spyOn(mcf, 'load_data');
+        clearAjaxRequests();
       });
 
       it("hides the bar", function () {
@@ -563,8 +580,8 @@ describe("initialize", function () {
       });
 
       it("loads the data", function () {
-        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         $('#internet-off-submit').click();
+        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         expect(mcf.configured).toHaveBeenCalled();
         expect(mcf.load_data).toHaveBeenCalled();
       });
@@ -651,8 +668,9 @@ describe("initialize", function () {
         spyOn(mcf, 'update_network').andCallFake(function (data, callback) {
           callback();
         });
-        spyOn(mcf, 'configured');
+        spyOn(mcf, 'configured').andCallThrough();
         spyOn(mcf, 'load_data');
+        clearAjaxRequests();
       });
 
       it("hides the bar", function () {
@@ -666,8 +684,8 @@ describe("initialize", function () {
       });
 
       it("loads the data", function () {
-        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         $('#network-submit').click();
+        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         expect(mcf.configured).toHaveBeenCalled();
         expect(mcf.load_data).toHaveBeenCalled();
       });
@@ -743,8 +761,9 @@ describe("initialize", function () {
         spyOn(mcf, 'update_micro_cloud').andCallFake(function (data, callback) {
           callback();
         });
-        spyOn(mcf, 'configured');
+        spyOn(mcf, 'configured').andCallThrough();
         spyOn(mcf, 'load_data');
+        clearAjaxRequests();
       });
 
       it("hides the bar", function () {
@@ -758,8 +777,8 @@ describe("initialize", function () {
       });
 
       it("loads the data", function () {
-        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         $('#proxy-submit').click();
+        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         expect(mcf.configured).toHaveBeenCalled();
         expect(mcf.load_data).toHaveBeenCalled();
       });
@@ -795,5 +814,3 @@ describe("initialize", function () {
     });
   });
 });
-
-
