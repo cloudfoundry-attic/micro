@@ -18,23 +18,23 @@ describe("initialize", function () {
 
     context("when configured", function () {
       it("displays the configured section", function () {
+        $('#not-configured').show();
         expect($('#configured')).not.toBeVisible();
-        expect($('#not-configured')).not.toBeVisible();
         mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
         expect($('#configured')).toBeVisible();
         expect($('#not-configured')).not.toBeVisible();
       });
 
       it('should call load data', function () {
-        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
-        expect(mcf.load_data).toHaveBeenCalled();
+        var data = {is_configured:true};
+        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify(data)});
+        expect(mcf.load_data).toHaveBeenCalledWith(data);
       });
     });
 
-
     context("when not configured", function () {
       it("displays the not configured section", function () {
-        expect($('#configured')).not.toBeVisible();
+        $('#configured').show();
         expect($('#not-configured')).not.toBeVisible();
         mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:false})});
         expect($('#configured')).not.toBeVisible();
@@ -46,6 +46,183 @@ describe("initialize", function () {
         expect(mcf.load_data).not.toHaveBeenCalled();
       });
     });
+  });
+
+  describe(".initial_submit", function () {
+    beforeEach(function () {
+      $('#jasmine_content').html(
+        '<div id="global-error" style="display: none"></div>' +
+          '<form>' +
+          '<input type="password" id="initial-password" value="password">' +
+          '<input type="radio" id="initial-domain-public" name="domain" checked>' +
+          '<input type="radio" id="initial-domain-private" name="domain">' +
+          '<input type="text" id="initial-domain-token" value="token">' +
+          '<input type="text" id="initial-domain-offline" value="domain">' +
+          '<input type="email" id="initial-email" value="email">' +
+          '<input type="radio" id="initial-network-dhcp" name="network">' +
+          '<input type="radio" id="initial-network-static" name="network" checked>' +
+          '<input type="text" id="initial-ip-address" class="static" value="ip">' +
+          '<input type="text" id="initial-netmask" class="static" value="netmask">' +
+          '<input type="text" id="initial-gateway" class="static" value="gateway">' +
+          '<input type="text" id="initial-nameservers" class="static" value="nameservers">' +
+          '<button type="button" class="btn" id="initial-submit">Submit</button>' +
+          '<div class="bar" style="width: 0%;" id="initial-bar"></div>' +
+          '</form>');
+      jasmine.Ajax.useMock();
+      mcf = new Mcf('/api');
+      initialize_micro_cloudfoundry(mcf);
+    });
+
+    describe("before the ajax request has returned", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'initial_config');
+      });
+
+      it("should shows a progress bar", function () {
+        expect($('#initial-bar')).not.toBeVisible();
+        $('#initial-submit').click();
+        expect($('#initial-bar')).toBeVisible();
+      });
+
+      it("should disables the submit button", function () {
+        expect($('#initial-submit')).not.toBeDisabled();
+        $('#initial-submit').click();
+        expect($('#initial-submit')).toBeDisabled();
+      });
+
+      it("should updates network config", function () {
+        $('#initial-submit').click();
+        expect(mcf.initial_config).toHaveBeenCalledWith({
+          password:"password",
+          token:"token",
+          ip:"ip",
+          netmask:"netmask",
+          gateway:"gateway",
+          nameservers:"nameservers",
+          is_dhcp:false
+        }, jasmine.any(Function), jasmine.any(Function));
+      });
+
+      context("when the user choose dhcp and public", function () {
+        beforeEach(function () {
+          $('#initial-network-dhcp').click();
+        });
+
+        it("should updates network config", function () {
+          $('#initial-submit').click();
+          expect(mcf.initial_config).toHaveBeenCalledWith({
+            password:"password",
+            token:"token",
+            is_dhcp:true
+          }, jasmine.any(Function), jasmine.any(Function));
+        });
+      });
+
+      context("when the user chooses private domain and static", function () {
+        beforeEach(function () {
+          $('#initial-domain-private').click();
+        });
+
+        it("should updates network config", function () {
+          $('#initial-submit').click();
+          expect(mcf.initial_config).toHaveBeenCalledWith({
+            password:"password",
+            name:"domain",
+            email:"email",
+            ip:"ip",
+            netmask:"netmask",
+            gateway:"gateway",
+            nameservers:"nameservers",
+            is_dhcp:false
+          }, jasmine.any(Function), jasmine.any(Function));
+        });
+      });
+    });
+
+    describe("when the updating is successful", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'initial_config').andCallFake(function (data, callback) {
+          callback();
+        });
+        spyOn(mcf, 'configured');
+        spyOn(mcf, 'load_data');
+      });
+
+      it("hides the bar", function () {
+        $('#initial-submit').click();
+        expect($('#initial-bar')).not.toBeVisible();
+      });
+
+      it("re-enables the submit button", function () {
+        $('#initial-submit').click();
+        expect($('#initial-submit')).not.toBeDisabled();
+      });
+
+      it("loads the data", function () {
+        mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
+        $('#initial-submit').click();
+        expect(mcf.configured).toHaveBeenCalled();
+        expect(mcf.load_data).toHaveBeenCalled();
+      });
+    });
+
+    describe("when the updating is a failure", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'initial_config').andCallFake(function (data, callback, error_callback) {
+          error_callback();
+        });
+        spyOn(mcf, 'load_data');
+      });
+
+      it("shows an error alert", function () {
+        $('#initial-submit').click();
+        expect($('#global-error')).toBeVisible();
+      });
+
+      it("hides the bar", function () {
+        $('#initial-submit').click();
+        expect($('#proxy-bar')).not.toBeVisible();
+      });
+
+      it("re-enables the submit button", function () {
+        $('#initial-submit').click();
+        expect($('#initial-submit')).not.toBeDisabled();
+      });
+
+      it("does not reload the data", function () {
+        $('#initial-submit').click();
+        expect(mcf.load_data).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("accordion toggles", function () {
+
+      beforeEach(function () {
+        $('#jasmine_content').html(
+          '<a class="accordion-toggle" id="a"><input type="radio" id="radio" </a>'
+        );
+
+        initialize_micro_cloudfoundry(mcf);
+      });
+
+      it("checks child radios", function () {
+        var spyEvent = spyOnEvent('#radio', 'click');
+
+        expect($('#radio')).not.toBeChecked();
+        $('#a').click();
+        expect($('#radio')).toBeChecked();
+      });
+
+      it("becomes checked when clicked", function () {
+        var spyEvent = spyOnEvent('#radio', 'click');
+
+        expect($('#radio')).not.toBeChecked();
+        $('#radio').click();
+        expect($('#radio')).toBeChecked();
+      });
+
+    });
+
   });
 
   describe(".admin_submit", function () {
@@ -587,211 +764,36 @@ describe("initialize", function () {
         expect(mcf.load_data).toHaveBeenCalled();
       });
     });
-  });
 
-  describe("when the updating is a failure", function () {
-    beforeEach(function () {
-      spyOn(mcf, 'update_micro_cloud').andCallFake(function (data, callback, error_callback) {
-        error_callback();
+    describe("when the updating is a failure", function () {
+      beforeEach(function () {
+        spyOn(mcf, 'update_micro_cloud').andCallFake(function (data, callback, error_callback) {
+          error_callback();
+        });
+        spyOn(mcf, 'load_data');
       });
-      spyOn(mcf, 'load_data');
-    });
 
-    it("shows an error alert", function () {
-      $('#proxy-submit').click();
-      expect($('#global-error')).toBeVisible();
-    });
+      it("shows an error alert", function () {
+        $('#proxy-submit').click();
+        expect($('#global-error')).toBeVisible();
+      });
 
-    it("hides the bar", function () {
-      $('#proxy-submit').click();
-      expect($('#proxy-bar')).not.toBeVisible();
-    });
+      it("hides the bar", function () {
+        $('#proxy-submit').click();
+        expect($('#proxy-bar')).not.toBeVisible();
+      });
 
-    it("re-enables the submit button", function () {
-      $('#proxy-submit').click();
-      expect($('#proxy-submit')).not.toBeDisabled();
-    });
+      it("re-enables the submit button", function () {
+        $('#proxy-submit').click();
+        expect($('#proxy-submit')).not.toBeDisabled();
+      });
 
-    it("does not reload the data", function () {
-      $('#proxy-submit').click();
-      expect(mcf.load_data).not.toHaveBeenCalled();
+      it("does not reload the data", function () {
+        $('#proxy-submit').click();
+        expect(mcf.load_data).not.toHaveBeenCalled();
+      });
     });
   });
 });
 
-describe(".initial_submit", function () {
-  beforeEach(function () {
-    $('#jasmine_content').html(
-      '<div id="global-error" style="display: none"></div>' +
-        '<form>' +
-        '<input type="password" id="initial-password" value="password">' +
-        '<input type="radio" id="initial-domain-public" name="domain" checked>' +
-        '<input type="radio" id="initial-domain-private" name="domain">' +
-        '<input type="text" id="initial-domain-token" value="token">' +
-        '<input type="text" id="initial-domain-offline" value="domain">' +
-        '<input type="email" id="initial-email" value="email">' +
-        '<input type="radio" id="initial-network-dhcp" name="network">' +
-        '<input type="radio" id="initial-network-static" name="network" checked>' +
-        '<input type="text" id="initial-ip-address" class="static" value="ip">' +
-        '<input type="text" id="initial-netmask" class="static" value="netmask">' +
-        '<input type="text" id="initial-gateway" class="static" value="gateway">' +
-        '<input type="text" id="initial-nameservers" class="static" value="nameservers">' +
-        '<button type="button" class="btn" id="initial-submit">Submit</button>' +
-        '<div class="bar" style="width: 0%;" id="initial-bar"></div>' +
-        '</form>');
-    jasmine.Ajax.useMock();
-    mcf = new Mcf('/api');
-    initialize_micro_cloudfoundry(mcf);
-  });
 
-  describe("before the ajax request has returned", function () {
-    beforeEach(function () {
-      spyOn(mcf, 'initial_config');
-    });
-
-    it("should shows a progress bar", function () {
-      expect($('#initial-bar')).not.toBeVisible();
-      $('#initial-submit').click();
-      expect($('#initial-bar')).toBeVisible();
-    });
-
-    it("should disables the submit button", function () {
-      expect($('#initial-submit')).not.toBeDisabled();
-      $('#initial-submit').click();
-      expect($('#initial-submit')).toBeDisabled();
-    });
-
-    it("should updates network config", function () {
-      $('#initial-submit').click();
-      expect(mcf.initial_config).toHaveBeenCalledWith({
-        password:"password",
-        token:"token",
-        ip:"ip",
-        netmask:"netmask",
-        gateway:"gateway",
-        nameservers:"nameservers",
-        is_dhcp:false
-      }, jasmine.any(Function), jasmine.any(Function));
-    });
-
-    context("when the user choose dhcp and public", function () {
-      beforeEach(function () {
-        $('#initial-network-dhcp').click();
-      });
-
-      it("should updates network config", function () {
-        $('#initial-submit').click();
-        expect(mcf.initial_config).toHaveBeenCalledWith({
-          password:"password",
-          token:"token",
-          is_dhcp:true
-        }, jasmine.any(Function), jasmine.any(Function));
-      });
-    });
-
-    context("when the user chooses private domain and static", function () {
-      beforeEach(function () {
-        $('#initial-domain-private').click();
-      });
-
-      it("should updates network config", function () {
-        $('#initial-submit').click();
-        expect(mcf.initial_config).toHaveBeenCalledWith({
-          password:"password",
-          name:"domain",
-          email:"email",
-          ip:"ip",
-          netmask:"netmask",
-          gateway:"gateway",
-          nameservers:"nameservers",
-          is_dhcp:false
-        }, jasmine.any(Function), jasmine.any(Function));
-      });
-    });
-  });
-
-  describe("when the updating is successful", function () {
-    beforeEach(function () {
-      spyOn(mcf, 'initial_config').andCallFake(function (data, callback) {
-        callback();
-      });
-      spyOn(mcf, 'configured');
-      spyOn(mcf, 'load_data');
-    });
-
-    it("hides the bar", function () {
-      $('#initial-submit').click();
-      expect($('#initial-bar')).not.toBeVisible();
-    });
-
-    it("re-enables the submit button", function () {
-      $('#initial-submit').click();
-      expect($('#initial-submit')).not.toBeDisabled();
-    });
-
-    it("loads the data", function () {
-      mostRecentAjaxRequest().response({status:200, responseText:JSON.stringify({is_configured:true})});
-      $('#initial-submit').click();
-      expect(mcf.configured).toHaveBeenCalled();
-      expect(mcf.load_data).toHaveBeenCalled();
-    });
-  });
-
-  describe("when the updating is a failure", function () {
-    beforeEach(function () {
-      spyOn(mcf, 'initial_config').andCallFake(function (data, callback, error_callback) {
-        error_callback();
-      });
-      spyOn(mcf, 'load_data');
-    });
-
-    it("shows an error alert", function () {
-      $('#initial-submit').click();
-      expect($('#global-error')).toBeVisible();
-    });
-
-    it("hides the bar", function () {
-      $('#initial-submit').click();
-      expect($('#proxy-bar')).not.toBeVisible();
-    });
-
-    it("re-enables the submit button", function () {
-      $('#initial-submit').click();
-      expect($('#initial-submit')).not.toBeDisabled();
-    });
-
-    it("does not reload the data", function () {
-      $('#initial-submit').click();
-      expect(mcf.load_data).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("accordion toggles", function () {
-
-    beforeEach(function () {
-      $('#jasmine_content').html(
-        '<a class="accordion-toggle" id="a"><input type="radio" id="radio" </a>'
-      );
-
-      initialize_micro_cloudfoundry(mcf);
-    });
-
-    it("checks child radios", function () {
-      var spyEvent = spyOnEvent('#radio', 'click');
-
-      expect($('#radio')).not.toBeChecked();
-      $('#a').click();
-      expect($('#radio')).toBeChecked();
-    });
-
-    it("becomes checked when clicked", function () {
-      var spyEvent = spyOnEvent('#radio', 'click');
-
-      expect($('#radio')).not.toBeChecked();
-      $('#radio').click();
-      expect($('#radio')).toBeChecked();
-    });
-
-  });
-
-});

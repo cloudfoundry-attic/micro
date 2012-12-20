@@ -48,20 +48,11 @@ window.Mcf = class Mcf
     @set_proxy micro_cloud.http_proxy
     @set_version micro_cloud.version
 
-  configured: ->
+  configured: (configured_callback, not_configured_callback) =>
     @from_root (data) =>
       if data.is_configured
-        $('#not-configured').hide()
-        $('#configured').show()
-        @load_data(data)
-      else
-        $('#configured').hide()
-        $('#not-configured').show()
-
-  configured: (configured_callback, not_configured_callback) ->
-    @from_root (data) ->
-      if data.is_configured
         configured_callback()
+        @load_data(data)
       else
         not_configured_callback()
 
@@ -103,8 +94,6 @@ window.Mcf = class Mcf
   shutdown: ->
     @logger.info 'shutting down'
     @update_micro_cloud { is_powered_on: false }
-
-
 
   # Frequently used code path for an edit link on level below the
   # root.
