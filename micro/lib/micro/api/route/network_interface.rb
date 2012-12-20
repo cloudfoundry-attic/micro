@@ -57,9 +57,13 @@ module VCAP
                 dnsmasq.ip = network_interface.ip_address
                 if network_interface.nameservers
                   dnsmasq.upstream_servers = network_interface.nameservers
+                  dnsmasq.write
+                else
+                  dnsmasq.write_conf
+                  dnsmasq.write_enter_hook
+                  dnsmasq.write_resolv_conf
+                  Dnsmasq.restart
                 end
-                dnsmasq.write
-                Dnsmasq.restart
               end
             end
 

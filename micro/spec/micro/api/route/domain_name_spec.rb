@@ -19,6 +19,7 @@ describe 'micro cloud resource' do
       VCAP::Micro::Dnsmasq.should_receive(:new).and_return(dnsmasq)
       VCAP::Micro::InternetConnection.should_receive(:new).and_return(
         internet_connection)
+      VCAP::Micro::Dnsmasq.should_receive(:restart)
 
       post '/domain_name', { 'name' => 'test.micro' }.to_json,
       'CONTENT_TYPE' => 'application/vnd.vmware.mcf-domain-name+json'

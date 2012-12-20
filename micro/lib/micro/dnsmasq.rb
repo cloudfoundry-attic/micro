@@ -102,23 +102,40 @@ eos
 
       # Write all config files.
       def write
+        write_conf
+        write_enter_hook
+        write_resolv_conf
+        write_upstream_servers
+
+        self.class.restart
+      end
+
+      # Write the dnsmasq main configuration file.
+      def write_conf
         open(conf_path, 'w') do |f|
           f.write(gen_conf)
         end
+      end
 
+      # Write the DHCP enter hook.
+      def write_enter_hook
         open(enter_hook_path, 'w') do |f|
           f.write(gen_enter_hook)
         end
+      end
 
+      # Write the resolv.conf DHCP enter hook.
+      def write_resolv_conf
         open(resolv_conf_path, 'w') do |f|
           f.write(gen_resolv_conf)
         end
+      end
 
+      # Write the upstream servers.
+      def write_upstream_servers
         open(upstream_servers_path, 'w') do |f|
           f.write(gen_upstream_servers)
         end
-
-        self.class.restart
       end
 
       # Comment out all of the upstream DNS servers.

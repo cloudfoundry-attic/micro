@@ -54,6 +54,11 @@ module VCAP
                   end
 
                   new_domain_name = config_file.subdomain
+
+                  dnsmasq = Dnsmasq.new.read
+                  dnsmasq.domain = new_domain_name
+                  dnsmasq.ip = ip
+                  dnsmasq.write
                 else
                   unless Domain.new(domain_name.name).valid?
                     halt 400, 'Domain is invalid'
@@ -66,12 +71,19 @@ module VCAP
                   InternetConnection.new.set_disconnected
 
                   new_domain_name = domain_name.name
-                end
 
-                dnsmasq = Dnsmasq.new.read
-                dnsmasq.domain = new_domain_name
-                dnsmasq.ip = ip
-                dnsmasq.write
+                  dnsmasq = Dnsmasq.new.read
+                  dnsmasq.domain = new_domain_name
+                  dnsmasq.ip = ip
+
+                  # Don't write upstream servers because they were just
+                  # commented out by going offline.
+                  dnsmasq.write_conf
+                  dnsmasq.write_enter_hook
+                  dnsmasq.write_resolv_conf
+
+                  Dnsmasq.restart
+                end
 
                 spec.write do |as|
                   as.domain = config_file.subdomain
