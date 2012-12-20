@@ -4,8 +4,11 @@ module VCAP
 
     class NetworkInterfacesFile
 
+      NETWORK_FILE = '/etc/network/interfaces'.freeze
+
       # Return true if an interface is configured as DHCP.
-      def self.is_interface_dhcp?(interface_name, interfaces_file)
+      def self.is_interface_dhcp?(interface_name, interfaces_file=NETWORK_FILE)
+        interfaces_file = interfaces_file.read if interfaces_file.respond_to?(:read)
         interfaces_file[/iface #{interface_name} inet dhcp/] ? true : false
       end
 
@@ -17,7 +20,7 @@ module VCAP
       end
 
       # Write the interface configuration to a file.
-      def write(file='/etc/network/interfaces')
+      def write(file=NETWORK_FILE)
         open(file, 'w') do |f|
           f.write(to_s)
         end

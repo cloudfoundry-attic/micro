@@ -69,6 +69,11 @@ def with_constants(constants, &block)
   end
 end
 
+def fixture(fixture)
+  fixture = File.expand_path("../fixtures/#{fixture}", __FILE__)
+  File.read(fixture)
+end
+
 class String
   def strip_heredoc
     string = scan(/^[ \t]*(?=\S)/).min

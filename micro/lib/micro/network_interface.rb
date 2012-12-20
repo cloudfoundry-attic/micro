@@ -5,39 +5,35 @@ module VCAP
     # Current running network configuration.
     class NetworkInterface
 
-      IP_RE = '(?:\d{1,3}\.){3}\d{1,3}'
-
-      # Parse an ifconfig for one interface.
-      #
-      # Return a regex match object with named captures ip and netmask.
-      def self.parse_ifconfig(ifconfig_output)
-        %r{
+      IP_RE = '(?:\d{1,3}\.){3}\d{1,3}'.freeze
+      ROUTE_TABLE = %r{#{IP_RE}\s+(?<default_route>#{IP_RE})\s+#{IP_RE}\s+UG}.freeze
+      IFCONFIG = %r{
           .*inet\ addr:(?<ip>#{IP_RE})
           .+
           Mask:(?<netmask>#{IP_RE})
-          }x.match(ifconfig_output)
-      end
+        }x.freeze
 
-      # Parse a route table (output of route -n).
-      #
-      # Return a regex match object with named capture default_route.
-      def self.parse_route_table(route_table)
-        %r{
-          #{IP_RE}
-          \s+
-          (?<default_route>#{IP_RE})
-          \s+
-          #{IP_RE}
-          \s+
-          UG
-          }x.match(route_table)
-      end
+      attr_reader :name, :ip, :netmask, :gateway
 
       def initialize(name)
         @name = name
         @ip = nil
         @netmask = nil
         @gateway = nil
+      end
+
+      # Parse an ifconfig for one interface.
+      #
+      # Return a regex match object with named captures ip and netmask.
+      def self.parse_ifconfig(ifconfig_output)
+        IFCONFIG.match(ifconfig_output)
+      end
+
+      # Parse a route table (output of route -n).
+      #
+      # Return a regex match object with named capture default_route.
+      def self.parse_route_table(route_table)
+        ROUTE_TABLE.match(route_table)
       end
 
       # Run commands, parse the output and load it into this instance.
@@ -56,17 +52,20 @@ module VCAP
         self
       end
 
-      # Restart this network interface.
-      def restart
-        Micro.shell_raiser(%Q{/etc/init.d/networking restart})
+      # Bring this network interface down.
+      def down
+        Micro.shell_raiser(%Q{ifdown #{name}})
       end
 
-      attr_reader :name
-      attr_reader :ip
-      attr_reader :netmask
-      attr_reader :gateway
+      def up
+        Micro.shell_raiser(%Q{ifup #{name}})
+      end
+
+      # Restart this network interface.
+      def restart
+        down
+        up
+      end
     end
-
   end
-
 end

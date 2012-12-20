@@ -10,7 +10,7 @@ module VCAP
     # Return its output.
     def shell_raiser(command)
       output = `#{command} 2>&1`
-      raise output  unless $? == 0
+      raise output unless $? == 0
 
       output
     end
