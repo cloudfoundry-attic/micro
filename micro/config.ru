@@ -10,12 +10,14 @@ Bundler.require(:default, :web)
 
 require 'micro'
 
+LOG_FILE = '/tmp/var/vcap/sys/log/micro/api.log'.freeze
+FileUtils.mkdir_p File.dirname(LOG_FILE)
+logger = File.new(LOG_FILE, 'a+')
+
+use VCAP::Micro::Api::Engine::Rack::Logger, logger
 use VCAP::Micro::Api::Engine::Rack::MediaTypeSerial
-
-use Rack::Rewrite do
-  rewrite '/', '/index.html'
-end
-
+use Rack::CommonLogger, logger
+use(Rack::Rewrite) { rewrite '/', '/index.html' }
 use Rack::Static, urls: %w{/index.html /tos.html /assets}, root: 'public'
 
 map '/api' do
