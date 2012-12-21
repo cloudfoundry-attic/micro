@@ -57,9 +57,23 @@ describe VCAP::Micro::Api::Route::NetworkInterface do
   end
 
   describe '.post' do
-    let(:params) {}
-    subject { post '/network_interface', params }
+    let(:valid_params) { {'ip_address' => '', 'netmask' => '', 'gateway' => '', 'nameservers' => '', 'is_dhcp' => true, 'name' => 'eth1'} }
+    let(:params) { valid_params }
+    let(:action) { post '/network_interface', params.to_json, 'CONTENT_TYPE' => 'application/vnd.vmware.mcf-network-interface+json' }
 
-    it 'should be tested'
+    before do
+      VCAP::Micro.stub(:shell_raiser)
+    end
+
+    subject { action; last_response.body }
+
+    context 'when the interface has no name' do
+      let(:params) { valid_params.delete('name'); valid_params }
+
+      it 'should default to eth0' do
+        VCAP::Micro.should_receive(:shell_raiser).with("ifdown eth0")
+        subject
+      end
+    end
   end
 end

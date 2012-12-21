@@ -29,7 +29,7 @@ module VCAP
                 halt 400, 'Invalid network configuration'
               end
 
-              interface = Micro::NetworkInterface.new(network_interface.name)
+              interface = Micro::NetworkInterface.new(network_interface.name || "eth0")
               interface.down
               network_interface_file.write
               interface.up
