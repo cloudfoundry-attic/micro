@@ -20,9 +20,11 @@ module VCAP
       def read
         groups = {}
 
-        YAML.load_file(@path).each do |k,v|
-          groups[k] = MonitoredProcessGroup.new(
-            k, v.map { |p| MonitoredProcess.new(p) })
+        if File.exist?(@path)
+          YAML.load_file(@path).each do |k,v|
+            groups[k] = MonitoredProcessGroup.new(
+              k, v.map { |p| MonitoredProcess.new(p) })
+          end
         end
 
         @groups = groups
