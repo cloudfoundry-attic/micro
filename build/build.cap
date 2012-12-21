@@ -21,6 +21,7 @@ desc 'Clean up build debris.'
 task :clean, role: :build do
   # TODO add /tmp
   sudo "rm -rf /var/tmp/bosh/agent-*"
+  sudo "rm -rf ~mmb/workspace/bosh/agent/mcf/*"
 end
 
 desc 'Update the bosh_cli gem.'
