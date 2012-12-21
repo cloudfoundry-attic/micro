@@ -11,15 +11,21 @@ module VCAP
 
       # Stop the process.
       def stop
-        Micro.shell_raiser("monit stop #{@name}")
+        Micro.shell_raiser("monit stop #{name}")
       end
 
       # Check a bosh agent status and return true if this process is running.
       def running?(bosh_agent_status)
-        bosh_agent_status[@name][:status][:message] == 'running'
+        try(try(bosh_agent_status[name], :status), :message) == 'running'
       end
 
       attr_reader :name
+
+      private
+
+      def try(a, b)
+        (a || {})[b]
+      end
     end
 
   end
