@@ -18,16 +18,14 @@ module VCAP
 
       # Read process group data from the filesystem.
       def read
-        groups = {}
+        @groups = {}
 
         if File.exist?(@path)
-          YAML.load_file(@path).each do |k,v|
-            groups[k] = MonitoredProcessGroup.new(
-              k, v.map { |p| MonitoredProcess.new(p) })
+          YAML.load_file(@path).each do |k, v|
+            monitored_processes = v.map { |p| MonitoredProcess.new(p) }
+            @groups[k] = MonitoredProcessGroup.new(k, monitored_processes)
           end
         end
-
-        @groups = groups
 
         self
       end
