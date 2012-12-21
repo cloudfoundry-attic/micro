@@ -8,9 +8,10 @@ require 'rubygems'
 require 'bundler'
 Bundler.require(:default, :web)
 
+require 'fileutils'
 require 'micro'
 
-LOG_FILE = '/tmp/var/vcap/sys/log/micro/api.log'.freeze
+LOG_FILE = '/var/vcap/sys/log/micro/api.log'.freeze
 FileUtils.mkdir_p File.dirname(LOG_FILE)
 logger = File.new(LOG_FILE, 'a+')
 
