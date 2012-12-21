@@ -7,13 +7,13 @@ module VCAP
       module MediaType
 
         class DomainName < Engine::MediaType
-          MediaType = 'application/vnd.vmware.mcf-domain-name+json'
+          MEDIA_TYPE = 'application/vnd.vmware.mcf-domain-name+json'.freeze
 
           Links = {
             :self => [:get, self],
             :microcloud => [:get, MicroCloud],
             :edit => [:post, self],
-          }
+          }.freeze
 
           def initialize(fields={})
             super fields

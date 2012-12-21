@@ -27,7 +27,7 @@ module VCAP
             @_links[rel] = {
               :method => link_def[0],
               :href => href,
-              :type => link_def[1]::MediaType
+              :type => link_def[1]::MEDIA_TYPE
             }
 
             self
@@ -60,12 +60,16 @@ module VCAP
 
           # Look up a subclass by its content type.
           def self.from_content_type(content_type)
-            subclasses.find { |c| c::MediaType == content_type }
+            subclasses.find { |c| c::MEDIA_TYPE == content_type }
           end
 
           # Respond to each so every subclass can act as a Rack body.
           def each
             yield to_json
+          end
+
+          def media_type
+            self.class::MEDIA_TYPE
           end
 
           def self.graph

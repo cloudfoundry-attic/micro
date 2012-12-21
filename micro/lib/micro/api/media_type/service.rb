@@ -7,14 +7,14 @@ module VCAP
       module MediaType
 
         class Service < Engine::MediaType
-          MediaType = 'application/vnd.vmware.mcf-service+json'
+          MEDIA_TYPE = 'application/vnd.vmware.mcf-service+json'.freeze
 
           Links = {
             :self => [:get, self],
             :microcloud => [:get, MicroCloud],
             :edit => [:post, self],
             :services => [:get, ServiceList],
-          }
+          }.freeze
 
           def initialize(fields={})
             super fields

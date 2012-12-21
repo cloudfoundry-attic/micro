@@ -36,10 +36,9 @@ module VCAP
 
               status, headers, response = @app.call(env)
 
-              if response.class.const_defined?(:MediaType, false)
-                # For now,  serve as application/json to view in the browser
-                # for easy debugging.
-                # headers['Content-Type'] = response.class::MediaType
+              if response.respond_to?(:media_type)
+                # For now,  serve as application/json to view in the browser for easy debugging.
+                # headers['Content-Type'] = response.media_type
                 headers['Content-Type'] = 'application/json'
               end
 

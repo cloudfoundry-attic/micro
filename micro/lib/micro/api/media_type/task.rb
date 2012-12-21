@@ -7,12 +7,12 @@ module VCAP
       module MediaType
 
         class Task < Engine::MediaType
-          MediaType = 'application/vnd.vmware.mcf-task+json'
+          MEDIA_TYPE = 'application/vnd.vmware.mcf-task+json'.freeze
 
           Links = {
             :self => [:get, self],
             :microcloud => [:get, MicroCloud],
-          }
+          }.freeze
 
           def initialize(fields={})
             super fields

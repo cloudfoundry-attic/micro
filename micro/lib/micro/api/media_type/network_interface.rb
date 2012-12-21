@@ -7,14 +7,14 @@ module VCAP
       module MediaType
 
         class NetworkInterface < Engine::MediaType
-          MediaType = 'application/vnd.vmware.mcf-network-interface+json'
+          MEDIA_TYPE = 'application/vnd.vmware.mcf-network-interface+json'.freeze
 
           Links = {
             :self => [:get, self],
             :microcloud => [:get, MicroCloud],
             :network_health => [:get, NetworkHealth],
             :edit => [:post, self],
-          }
+          }.freeze
 
           def initialize(fields={})
             super fields

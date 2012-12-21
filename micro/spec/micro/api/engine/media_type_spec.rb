@@ -4,7 +4,7 @@ describe VCAP::Micro::Api::Engine::MediaType do
 
   class TestMediaType1 < VCAP::Micro::Api::Engine::MediaType
 
-    MediaType = 'application/vnd.vmware.media-type-1+json'
+    MEDIA_TYPE = 'application/vnd.vmware.media-type-1+json'.freeze
 
     def initialize(fields={})
       super fields
@@ -17,7 +17,7 @@ describe VCAP::Micro::Api::Engine::MediaType do
 
   class TestMediaType2 < VCAP::Micro::Api::Engine::MediaType
 
-    MediaType = 'application/vnd.vmware.media-type-2+json'
+    MEDIA_TYPE = 'application/vnd.vmware.media-type-2+json'.freeze
 
     def initialize(fields={})
       super fields
@@ -30,7 +30,7 @@ describe VCAP::Micro::Api::Engine::MediaType do
 
   class TestMediaType3 < VCAP::Micro::Api::Engine::MediaType
 
-    MediaType = 'application/vnd.vmware.media-type-3+json'
+    MEDIA_TYPE = 'application/vnd.vmware.media-type-3+json'.freeze
 
     Links = {
       :rel1 => [:get,  TestMediaType1],
@@ -65,7 +65,7 @@ describe VCAP::Micro::Api::Engine::MediaType do
           :rel1 => {
             :method => TestMediaType3::Links[:rel1][0],
             :href => 'test',
-            :type => TestMediaType3::Links[:rel1][1]::MediaType
+            :type => TestMediaType3::Links[:rel1][1]::MEDIA_TYPE
           }
         })
       }
@@ -116,7 +116,7 @@ describe VCAP::Micro::Api::Engine::MediaType do
 
     it 'gets the correct content type' do
       VCAP::Micro::Api::Engine::MediaType.from_content_type(
-        TestMediaType1::MediaType).should == TestMediaType1
+        TestMediaType1::MEDIA_TYPE).should == TestMediaType1
     end
   end
 

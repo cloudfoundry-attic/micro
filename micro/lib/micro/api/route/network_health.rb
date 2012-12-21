@@ -16,8 +16,7 @@ module VCAP
 
               can_resolve_other = nh.can_resolve_other?
 
-              default_gateway = Micro::NetworkInterface.new(
-                'eth0').load.gateway
+              default_gateway = Micro::NetworkInterface.new('eth0').load.gateway
 
               network_health = MediaType::NetworkHealth.new(
                 :reach_gateway => nh.ping?(default_gateway),
