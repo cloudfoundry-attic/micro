@@ -41,10 +41,13 @@ def follow_link(data_in, rel, data_next=nil)
   if link['method'] == 'get'
     args = [link_uri.path]
   else
+    data_next = data_next.to_json if data_next.is_a? Hash
     args = [link_uri.path, data_next, { 'Content-Type' => link['type'] }]
   end
 
-  http.send(link['method'], *args)
+  result = http.send(link['method'], *args)
+  p [result, result.body]
+  result
 end
 
 def run_commands(commands)
@@ -123,34 +126,13 @@ task :initial_setup do
 
   micro_cloud = JSON.parse(Net::HTTP.get(root_uri))
 
-  # change network to static
-
-  offline_resp = follow_link(micro_cloud, 'edit',
-                             { internet_connected: false }.to_json)
-  p offline_resp
-  p offline_resp.body
-
   admin = JSON.parse(follow_link(micro_cloud, 'administrator').body)
+  domain = JSON.parse(follow_link(micro_cloud, 'domain_name').body)
 
-  admin_edit_resp = follow_link(admin, 'edit', {
-      email: admin_user,
-      password: micro_password
-  }.to_json)
-  p admin_edit_resp
-  p admin_edit_resp.body
-
-  domain_resp = JSON.parse(follow_link(micro_cloud, 'domain_name').body)
-
-  domain_edit_resp = follow_link(domain_resp, 'edit', {
-      name: domain,
-  }.to_json)
-  p domain_edit_resp
-  p domain_edit_resp.body
-
-  online_resp = follow_link(micro_cloud, 'edit',
-                            { internet_connected: true }.to_json)
-  p online_resp
-  p online_resp.body
+  follow_link(micro_cloud, 'edit', internet_connected: false)
+  follow_link(admin, 'edit', email: admin_user, password: micro_password)
+  follow_link(domain, 'edit', name: domain)
+  follow_link(micro_cloud, 'edit', internet_connected: true)
 end
 
 desc 'Cleanup and Start VM'
