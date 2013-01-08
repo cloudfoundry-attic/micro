@@ -189,3 +189,6 @@ window.Mcf = class Mcf
       @update_admin input.admin, =>
         @update_domain input.domain, =>
           success_callback()
+        , error_callback
+      , error_callback
+    , error_callback
