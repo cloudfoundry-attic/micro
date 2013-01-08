@@ -41,9 +41,13 @@ module VCAP
 
               if micro_cloud
                 if micro_cloud.http_proxy
-                  if !micro_cloud.http_proxy.empty? &&
-                      !(micro_cloud.http_proxy =~ URI::regexp)
+                  if !micro_cloud.http_proxy.empty?
+                    begin
+                      URI.parse(micro_cloud.http_proxy)
+                    rescue URI::InvalidURIError
                       halt 400, 'HTTP proxy is not a valid URL'
+                    end
+
                   end
 
                   spec = ApplySpec.new.read
