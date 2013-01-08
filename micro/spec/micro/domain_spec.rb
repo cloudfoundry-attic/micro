@@ -1,33 +1,24 @@
 require 'spec_helper'
 
 describe VCAP::Micro::Domain do
+  subject { VCAP::Micro::Domain.new(url) }
 
-  it 'detects that a valid domain is valid' do
-    VCAP::Micro::Domain.new('test.com').should be_valid
+  context "when valid url is passed" do
+
+    %w{test.com vcap.me 1test.com}.each do |url|
+      context "when url is #{url}" do
+        let(:url) { url }
+        it { should be_valid }
+      end
+    end
   end
 
-  it 'allows a domain starting with a digit' do
-    VCAP::Micro::Domain.new('1test.com').should be_valid
+  context "when invalid url is passed" do
+    [nil, '', 'foo', '-foo.com', 'foo-.com', 'test.a'].each do |url|
+      context "when url is #{url}" do
+        let(:url) { url }
+        it { should_not be_valid }
+      end
+    end
   end
-
-  it 'detects that a nil domain is invalid' do
-    VCAP::Micro::Domain.new(nil).should_not be_valid
-  end
-
-  it 'detects that an empty string domain is invalid' do
-    VCAP::Micro::Domain.new('').should_not be_valid
-  end
-
-  it 'detects that an invalid domain is invalid' do
-    VCAP::Micro::Domain.new('foo').should_not be_valid
-  end
-
-  it 'does not allow a domain starting with a hyphen' do
-    VCAP::Micro::Domain.new('-foo.com').should_not be_valid
-  end
-
-  it 'does not allow a domain part ending with a hyphen' do
-    VCAP::Micro::Domain.new('foo-.com').should_not be_valid
-  end
-
 end
