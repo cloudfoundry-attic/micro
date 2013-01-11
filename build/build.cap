@@ -45,11 +45,7 @@ task :create_release, role: :build do
   commands << '. ~/.bash_profile'
   commands << "cd ~/workspace/cf-release"
   if ENV["USE_NG"]
-    commands << "cp jobs/micro/manifest-ng.yml jobs/micro/manifest.yml"
-    commands << "cd src/warden"
-    commands << "git fetch"
-    commands << "git reset --hard FETCH_HEAD"
-    commands << "cd ~/workspace/cf-release"
+    commands << "cp jobs/micro/monit-ng.yml jobs/micro/monit.yml"
   end
   commands << 'bosh -n create release --force --with-tarball'
   run_commands(commands)
