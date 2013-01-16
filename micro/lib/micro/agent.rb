@@ -82,8 +82,10 @@ module VCAP
         properties = @spec['properties']
 
         properties['domain'] = subdomain
-        properties['cc']['srv_api_uri'] = "http://api.#{subdomain}"
-        properties['cc']['admins'] = admins
+        cc_props = properties['cc_props'] || 'cc'
+        cc_host = cc_props == "ccng" ? "ccng" : "api"
+        properties[cc_props]['srv_api_uri'] = "http://#{cc_host}.#{subdomain}"
+        properties[cc_props]['admins'] = admins
 
         env = properties['env']
         if @identity.proxy.url.empty?

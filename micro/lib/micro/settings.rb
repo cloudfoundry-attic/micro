@@ -23,6 +23,9 @@ module VCAP
         randomize_password(properties, 'cc', 'password', 64)
         randomize_password(properties, 'cc', 'staging_upload_user', 8)
         randomize_password(properties, 'cc', 'staging_upload_password', 9)
+        randomize_password(properties, 'ccng', 'bulk_api_password', 64)
+        randomize_password(properties, 'ccng', 'staging_upload_user', 8)
+        randomize_password(properties, 'ccng', 'staging_upload_password', 9)
         randomize_password(properties, 'router', 'password', 8)
         router = properties['router']
         randomize_password(router, 'status', 'user', 8)
@@ -32,15 +35,21 @@ module VCAP
         ccdb_password = secret(8)
         properties['ccdb']['roles'].find {
           |role| role['tag'] == 'admin' }['password'] = ccdb_password
+        properties['ccdb_ng']['roles'].find {
+          |role| role['tag'] == 'admin' }['password'] = ccdb_password
 
         acmdb_password = secret(8)
         properties['ccdb']['roles'].find {
+          |role| role['tag'] == 'acm' }['password'] = acmdb_password
+        properties['ccdb_ng']['roles'].find {
           |role| role['tag'] == 'acm' }['password'] = acmdb_password
         properties['acmdb']['roles'].find {
           |role| role['tag'] == 'admin' }['password'] = acmdb_password
 
         uaadb_password = secret(8)
         properties['ccdb']['roles'].find {
+          |role| role['tag'] == 'uaa' }['password'] = uaadb_password
+        properties['ccdb_ng']['roles'].find {
           |role| role['tag'] == 'uaa' }['password'] = uaadb_password
         properties['uaadb']['roles'].find {
           |role| role['tag'] == 'admin' }['password'] = uaadb_password

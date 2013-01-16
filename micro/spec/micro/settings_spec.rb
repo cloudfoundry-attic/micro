@@ -10,6 +10,12 @@ describe VCAP::Micro::Network do
                     { 'tag' => 'admin' },
                     { 'tag' => 'uaa' },
                    ] },
+      'ccdb_ng' => {
+        'roles' => [
+                    { 'tag' => 'acm' },
+                    { 'tag' => 'admin' },
+                    { 'tag' => 'uaa' },
+                   ] },
       'acmdb' => {
         'roles' => [
                     { 'tag' => 'admin' },

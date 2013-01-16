@@ -30,6 +30,9 @@ describe VCAP::Micro::ApplySpec do
                     { 'tag' => 'uaa' },
                    ]
       }
+
+      as.properties['ccdb_ng'] = as.properties['ccdb'].dup
+
       as.properties['acmdb'] = {
         'roles' => [
                     { 'tag' => 'admin' },
@@ -79,6 +82,8 @@ describe VCAP::Micro::ApplySpec do
                     { 'tag' => 'uaa' },
                    ]
       }
+      as.properties['ccdb_ng'] = as.properties['ccdb'].dup
+
       as.properties['acmdb'] = {
         'roles' => [
                     { 'tag' => 'admin' },

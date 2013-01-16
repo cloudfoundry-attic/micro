@@ -49,8 +49,12 @@ module VCAP
         @spec['properties'] ||= {}
       end
 
+      def cc_props
+        properties['cc_props'] || 'cc'
+      end
+
       def cc
-        properties['cc'] ||= {}
+        properties[cc_props] ||= {}
       end
 
       def env
@@ -79,7 +83,8 @@ module VCAP
 
       def domain=(domain)
         properties['domain'] = domain
-        cc['srv_api_uri'] = "http://api.#{domain}/"
+        cc_host = cc_props == "ccng" ? "ccng" : "api"
+        cc['srv_api_uri'] = "http://#{cc_host}.#{domain}/"
       end
 
       def http_proxy
