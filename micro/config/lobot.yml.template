@@ -1,0 +1,30 @@
+---
+ssh_port: 22
+master: <YOUR IP>
+server_ssh_key: ~/.ssh/id_rsa
+recipes:
+- pivotal_ci::jenkins
+- pivotal_ci::limited_travis_ci_environment
+- pivotal_ci
+cookbook_paths:
+- ./chef/cookbooks/
+- ./chef/travis-cookbooks/ci_environment
+node_attributes:
+  jenkins:
+    builds:
+    - name: micro
+      repository: git://github.com/cloudfoundry/micro.git
+      branch: master
+      command: micro/script/ci_build.sh
+  travis_build_environment:
+    user: jenkins
+    group: nogroup
+    home: /var/lib/jenkins
+  nginx:
+    basic_auth_user: <YOUR AUTH USER>
+    basic_auth_password: <YOUR AUTH PASSWORD>
+instance_size: c1.medium
+github_ssh_key: ~/.ssh/id_rsa
+aws_key: <YOUR AWS KEY>
+aws_secret: <YOUR AWS SECRET>
+instance_id: <YOUR AWS INSTANCE ID>

@@ -3,3 +3,4 @@ micro/public/assets/js/*.js
 micro/spec/micro/tmp/
 .idea
 micro/tmp
+lobot.yml
