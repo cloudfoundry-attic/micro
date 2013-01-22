@@ -75,6 +75,7 @@ module VCAP
 
       def admins=(admins)
         cc['admins'] = admins
+        cc['bootstrap_admin_email'] = admins[0]
       end
 
       def domain

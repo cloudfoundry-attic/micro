@@ -57,6 +57,8 @@ describe VCAP::Micro::ApplySpec do
 
     its(:admin) { should == 'foo@bar.com' }
 
+    its(:cc) { should include('bootstrap_admin_email' => 'foo@bar.com') }
+
     its(:domain) { should == 'test.com' }
 
     its(:env) { should include({
