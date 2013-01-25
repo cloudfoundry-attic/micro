@@ -48,7 +48,6 @@ module VCAP
                   config_file.write do |c|
                     c.name = dns_info['name']
                     c.cloud = dns_info['cloud']
-                    c.admin_email = dns_info['email']
                     c.token = dns_info['auth-token']
                     c.ip = ip
                   end

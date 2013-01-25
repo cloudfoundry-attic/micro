@@ -19,7 +19,6 @@ describe VCAP::Micro::ApplySpec do
       temp.unlink
 
       as = VCAP::Micro::ApplySpec.new(path)
-      as.admin = 'foo@bar.com'
       as.domain = 'test.com'
       as.http_proxy = 'http://proxy.test.com:1234'
 
@@ -54,10 +53,6 @@ describe VCAP::Micro::ApplySpec do
 
       VCAP::Micro::ApplySpec.new(path).read
     }
-
-    its(:admin) { should == 'foo@bar.com' }
-
-    its(:cc) { should include('bootstrap_admin_email' => 'foo@bar.com') }
 
     its(:domain) { should == 'test.com' }
 
@@ -104,7 +99,6 @@ describe VCAP::Micro::ApplySpec do
       as.properties['uaa'] = {}
 
       as.write do |a|
-        a.admin = 'foo@bar.com'
         a.domain = 'test.com'
         a.http_proxy = 'http://proxy.test.com:1234'
       end

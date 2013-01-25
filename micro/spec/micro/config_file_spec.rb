@@ -30,7 +30,6 @@ describe VCAP::Micro::ConfigFile do
 
       cf = VCAP::Micro::ConfigFile.new(path)
       cf.write do |c|
-        c.admin_email = 'foo@bar.com'
         c.api_host = 'test.com'
         c.cloud = 'cloud'
         c.ip = '192.168.0.1'
@@ -40,10 +39,6 @@ describe VCAP::Micro::ConfigFile do
 
       VCAP::Micro::ConfigFile.new(path)
     }
-
-    its(:admin_email) { should == 'foo@bar.com' }
-
-    its(:admin_emails) { should == ['foo@bar.com'] }
 
     its(:api_host) { should == 'test.com' }
 
@@ -68,7 +63,6 @@ describe VCAP::Micro::ConfigFile do
       cf.path = temp.path
 
       cf.write do |c|
-        c.admin_email = 'foo@bar.com'
         c.api_host = 'test.com'
         c.cloud = 'cloud'
         c.ip = '192.168.0.1'
@@ -78,10 +72,9 @@ describe VCAP::Micro::ConfigFile do
 
       orig_content = open(temp.path).read
 
-      begin
+      expect {
         cf.write { |c| raise 'derp' }
-      rescue Exception
-      end
+      }.to raise_error
 
       new_content = open(temp.path).read
 

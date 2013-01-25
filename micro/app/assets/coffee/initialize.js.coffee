@@ -37,13 +37,11 @@ window.initialize_micro_cloudfoundry = (mcf) ->
     if $('#initial-domain-private').is ':checked'
       $.extend data,
         name: $('#initial-domain-offline').val()
-        email: $('#initial-email').val()
     else if $('#initial-domain-public').is ':checked'
       data.token = $('#initial-domain-token').val()
 
   $('#admin-submit').on 'click', ->
     submit.call this, '#admin-bar', 'update_admin',
-      email: $('#email').val()
       password: $('#password').val()
 
   $('#domain-submit').on 'click', ->

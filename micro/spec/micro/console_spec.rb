@@ -67,33 +67,6 @@ describe VCAP::Micro::Console do
         console_output.should_not include "vmc target http://api.some_subdomain"
       end
 
-      it 'does not try to start the agent' do
-        VCAP::Micro::Agent.should_not_receive(:start)
-        subject
-      end
-    end
-
-    context 'when configured' do
-      let(:configured) { true }
-
-      it 'shows the configured configuration' do
-        input.write "5\n" #quit
-        input.rewind
-        VCAP::Micro::Agent.should_receive(:start)
-
-        subject
-
-        output.rewind
-        output.read.should include <<-CONSOLE.chomp.strip_heredoc
-        Current Configuration:
-         Identity:   some_subdomain (\e[0m\e[32mok\e[0m)
-         Admin:      none
-         IP Address: #{ip} (network up)
-
-        To access your Micro Cloud Foundry instance, use:
-        vmc target http://api.some_subdomain
-        CONSOLE
-      end
     end
 
     it 'catches and logs exceptions' do

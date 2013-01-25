@@ -72,7 +72,6 @@ module VCAP
 
         unless @token
           resp = auth
-          @admins = @config['admins'] = [ resp['email'] ]
           @cloud = @config['cloud'] = resp['cloud']
           @name = @config['name'] = resp['name']
           @token = @config['token'] = resp['auth-token']

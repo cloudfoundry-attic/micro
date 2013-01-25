@@ -12,7 +12,7 @@ describe("Mcf", function () {
       jasmine.Ajax.useMock();
       mcf.configured();
       request = mostRecentAjaxRequest();
-      request.response({status:500, responseText:""});
+      request.response({status: 500, responseText: ""});
 
       expect($('#global-error')).toBeVisible();
     });
@@ -43,49 +43,40 @@ describe("Mcf", function () {
     });
   });
 
-  describe(".initial_config", function() {
-    var mcf;
+  describe(".initial_config", function () {
+    var mcf, error, success, successCallThrough;
 
-    beforeEach(function() {
+    beforeEach(function () {
       mcf = new Mcf;
-    });
-
-    it("configures the administrator", function() {
-      spyOn(mcf, 'update_admin');
-
-      spyOn(mcf, 'update_network').andCallFake(function (data, callback, error_callback) {
+      success = jasmine.createSpy("successCallback");
+      error = jasmine.createSpy("errorCallback");
+      successCallThrough = function (data, callback, _) {
         callback();
-      });
+      };
 
-      mcf.initial_config({foo: 'bar', password: 'password', email: 'email@email.com'});
-      expect(mcf.update_admin).toHaveBeenCalledWith({password: 'password', email: 'email@email.com'}, jasmine.any(Function));
+      spyOn(mcf, 'update_domain').andCallFake(successCallThrough);
+      spyOn(mcf, 'update_network').andCallFake(successCallThrough);
+      spyOn(mcf, 'update_admin').andCallFake(successCallThrough);
     });
 
-    it("configures the domain", function() {
-      spyOn(mcf, 'update_domain');
-
-      spyOn(mcf, 'update_network').andCallFake(function (data, callback, error_callback) {
-        callback();
-      });
-
-      spyOn(mcf, 'update_admin').andCallFake(function (data, callback, error_callback) {
-        callback();
-      });
-
-      mcf.initial_config({foo: 'bar', name: 'domain', token: 'token'});
-
-      expect(mcf.update_domain).toHaveBeenCalledWith({name: 'domain', token: 'token'}, jasmine.any(Function));
+    it("configures the administrator", function () {
+      mcf.initial_config({foo: 'bar', password: 'password' }, success, error);
+      expect(mcf.update_admin).toHaveBeenCalledWith({password: 'password' }, jasmine.any(Function), error);
     });
 
-    it("configures the network", function() {
-      spyOn(mcf, 'update_network');
+    it("configures the domain", function () {
+      mcf.initial_config({foo: 'bar', name: 'domain', token: 'token'}, success, error);
 
-      mcf.initial_config({foo: 'bar', ip_address: 'ip_address', netmask: 'netmask', gateway: "gateway", nameservers: "nameservers", is_dhcp: false});
-      expect(mcf.update_network).toHaveBeenCalledWith({ip_address: 'ip_address', netmask: 'netmask', gateway: "gateway", nameservers: "nameservers", is_dhcp: false}, jasmine.any(Function));
+      expect(mcf.update_domain).toHaveBeenCalledWith({name: 'domain', token: 'token'}, jasmine.any(Function), error);
+      expect(success).toHaveBeenCalled();
     });
 
-    context("when an error occurs", function() {
+    it("configures the network", function () {
+      mcf.initial_config({foo: 'bar', ip_address: 'ip_address', netmask: 'netmask', gateway: "gateway", nameservers: "nameservers", is_dhcp: false}, success, error);
+      expect(mcf.update_network).toHaveBeenCalledWith({ip_address: 'ip_address', netmask: 'netmask', gateway: "gateway", nameservers: "nameservers", is_dhcp: false}, jasmine.any(Function), error);
     });
 
+    context("when an error occurs", function () {
+    });
   });
 });

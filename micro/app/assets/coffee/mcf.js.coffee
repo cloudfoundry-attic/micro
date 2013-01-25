@@ -20,9 +20,6 @@ window.Mcf = class Mcf
   load_data: (micro_cloud) =>
     @logger.info 'refreshing data'
 
-    @follow_link micro_cloud, 'administrator', null,
-      (admin) => @set_admin_email(admin.email)
-
     @follow_link micro_cloud, 'domain_name', null,
       (domain) => @set_domain(domain.name)
 
@@ -119,9 +116,6 @@ window.Mcf = class Mcf
       success: callback
       error: @handle_error(error_callback)
 
-  set_admin_email: (@admin_email) ->
-    $('.admin-email').text(@admin_email)
-
   set_domain: (@domain) ->
     $('.domain').text(@domain)
 
@@ -177,7 +171,7 @@ window.Mcf = class Mcf
 
     $.each data, (key, value) ->
       type = switch key
-        when 'password', 'email' then 'admin'
+        when 'password' then 'admin'
         when 'name', 'token' then 'domain'
         when 'ip_address', 'netmask', 'gateway', 'nameservers', 'is_dhcp' then 'network'
         else 'other'

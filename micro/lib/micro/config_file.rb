@@ -49,22 +49,6 @@ module VCAP
         "#{name}.#{cloud}"
       end
 
-      def admin_emails
-        @config.fetch('admins', [])
-      end
-
-      def admin_emails=(admin_emails)
-        @config['admins'] = admin_emails
-      end
-
-      def admin_email
-        admin_emails[0]
-      end
-
-      def admin_email=(email)
-        self.admin_emails = [email]
-      end
-
       def api_host
         @config['api_host'] ||= 'mcapi.cloudfoundry.com'
       end

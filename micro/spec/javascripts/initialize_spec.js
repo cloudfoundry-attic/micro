@@ -59,7 +59,6 @@ describe("initialize", function () {
           '<input type="radio" id="initial-domain-private" name="domain">' +
           '<input type="text" id="initial-domain-token" value="token">' +
           '<input type="text" id="initial-domain-offline" value="domain">' +
-          '<input type="email" id="initial-email" value="email">' +
           '<input type="radio" id="initial-network-dhcp" name="network">' +
           '<input type="radio" id="initial-network-static" name="network" checked>' +
           '<input type="text" id="initial-ip-address" class="static" value="ip">' +
@@ -129,7 +128,6 @@ describe("initialize", function () {
           expect(mcf.initial_config).toHaveBeenCalledWith({
             password:"password",
             name:"domain",
-            email:"email",
             ip:"ip",
             netmask:"netmask",
             gateway:"gateway",
@@ -243,7 +241,6 @@ describe("initialize", function () {
       $('#jasmine_content').html(
         '<button id="admin-submit" type="button" class="btn">Submit</button>' +
           '<div id="global-error" style="display: none"></div>' +
-          '<input id="email" value="some_email"> ' +
           '<input id="password" value="some_password"> ' +
           '<div class="progress progress-striped active"><div class="bar" style="width: 0;" id="admin-bar"></div></div>'
       );
@@ -269,9 +266,9 @@ describe("initialize", function () {
         expect($('#admin-submit')).toBeDisabled();
       });
 
-      it("should updates the users email and password", function () {
+      it("should updates the users password", function () {
         $('#admin-submit').click();
-        expect(mcf.update_admin).toHaveBeenCalledWith({email:"some_email", password:"some_password"}, jasmine.any(Function), jasmine.any(Function));
+        expect(mcf.update_admin).toHaveBeenCalledWith({password:"some_password"}, jasmine.any(Function), jasmine.any(Function));
       });
     });
 

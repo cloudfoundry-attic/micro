@@ -18,11 +18,9 @@ module VCAP
           def initialize(fields={})
             super fields
 
-            @email = fields[:email]
             @password = fields[:password]
           end
 
-          attr_accessor :email
           attr_accessor :password
         end
 

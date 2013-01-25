@@ -61,23 +61,6 @@ module VCAP
         properties['env'] ||= {}
       end
 
-      def admin
-        admins[0]
-      end
-
-      def admin=(admin)
-        self.admins = [admin]
-      end
-
-      def admins
-        cc['admins']
-      end
-
-      def admins=(admins)
-        cc['admins'] = admins
-        cc['bootstrap_admin_email'] = admins[0]
-      end
-
       def domain
         properties['domain']
       end

@@ -2,11 +2,9 @@ require 'logger'
 
 require 'micro/network'
 require 'micro/identity'
-require 'micro/agent'
 require 'micro/settings'
 require 'micro/watcher'
 require 'micro/version'
-require 'micro/memory'
 require 'micro/proxy'
 require 'micro/core_ext'
 require 'micro/dns'
@@ -43,14 +41,12 @@ module VCAP
         @proxy = Proxy.new
         @identity = Identity.new(@proxy)
         @network = Network.new
-        @memory = Memory.new
         @watcher = Watcher.new(@network, @identity)
         @svcmgr = ServiceManager.new
         @watcher.start
       end
 
       def console
-        VCAP::Micro::Agent.start if @identity.configured?
         # TODO add a timeout so the console will be auto-refreshed
         while @run
           clear

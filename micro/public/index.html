@@ -63,9 +63,6 @@
                   <div class="accordion-inner">
                     <label>Offline domain name</label>
                     <input type="text" id="initial-domain-offline">
-
-                    <label>Email</label>
-                    <input type="email" id="initial-email">
                   </div>
                 </div>
               </div>
@@ -374,15 +371,12 @@
 	      <div class="tab-pane" id="account">
 		<form>
 		  <fieldset>
-		    <p>The Micro Cloud user with this email address will have administrator privileges.</p>
-		    <p>Current email: <span class="admin-email"></span></p>
-		    <label>Email</label>
-		    <input type="text" placeholder="Email" id="email">
-		    <p>This password is used for Micro Cloud Foundry shell access.</p>
-		    <label>Password</label>
-		    <input type="password" id="password">
-		    <label></label>
-		    <button id="admin-submit" type="button" class="btn">Submit</button>
+		    <p>The Micro Cloud uses the "<i>micro@vmware.me</i>" account as the VMC admin. The password is "<i>micro</i>". The password is changeable with VMC if necessary.</p>
+            <p>This password is used for Micro Cloud Foundry shell access.</p>
+            <label>Password</label>
+            <input type="password" id="password">
+            <label></label>
+            <button id="admin-submit" type="button" class="btn">Submit</button>
 		  </fieldset>
 		</form>
 

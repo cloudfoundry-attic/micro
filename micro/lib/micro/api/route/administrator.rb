@@ -12,11 +12,7 @@ module VCAP
           def self.registered(app)
 
             app.get '/administrator' do
-              config_file = ConfigFile.new
-
-              administrator = MediaType::Administrator.new(
-                :email => config_file.admin_email,
-              )
+              administrator = MediaType::Administrator.new
 
               administrator.link(:self, request.url)
               administrator.link(:microcloud, url('/'))
@@ -28,28 +24,8 @@ module VCAP
 
               administrator = env['media_type_object']
 
-              if administrator
-                if administrator.password
-                  `echo "root:#{administrator.password}\nvcap:#{administrator.password}" | chpasswd`
-                end
-
-                if !administrator.email.to_s.empty?
-                  if !Micro::InternetConnection.new.connected?
-                    config_file = ConfigFile.new
-                    config_file.write do |c|
-                      c.admin_email = administrator.email
-                    end
-
-                    spec = ApplySpec.new.read
-                    spec.write do |s|
-                      s.admin = administrator.email
-                    end
-
-                    BoshWrapper.new.apply_spec(spec.spec)
-                  else
-                    halt 400, 'Cannot set administrator email when connected to the internet'
-                  end
-                end
+              if administrator && administrator.password
+                `echo "root:#{administrator.password}\nvcap:#{administrator.password}" | chpasswd`
               end
             end
 
