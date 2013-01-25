@@ -107,6 +107,8 @@ module VCAP
                     'auth-token' => config_file.token)
                 end
               end
+
+              ''
             end
           end
         end
