@@ -64,7 +64,7 @@ task :build_stemcell, role: :build do
     'export UBUNTU_MIRROR=http://localhost:9999/ubuntu',
     'LATEST_RELEASE=`ls -t ~/workspace/cf-release/dev_releases/bosh-release-*-dev.tgz | head -1`',
     'cd ~/workspace/bosh/agent',
-    'bundle exec rake stemcell2:mcf[vsphere,~/workspace/cf-release/micro/manifest.yml,$LATEST_RELEASE]'
+    'bundle exec rake stemcell2:mcf[vsphere,~/workspace/micro/deploy/manifest.yml,$LATEST_RELEASE]'
   ])
 
   build_host = find_servers_for_task(current_task)[0]
