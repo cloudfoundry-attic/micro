@@ -2,7 +2,7 @@ require 'capistrano_colors'
 
 load 'deploy'
 role :build, ENV['BUILD_SERVER']
-set :user, 'mmb'
+set :user, 'pivotal'
 set :ssh_options, {:forward_agent => true}
 set :bundle_install, "(bundle check || bundle install || true)"
 
