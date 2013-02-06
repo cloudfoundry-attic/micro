@@ -14,14 +14,14 @@ end
 
 desc "rsync code to build VM."
 task :rsync_code do
-  run_locally "rsync -e ssh -az --delete '#{ENV['WORKSPACE']}/' mmb@#{ENV['BUILD_SERVER']}:~/workspace/"
+  run_locally "rsync -e ssh -az --delete '#{ENV['WORKSPACE']}/' pivotal@#{ENV['BUILD_SERVER']}:~/workspace/"
 end
 
 desc 'Clean up build debris.'
 task :clean, role: :build do
   # TODO add /tmp
   sudo "rm -rf /var/tmp/bosh/agent-*"
-  sudo "rm -rf ~mmb/workspace/bosh/agent/mcf/*"
+  sudo "rm -rf ~pivotal/workspace/bosh/agent/mcf/*"
 end
 
 desc 'Update the bosh_cli gem.'
@@ -69,7 +69,7 @@ task :build_stemcell, role: :build do
 
   build_host = find_servers_for_task(current_task)[0]
   zip_name = File.basename("/tmp/micro-#{version}.zip")
-  zip_path = "mmb@#{build_host}:~/workspace/bosh/agent/mcf/#{build_time}/#{zip_name}"
+  zip_path = "pivotal@#{build_host}:~/workspace/bosh/agent/mcf/#{build_time}/#{zip_name}"
   run_locally "scp #{zip_path} '#{ENV['WORKSPACE']}/micro.zip'"
 end
 
