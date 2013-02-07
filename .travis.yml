@@ -1,4 +1,4 @@
-script: "cd micro && rake spec"
+script: "cd micro && bundle exec rake spec"
 rvm:
   - 1.9.2
   - 1.9.3
