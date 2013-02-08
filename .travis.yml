@@ -1,4 +1,5 @@
 script: "cd micro && bundle exec rake spec"
+gemfile: micro/Gemfile
 rvm:
   - 1.9.2
   - 1.9.3
