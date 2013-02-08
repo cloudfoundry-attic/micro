@@ -1,4 +1,4 @@
-script: "cd micro && bundle exec rake spec"
+script: "cd micro && bundle exec rake spec jasmine:ci"
 gemfile: micro/Gemfile
 rvm:
   - 1.9.2

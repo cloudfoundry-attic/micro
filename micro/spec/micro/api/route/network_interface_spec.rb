@@ -70,6 +70,8 @@ describe VCAP::Micro::Api::Route::NetworkInterface do
     context 'when the interface has no name' do
       let(:params) { valid_params.delete('name'); valid_params }
 
+      before { VCAP::Micro::NetworkInterfacesFile.any_instance.stub(:write) }
+
       it 'should default to eth0' do
         VCAP::Micro.should_receive(:shell_raiser).with("ifdown eth0")
         subject
