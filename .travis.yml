@@ -1,5 +1,8 @@
 script: "cd micro && bundle exec rake spec assets:precompile jasmine:ci"
 gemfile: micro/Gemfile
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
 rvm:
   - 1.9.2
   - 1.9.3
