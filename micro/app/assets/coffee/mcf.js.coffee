@@ -14,11 +14,14 @@
 window.Mcf = class Mcf
 
   constructor: (@json_root) ->
-    @logger = new Logger($('#terminal'))
+    @logger = console || {
+      log: -> null
+      error: -> null
+    }
 
   # Load all data from the API.
   load_data: (micro_cloud) =>
-    @logger.info 'refreshing data'
+    @logger.log 'refreshing data'
 
     @follow_link micro_cloud, 'domain_name', null,
       (domain) => @set_domain(domain.name)
@@ -84,12 +87,12 @@ window.Mcf = class Mcf
         (services) =>
           [match] = (service for service in services.services when service.name == name)
           @follow_link match, 'edit', { enabled: enabled }, =>
-            @logger.info "#{name} service #{if enabled then 'enabled' else 'disabled'}"
+            @logger.log "#{name} service #{if enabled then 'enabled' else 'disabled'}"
             @refresh_services(micro_cloud)
 
   # Shut down the Micro Cloud VM.
   shutdown: ->
-    @logger.info 'shutting down'
+    @logger.log 'shutting down'
     @update_micro_cloud { is_powered_on: false }
 
   # Frequently used code path for an edit link on level below the

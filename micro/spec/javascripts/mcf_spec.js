@@ -6,6 +6,10 @@ describe("Mcf", function () {
       mcf = new Mcf;
     });
 
+    it("has a logger", function() {
+      expect(mcf.logger).toBeDefined();
+    });
+
     it("should show an error div if the ajax request fails", function () {
       $('#jasmine_content').html("<div id='global-error'></div>");
       expect($('#global-error')).not.toBeVisible();
