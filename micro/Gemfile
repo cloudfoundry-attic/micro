@@ -4,7 +4,6 @@ source :rubygems
 gem 'rake'
 gem 'nats'
 gem 'netaddr'
-gem 'blobstore_client', '~> 0.3.13'
 gem 'posix-spawn'
 gem 'ruby-atmos-pure'
 gem 'sigar', '>=0.7.2'
@@ -15,11 +14,13 @@ gem 'agent_client'
 gem 'bosh_common'
 gem 'rest-client'
 gem 'ruby-graphviz'
+gem 'cfoundry', '~> 0.5.0'
 
 git 'git://github.com/cloudfoundry/bosh.git' do
   gem 'monit_api'
   gem 'bosh_encryption'
-  gem 'bosh_agent', require: 'agent'
+  gem 'bosh_agent'
+  gem 'blobstore_client'
 end
 
 group :console do

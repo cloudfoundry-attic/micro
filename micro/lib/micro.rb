@@ -3,6 +3,7 @@ require 'micro/service_config'
 
 require 'micro/api'
 require 'micro/apply_spec'
+require 'micro/client'
 require 'micro/config_file'
 require 'micro/commenter'
 require 'micro/console'

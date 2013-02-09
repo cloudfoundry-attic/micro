@@ -34,11 +34,14 @@ module VCAP
 
                 ip = Micro.local_ip
 
+                api_host = spec.cc['srv_api_uri']
+
                 if !domain_name.token.to_s.empty?
                   InternetConnection.new.set_connected
 
+
                   dns_api_client = DnsApiClient.new(
-                    :root_url => "https://#{config_file.api_host}/api/v1/micro",
+                    :root_url => "#{api_host}/api/v1/micro",
                     :http_proxy => http_proxy)
 
                   dns_info = dns_api_client.redeem_nonce(domain_name.token)
@@ -50,6 +53,7 @@ module VCAP
                     c.cloud = dns_info['cloud']
                     c.token = dns_info['auth-token']
                     c.ip = ip
+                    c.api_host = api_host
                   end
 
                   new_domain_name = config_file.subdomain
@@ -65,6 +69,7 @@ module VCAP
                   config_file.write do |c|
                     c.name, c.cloud = domain_name.name.split('.', 2)
                     c.ip = ip
+                    c.api_host = api_host
                   end
 
                   InternetConnection.new.set_disconnected
@@ -93,12 +98,13 @@ module VCAP
                 config_file = ConfigFile.new
 
                 config_file.write do |c|
-                    c.ip = Micro.local_ip
+                  c.ip = Micro.local_ip
+                  c.api_host = api_host
                 end
 
                 if config_file.token
                   dns_api_client = DnsApiClient.new(
-                    :root_url => "https://#{config_file.api_host}/api/v1/micro",
+                    :root_url => "https://#{api_host}/api/v1/micro",
                     :http_proxy => http_proxy)
 
                   dns_api_client.update_dns(config_file.ip,

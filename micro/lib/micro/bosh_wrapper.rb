@@ -96,7 +96,7 @@ module VCAP
       # Restart all services.
       def restart_services
         stop_services_and_wait
-        start_services
+        start_services_and_wait
       end
 
       # Create an HTTP client for the Bosh agent.
@@ -109,8 +109,8 @@ module VCAP
       # Apply an apply spec using the Bosh agent client.
       def apply_spec(spec)
         agent_client.run_task(:apply, spec)
-
         restart_services
+        Client.new.create_org_and_space
       end
 
       # Reload monitor.

@@ -1,35 +1,42 @@
 GIT
   remote: git://github.com/cloudfoundry/bosh.git
-  revision: d2058f1b0e4fa9104a284dc05042465e96d4e899
+  revision: 78f26a1fcdae786fd44545e5fd4b80cd56f5d030
   specs:
-    agent_client (0.1.1)
-      httpclient
-      yajl-ruby
-    bosh_agent (0.7.0)
-      blobstore_client
-      bosh_common
-      bosh_encryption
-      highline
-      monit_api
+    blobstore_client (1.5.0.pre)
+      aws-sdk (~> 1.8.0)
+      bosh_common (~> 1.5.0.pre)
+      fog (~> 1.9.0)
+      httpclient (= 2.2.4)
+      multi_json (~> 1.1)
+      ruby-atmos-pure (~> 1.0.5)
+      uuidtools (~> 2.1.2)
+    bosh_agent (1.5.0.pre)
+      blobstore_client (~> 1.5.0.pre)
+      bosh_common (~> 1.5.0.pre)
+      bosh_encryption (~> 1.5.0.pre)
+      highline (~> 1.6.2)
+      httpclient (= 2.2.4)
+      monit_api (~> 1.5.0.pre)
       nats (~> 0.4.28)
-      netaddr
-      posix-spawn
-      ruby-atmos-pure
+      netaddr (~> 1.5.0)
+      posix-spawn (~> 0.3.6)
+      ruby-atmos-pure (~> 1.0.5)
       sigar (>= 0.7.2)
       sinatra (~> 1.2.8)
-      thin
-      uuidtools
-      yajl-ruby
-    bosh_encryption (0.0.4)
+      thin (~> 1.5.0)
+      uuidtools (~> 2.1.3)
+      yajl-ruby (~> 1.1.0)
+    bosh_common (1.5.0.pre)
+    bosh_encryption (1.5.0.pre)
       gibberish (~> 1.2.0)
-      uuidtools (~> 2.1.2)
-      yajl-ruby
-    monit_api (1.0.2)
-      crack
+      uuidtools (~> 2.1.3)
+      yajl-ruby (~> 1.1.0)
+    monit_api (1.5.0.pre)
+      crack (~> 0.3.2)
 
 GIT
   remote: git://github.com/pivotal/lobot.git
-  revision: 927bca39678be387237e7434bd89242d98b7c8a1
+  revision: ce029e129b5de405bdb86beb4ab1096635f185a2
   submodules: true
   specs:
     lobot (2.0.1.pre)
@@ -43,21 +50,24 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
-    aws-s3 (0.6.3)
-      builder
-      mime-types
-      xml-simple
-    blobstore_client (0.3.13)
-      aws-s3 (~> 0.6.2)
-      httpclient (>= 2.2)
-      multi_json (~> 1.1.0)
-      ruby-atmos-pure (~> 1.0.5)
-      uuidtools (~> 2.1.2)
-    bosh_common (0.5.4)
+    agent_client (0.1.1)
+      httpclient
+      yajl-ruby
+    aws-sdk (1.8.1.2)
+      json (~> 1.4)
+      nokogiri (>= 1.4.4)
+      uuidtools (~> 2.1)
     builder (3.1.4)
+    cf-uaa-lib (1.3.7)
+      multi_json
+    cfoundry (0.5.0)
+      cf-uaa-lib (~> 1.3.3)
+      multi_json (~> 1.3)
+      multipart-post (~> 1.1)
+      rubyzip (~> 0.9)
     childprocess (0.3.7)
       ffi (~> 1.0, >= 1.0.6)
-    ci_reporter (1.8.3)
+    ci_reporter (1.8.4)
       builder (>= 2.1.2)
     coffee-script (2.2.0)
       coffee-script-source
@@ -87,7 +97,7 @@ GEM
     hashie (1.2.0)
     highline (1.6.15)
     hike (1.2.1)
-    httpclient (2.3.2)
+    httpclient (2.2.4)
     jasmine (1.3.0)
       jasmine-core (>= 1.3.0)
       rack (~> 1.0)
@@ -98,21 +108,22 @@ GEM
     json_pure (1.7.6)
     libv8 (3.11.8.13)
     log4r (1.1.10)
-    mime-types (1.19)
-    multi_json (1.1.0)
+    mime-types (1.20.1)
+    multi_json (1.5.0)
+    multipart-post (1.1.5)
     nats (0.4.28)
       daemons (>= 1.1.5)
       eventmachine (= 0.12.10)
       json_pure (>= 1.7.3)
       thin (>= 1.4.1)
-    net-scp (1.0.4)
-      net-ssh (>= 1.99.1)
-    net-ssh (2.6.3)
+    net-scp (1.0.6)
+      net-ssh (>= 2.6.5)
+    net-ssh (2.6.5)
     netaddr (1.5.0)
     nokogiri (1.5.6)
     posix-spawn (0.3.6)
     progressbar (0.12.0)
-    rack (1.5.0)
+    rack (1.5.1)
     rack-rewrite (1.3.3)
     rack-test (0.6.2)
       rack (>= 1.0)
@@ -128,7 +139,7 @@ GEM
     rspec-core (2.12.2)
     rspec-expectations (2.12.1)
       diff-lcs (~> 1.1.3)
-    rspec-mocks (2.12.1)
+    rspec-mocks (2.12.2)
     ruby-atmos-pure (1.0.5)
       log4r (>= 1.1.9)
       ruby-hmac (>= 0.4.0)
@@ -171,8 +182,7 @@ GEM
       execjs (>= 0.3.0)
       multi_json (~> 1.0, >= 1.0.2)
     uuidtools (2.1.3)
-    websocket (1.0.6)
-    xml-simple (1.1.2)
+    websocket (1.0.7)
     yajl-ruby (1.1.0)
 
 PLATFORMS
@@ -180,10 +190,11 @@ PLATFORMS
 
 DEPENDENCIES
   agent_client
-  blobstore_client (~> 0.3.13)
+  blobstore_client!
   bosh_agent!
   bosh_common
   bosh_encryption!
+  cfoundry (~> 0.5.0)
   ci_reporter
   coffee-script
   execjs
