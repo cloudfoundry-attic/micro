@@ -57,5 +57,4 @@ group :development do
   gem 'jasmine', '= 1.3.0'
   gem 'execjs'
   gem 'therubyracer'
-  gem 'lobot', :git => 'git://github.com/pivotal/lobot.git', :submodules => true
 end
