@@ -53,6 +53,12 @@ task :build_stemcell, role: :build do
   build_time = Time.now.strftime('%Y%m%d.%H%M%S')
   version = "v-#{build_time}"
 
+  if ENV["USE_NG"]
+    manifest = '~/workspace/micro/deploy/manifest-ng.yml'
+  else
+    manifest = '~/workspace/micro/deploy/manifest.yml'
+  end
+
   run_commands([
     "export BUILD_TIME=#{build_time}",
     "export MCF_VERSION=#{version}",
@@ -60,11 +66,6 @@ task :build_stemcell, role: :build do
     'export UBUNTU_MIRROR=http://localhost:9999/ubuntu',
     'LATEST_RELEASE=`ls -t ~/workspace/cf-release/dev_releases/bosh-release-*-dev.tgz | head -1`',
     'cd ~/workspace/bosh/bosh_agent',
-    if ENV["USE_NG"]
-      manifest = '~/workspace/micro/deploy/manifest-ng.yml'
-    else
-      manifest = '~/workspace/micro/deploy/manifest.yml'
-    end
     "bundle exec rake stemcell:mcf[vsphere,#{manifest},$LATEST_RELEASE]"
   ])
 
