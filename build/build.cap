@@ -31,7 +31,7 @@ task :update_gems, role: :build do
     bundle_install,
     'bundle exec rake assets:precompile',
 
-    "cd ~/workspace/bosh/agent",
+    "cd ~/workspace/bosh/bosh_agent",
     'gem update bosh_cli',
     bundle_install
   ])
@@ -59,8 +59,13 @@ task :build_stemcell, role: :build do
     'export UBUNTU_ISO=~/ubuntu-10.04.4-server-amd64.iso',
     'export UBUNTU_MIRROR=http://localhost:9999/ubuntu',
     'LATEST_RELEASE=`ls -t ~/workspace/cf-release/dev_releases/bosh-release-*-dev.tgz | head -1`',
-    'cd ~/workspace/bosh/agent',
-    'bundle exec rake stemcell2:mcf[vsphere,~/workspace/micro/deploy/manifest.yml,$LATEST_RELEASE]'
+    'cd ~/workspace/bosh/bosh_agent',
+    if ENV["USE_NG"]
+      manifest = '~/workspace/micro/deploy/manifest-ng.yml'
+    else
+      manifest = '~/workspace/micro/deploy/manifest.yml'
+    end
+    "bundle exec rake stemcell:mcf[vsphere,#{manifest},$LATEST_RELEASE]"
   ])
 
   build_host = find_servers_for_task(current_task)[0]
