@@ -74,7 +74,7 @@ task :build_stemcell, role: :build do
 
   build_host = find_servers_for_task(current_task)[0]
   zip_name = File.basename("/tmp/micro-#{version}.zip")
-  zip_path = "pivotal@#{build_host}:~/workspace/bosh/agent/mcf/#{build_time}/#{zip_name}"
+  zip_path = "pivotal@#{build_host}:~/workspace/bosh/bosh_agent/mcf/#{build_time}/#{zip_name}"
   run_locally "scp #{zip_path} '#{ENV['WORKSPACE']}/micro.zip'"
 end
 
