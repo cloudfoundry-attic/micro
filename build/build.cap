@@ -27,6 +27,7 @@ end
 desc 'Update the bosh_cli gem.'
 task :update_gems, role: :build do
   run_commands([
+    'source "$HOME/.rvm/scripts/rvm"',
     "cd ~/workspace/micro/micro",
     bundle_install,
     'bundle exec rake assets:precompile',
