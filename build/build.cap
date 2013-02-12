@@ -60,6 +60,7 @@ task :build_stemcell, role: :build do
   end
 
   run_commands([
+    'source "$HOME/.rvm/scripts/rvm"',
     "export BUILD_TIME=#{build_time}",
     "export MCF_VERSION=#{version}",
     'export UBUNTU_ISO=~/ubuntu-10.04.4-server-amd64.iso',
