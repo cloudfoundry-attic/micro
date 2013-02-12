@@ -5,6 +5,7 @@ role :build, ENV['BUILD_SERVER']
 set :user, 'pivotal'
 set :ssh_options, {:forward_agent => true}
 set :bundle_install, "(bundle check || bundle install || true)"
+set :default_shell, 'bash -l'
 
 #ssh_options[:keys] = '/var/lib/jenkins/.ssh/id_rsa'
 
@@ -27,7 +28,7 @@ end
 desc 'Update the bosh_cli gem.'
 task :update_gems, role: :build do
   run_commands([
-    '$HOME/.rvm/scripts/rvm',
+    '. "$HOME/.rvm/scripts/rvm"',
     "cd ~/workspace/micro/micro",
     bundle_install,
     'bundle exec rake assets:precompile',
@@ -61,7 +62,7 @@ task :build_stemcell, role: :build do
   end
 
   run_commands([
-    '$HOME/.rvm/scripts/rvm',
+    '. "$HOME/.rvm/scripts/rvm"',
     "export BUILD_TIME=#{build_time}",
     "export MCF_VERSION=#{version}",
     'export UBUNTU_ISO=~/ubuntu-10.04.4-server-amd64.iso',
