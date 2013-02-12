@@ -15,6 +15,9 @@ end
 
 desc "rsync code to build VM."
 task :rsync_code do
+  run_commands([
+    'sudo rm -rf ~pivotal/workspace/bosh/mcf'
+  ])
   run_locally "rsync -e ssh -az --delete '#{ENV['WORKSPACE']}/' pivotal@#{ENV['BUILD_SERVER']}:~/workspace/"
 end
 
