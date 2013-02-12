@@ -27,7 +27,7 @@ end
 desc 'Update the bosh_cli gem.'
 task :update_gems, role: :build do
   run_commands([
-    'source "$HOME/.rvm/scripts/rvm"',
+    '. ~/.bash_profile',
     "cd ~/workspace/micro/micro",
     bundle_install,
     'bundle exec rake assets:precompile',
@@ -61,7 +61,7 @@ task :build_stemcell, role: :build do
   end
 
   run_commands([
-    'source "$HOME/.rvm/scripts/rvm"',
+    '. ~/.bash_profile',
     "export BUILD_TIME=#{build_time}",
     "export MCF_VERSION=#{version}",
     'export UBUNTU_ISO=~/ubuntu-10.04.4-server-amd64.iso',
