@@ -31,7 +31,7 @@ module VCAP
                   :data => JSON.parse(request.body.read)
                 }.to_json
 
-                env['media_type_object'] = JSON.parse!(new_json)
+                env['media_type_object'] = JSON.parse(new_json, :create_additions => true)
               end
 
               status, headers, response = @app.call(env)

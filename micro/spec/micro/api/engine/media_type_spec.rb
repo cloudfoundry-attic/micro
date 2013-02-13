@@ -101,7 +101,7 @@ describe VCAP::Micro::Api::Engine::MediaType do
         }
       }.to_json
 
-      JSON.parse(json)
+      JSON.parse(json, :create_additions => true)
     end
 
     it { should be_a TestMediaType3 }
