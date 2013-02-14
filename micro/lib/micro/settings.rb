@@ -38,14 +38,6 @@ module VCAP
         properties['ccdb_ng']['roles'].find {
           |role| role['tag'] == 'admin' }['password'] = ccdb_password
 
-        acmdb_password = secret(8)
-        properties['ccdb']['roles'].find {
-          |role| role['tag'] == 'acm' }['password'] = acmdb_password
-        properties['ccdb_ng']['roles'].find {
-          |role| role['tag'] == 'acm' }['password'] = acmdb_password
-        properties['acmdb']['roles'].find {
-          |role| role['tag'] == 'admin' }['password'] = acmdb_password
-
         uaadb_password = secret(8)
         properties['ccdb']['roles'].find {
           |role| role['tag'] == 'uaa' }['password'] = uaadb_password
@@ -66,9 +58,6 @@ module VCAP
         properties['postgresql_node']['admin_passwd_hash'] = properties['postgresql_gateway']['admin_passwd_hash']
 
         randomize_password(properties, 'rabbit_gateway', 'token', 64)
-
-        randomize_password(properties, 'acm', 'user', 16)
-        randomize_password(properties, 'acm', 'password', 16)
 
         randomize_password(properties, 'serialization_data_server',
           'upload_token', 32)

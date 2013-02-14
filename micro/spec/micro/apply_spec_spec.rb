@@ -24,7 +24,6 @@ describe VCAP::Micro::ApplySpec do
 
       as.properties['ccdb'] = {
         'roles' => [
-                    { 'tag' => 'acm' },
                     { 'tag' => 'admin' },
                     { 'tag' => 'uaa' },
                    ]
@@ -32,12 +31,6 @@ describe VCAP::Micro::ApplySpec do
 
       as.properties['ccdb_ng'] = as.properties['ccdb'].dup
 
-      as.properties['acmdb'] = {
-        'roles' => [
-                    { 'tag' => 'admin' },
-                    { 'tag' => 'acm' },
-                   ],
-      }
       as.properties['uaadb'] = {
         'roles' => [
                     { 'tag' => 'admin' },
@@ -74,19 +67,12 @@ describe VCAP::Micro::ApplySpec do
 
       as.properties['ccdb'] = {
         'roles' => [
-                    { 'tag' => 'acm' },
                     { 'tag' => 'admin' },
                     { 'tag' => 'uaa' },
                    ]
       }
       as.properties['ccdb_ng'] = as.properties['ccdb'].dup
 
-      as.properties['acmdb'] = {
-        'roles' => [
-                    { 'tag' => 'admin' },
-                    { 'tag' => 'acm' },
-                   ],
-      }
       as.properties['uaadb'] = {
         'roles' => [
                     { 'tag' => 'admin' },
