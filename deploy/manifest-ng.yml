@@ -9,7 +9,7 @@ jobs:
   template:
   - postgres
   - nats
-  - router
+  - gorouter
   - dea_next
   - health_manager_next
   - cloud_controller_ng
