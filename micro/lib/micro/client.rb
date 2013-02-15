@@ -22,6 +22,10 @@ module VCAP
         @client ||= CFoundry::Client.new(target)
       end
 
+      def v2?
+        client.is_a?(CFoundry::V2::Client)
+      end
+
       def target
         @target ||= micro_config.api_host
       end
@@ -41,10 +45,12 @@ module VCAP
       end
 
       def find_space
+        return unless v2?
         client.space_by_name(SPACE_NAME)
       end
 
       def create_space
+        return unless v2?
         space = client.space
         space.name = SPACE_NAME
         space.organization = organization
@@ -59,10 +65,12 @@ module VCAP
       end
 
       def find_org
+        return unless v2?
         client.organization_by_name(ORG_NAME)
       end
 
       def create_org
+        return unless v2?
         org = client.organization
         org.name = ORG_NAME
         org.create!
@@ -72,16 +80,19 @@ module VCAP
       end
 
       def domain
+        return unless v2?
         @domain ||= space.domain_by_name(micro_config.subdomain)
       end
 
       def find_route(host_name)
+        return unless v2?
         client.routes_by_host(host_name, :depth => 0).find do |r|
           r.domain = domain
         end
       end
 
       def create_route(host_name)
+        return unless v2?
         route = client.route
         route.host = host_name
         route.space = space
@@ -97,7 +108,7 @@ module VCAP
         unless app
           app = client.app
           app.name = manifest[:name]
-          app.space = space
+          app.space = space if v2?
           app.total_instances = 1
 
           app.framework = client.framework_by_name(manifest[:framework])
@@ -108,8 +119,13 @@ module VCAP
         end
 
         logger.info('Mapping url')
-        new_route = find_route(manifest[:name]) || create_route(manifest[:name])
-        app.add_route(new_route)
+        if v2?
+          new_route = find_route(manifest[:name]) || create_route(manifest[:name])
+          app.add_route(new_route)
+        else
+          app.urls << "#{manifest[:name]}.#{micro_config.subdomain}"
+          app.update!
+        end
 
         logger.info('Uploading docs app')
         app.upload(manifest[:path])
@@ -119,6 +135,7 @@ module VCAP
       end
 
       def create_org_and_space
+        return unless v2?
         login
         create_org
         create_space
