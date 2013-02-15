@@ -42,6 +42,22 @@ task :update_gems, role: :build do
   ])
 end
 
+desc 'Install docs'
+task :install_docs, role: :build do
+  # Packages all required gems to stage app without internet
+  run_commands([
+    '. "$HOME/.rvm/scripts/rvm"',
+    'cd ~/workspace/micro/micro',
+    'rm -rf cf-docs',
+    'git clone git://github.com/cloudfoundry/cf-docs.git cf-docs',
+    'cd cf-docs',
+    'bundle package',
+    'cd vendor/cache',
+    'gem fetch bundler -v 1.2.1',
+    'gem fetch cf-runtime -v 0.0.2'
+  ])
+end
+
 desc 'Create Micro Cloud Foundry bosh release.'
 task :create_release, role: :build do
   commands = []
@@ -87,6 +103,7 @@ task :build do
 
   clean
   update_gems
+  install_docs
   create_release
   build_stemcell
 end

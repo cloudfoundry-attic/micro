@@ -110,7 +110,9 @@ module VCAP
       def apply_spec(spec)
         agent_client.run_task(:apply, spec)
         restart_services
-        Client.new.create_org_and_space
+        client = Client.new
+        client.create_org_and_space
+        client.push_docs_app
       end
 
       # Reload monitor.
