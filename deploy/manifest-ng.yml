@@ -14,7 +14,6 @@ jobs:
   - health_manager_next
   - cloud_controller_ng
   - serialization_data_server
-  - stager
   - uaa
   - vcap_redis
   - mongodb_node
@@ -115,7 +114,6 @@ properties:
       app_uris: 32
       services: 16
       apps: 16
-    new_stager_percent: 100
     staging_upload_user:
     staging_upload_password:
     uaa:
