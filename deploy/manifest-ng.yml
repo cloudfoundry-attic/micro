@@ -232,6 +232,8 @@ properties:
     cc:
       token_secret:
       client_secret:
+    client:
+      autoapprove: false
     admin:
       client_secret:
     login:
