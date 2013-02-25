@@ -7,7 +7,7 @@ STEMCELLS_DIR=${STEMCELLS_DIR:-/var/vcap/store/stemcells}
 RELEASES_DIR=${REPOS_DIR:-/var/vcap/store/releases}
 REPOS_DIR=${REPOS_DIR:-/var/vcap/store/repos}
 
-CF_RELEASE_BRANCH=${CF_RELEASE_BRANCH:-staging}
+CF_RELEASE_BRANCH=${CF_RELEASE_BRANCH:-master}
 CF_RELEASE_DIR=${CF_RELEASE_DIR:-$RELEASES_DIR/cf-release/$CF_RELEASE_BRANCH}
 MICRO_DIR=${MICRO_DIR:-${REPOS_DIR}/micro}
 BOSH_DIR=${BOSH_DIR:-${REPOS_DIR}/bosh}
@@ -35,14 +35,26 @@ if [[ ! -f ${ISO_NAME} ]]; then
 fi
 export UBUNTU_ISO=${STEMCELLS_DIR}/${ISO_NAME}
 
-sudo apt-get install apt-proxy
+sudo apt-get install --assume-yes \
+apt-proxy \
+build-essential \
+debootstrap \
+kpartx \
+libpq-dev \
+libssl-dev \
+libxml2-dev \
+libxslt-dev \
+libsqlite3-dev \
+zip \
+zlib1g-dev
+
 export UBUNTU_MIRROR=http://localhost:9999/ubuntu
 
 # Install a gem if $UPGRADE or if gem not yet installed
 function install_gem() {
   gem_name=$1
   if [[ ("${UPGRADE}X" != "X") || "$(gem list $gem_name | grep $gem_name)X" == "X" ]]; then
-    sudo gem install $gem_name --no-ri --no-rdoc
+    gem install $gem_name --no-ri --no-rdoc
   else
     echo gem $gem_name already installed
   fi
@@ -51,6 +63,9 @@ function install_gem() {
 install_gem linecache19
 install_gem therubyracer
 install_gem bosh_cli
+install_gem bundler
+
+$(which rbenv > /dev/null) && rbenv rehash || true
 
 if [[ ! -d ${CF_RELEASE_DIR} ]]; then
   echo "Cloning cf-release repository..."
@@ -94,7 +109,7 @@ rm -rf .bundle
 bundle install
 
 CPI=vsphere
-MANIFEST=${MICRO_DIR}/deploy/manifest.yml
+MANIFEST=${MANIFEST:-$MICRO_DIR/deploy/manifest.yml}
 LATEST_RELEASE=`ls -t ${CF_RELEASE_DIR}/dev_releases/*.tgz | head -1`
 
 bundle exec rake stemcell:mcf[$CPI,$MANIFEST,$LATEST_RELEASE]
