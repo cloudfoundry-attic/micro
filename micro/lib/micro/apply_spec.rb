@@ -7,10 +7,12 @@ module VCAP
     # Micro Cloud Foundry bosh apply spec.
     class ApplySpec
 
-      DEFAULT_PATH = '/var/vcap/micro/apply_spec.yml'
+      def self.default_path
+        "/var/vcap/micro/apply_spec.yml"
+      end
 
-      def initialize(path=DEFAULT_PATH)
-        @path = path
+      def initialize(path=nil)
+        @path = path || self.class.default_path
         @spec = {}
       end
 

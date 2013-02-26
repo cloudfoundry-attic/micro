@@ -87,10 +87,11 @@ describe VCAP::Micro::Client do
   before do
     CFoundry::Client.stub(:new) { cfoundry_client }
     VCAP::Micro::ConfigFile.stub(:new) { config }
+    VCAP::Micro::ApplySpec.stub(:default_path) { "spec/assets/apply_spec.yml" }
   end
 
   it 'creates client to host name from config file' do
-    CFoundry::Client.should_receive(:new).with('mcapi.cloudfoundry.com').and_return(cfoundry_client)
+    CFoundry::Client.should_receive(:new).with('http://api.englund.cloudfoundry.me').and_return(cfoundry_client)
     subject.client
   end
 

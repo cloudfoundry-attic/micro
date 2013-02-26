@@ -27,7 +27,7 @@ module VCAP
       end
 
       def target
-        @target ||= micro_config.api_host
+        @target ||= VCAP::Micro::ApplySpec.new.read.cc['srv_api_uri']
       end
 
       def login
