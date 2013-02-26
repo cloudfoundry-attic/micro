@@ -30,7 +30,7 @@ mkdir -p $RELEASES_DIR
 mkdir -p $REPOS_DIR
 
 # run Ubuntu release specific steps
-. #{UBUNTU_RELEASE}.sh
+. ${UBUNTU_RELEASE}.sh
 
 sudo apt-get install --assume-yes \
 build-essential \
@@ -40,6 +40,7 @@ libpq-dev \
 libssl-dev \
 libxml2-dev \
 libsqlite3-dev \
+libxslt-dev \
 zip \
 zlib1g-dev
 
