@@ -12,11 +12,11 @@ CF_RELEASE_DIR=${CF_RELEASE_DIR:-$RELEASES_DIR/cf-release/$CF_RELEASE_BRANCH}
 MICRO_DIR=${MICRO_DIR:-${REPOS_DIR}/micro}
 BOSH_DIR=${BOSH_DIR:-${REPOS_DIR}/bosh}
 
-CF_RELEASE_GIT=${CF_RELEASE_GIT:-git://github.com/cloudfoundry/cf-release.git}
-MICRO_GIT=${MICRO_GIT:-git://github.com/cloudfoundry/micro.git}
-BOSH_GIT=${BOSH_GIT:-git://github.com/cloudfoundry/bosh.git}
+CF_RELEASE_GIT=${CF_RELEASE_GIT:-https://github.com/cloudfoundry/cf-release.git}
+MICRO_GIT=${MICRO_GIT:-https://github.com/cloudfoundry/micro.git}
+BOSH_GIT=${BOSH_GIT:-https://github.com/cloudfoundry/bosh.git}
 
-ISO_NAME=${ISO_NAME:-ubuntu-10.04.4-server-amd64.iso}
+UBUNTU_RELEASE=`lsb_release -c -s`
 UPGRADE=${UPGRADE:-}
 
 if [[ "$(which ovftool)X" == "X" ]]; then
@@ -29,26 +29,26 @@ mkdir -p $STEMCELLS_DIR
 mkdir -p $RELEASES_DIR
 mkdir -p $REPOS_DIR
 
-cd ${STEMCELLS_DIR}
-if [[ ! -f ${ISO_NAME} ]]; then
-  wget http://releases.ubuntu.com/lucid/${ISO_NAME}
-fi
-export UBUNTU_ISO=${STEMCELLS_DIR}/${ISO_NAME}
+# run Ubuntu release specific steps
+. #{UBUNTU_RELEASE}.sh
 
 sudo apt-get install --assume-yes \
-apt-proxy \
 build-essential \
 debootstrap \
 kpartx \
 libpq-dev \
 libssl-dev \
 libxml2-dev \
-libxslt-dev \
 libsqlite3-dev \
 zip \
 zlib1g-dev
 
-export UBUNTU_MIRROR=http://localhost:9999/ubuntu
+cd ${STEMCELLS_DIR}
+if [[ ! -f ${ISO_NAME} ]]; then
+  wget http://releases.ubuntu.com/${UBUNTU_RELEASE}/${ISO_NAME}
+fi
+export UBUNTU_ISO=${STEMCELLS_DIR}/${ISO_NAME}
+
 
 # Install a gem if $UPGRADE or if gem not yet installed
 function install_gem() {
@@ -78,6 +78,7 @@ fi
 
 echo "Creating cf-release bosh release..."
 cd ${CF_RELEASE_DIR}
+# Remove when https://github.com/cloudfoundry/cf-release/pull/25 gets merged.
 sed -i 's#git@github.com:#https://github.com/#g' .gitmodules
 sed -i 's#git://github.com#https://github.com#g' .gitmodules
 ./update
