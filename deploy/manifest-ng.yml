@@ -270,6 +270,8 @@ properties:
     password:
     maxmemory: 500000000
   db: ccdb_ng
+  login:
+    enabled: false
   service_plans:
     mysql:
       free:

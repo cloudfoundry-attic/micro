@@ -265,3 +265,5 @@ properties:
           high_water: 1400
         configuration:
           capacity: 200
+  login:
+    enabled: false
