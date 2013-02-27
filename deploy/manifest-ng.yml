@@ -16,15 +16,15 @@ jobs:
   - serialization_data_server
   - uaa
   - vcap_redis
-  - mongodb_node
+  - mongodb_node_100
   - mongodb_gateway
-  - mysql_node
+  - mysql_node_100
   - mysql_gateway
-  - postgresql_node
+  - postgresql_node_100
   - postgresql_gateway
-  - redis_node
+  - redis_node_100
   - redis_gateway
-  - rabbit_node
+  - rabbit_node_100
   - rabbit_gateway
 properties:
   micro: true
@@ -137,72 +137,86 @@ properties:
         paid_memory_limit: 1024
     admins:
   mysql_gateway:
+    cc_api_version: v2
+    default_plan: "100"
     ip_route: 127.0.0.1
     token:
-    supported_versions: ["5.1"]
+    supported_versions: ["5.5"]
     version_aliases:
-      current: "5.1"
-  mysql_node:
+      current: "5.5"
+  mysql_node_100:
+    template: mysql_node_ng
     ip_route: 127.0.0.1
     available_storage: 2048
     password:
     max_db_size: 256
-    supported_versions: ["5.1"]
-    default_version: "5.1"
+    supported_versions: ["5.5"]
+    default_version: "5.5"
   redis_gateway:
+    cc_api_version: v2
+    default_plan: "100"
+    ip_route: 127.0.0.1
+    token:
+    supported_versions: ["2.6"]
+    version_aliases:
+      current: "2.6"
+  redis_node_100:
+    template: redis_node_ng
+    ip_route: 127.0.0.1
+    available_memory: 256
+    supported_versions: ["2.6"]
+    default_version: "2.6"
+  mongodb_gateway:
+    cc_api_version: v2
+    default_plan: "100"
     ip_route: 127.0.0.1
     token:
     supported_versions: ["2.2"]
     version_aliases:
       current: "2.2"
-  redis_node:
+  mongodb_node_100:
+    template: mondodb_node_ng
     ip_route: 127.0.0.1
     available_memory: 256
     supported_versions: ["2.2"]
     default_version: "2.2"
-  mongodb_gateway:
-    ip_route: 127.0.0.1
-    token:
-    supported_versions: ["1.8", "2.0"]
-    version_aliases:
-      current: "2.0"
-      deprecated: "1.8"
-  mongodb_node:
-    ip_route: 127.0.0.1
-    available_memory: 256
-    supported_versions: ["1.8", "2.0"]
-    default_version: "1.8"
   postgresql_gateway:
+    cc_api_version: v2
+    default_plan: "100"
     ip_route: 127.0.0.1
     admin_user: psql_admin
     admin_passwd_hash:
     token:
-    supported_versions: ["9.0"]
+    supported_versions: ["9.1"]
     version_aliases:
-      current: "9.0"
-  postgresql_node:
+      current: "9.1"
+  postgresql_node_100:
+    template: postgresql_node_ng
     ip_route: 127.0.0.1
     admin_user: psql_admin
     admin_passwd_hash:
     available_storage: 2048
     max_db_size: 256
     max_long_tx: 30
-    supported_versions: ["9.0"]
-    default_version: "9.0"
+    supported_versions: ["9.1"]
+    default_version: "9.1"
   postgresql_server:
     max_connections: 30
     listen_address: 127.0.0.1
   rabbit_gateway:
+    cc_api_version: v2
+    default_plan: "100"
     ip_route: 127.0.0.1
     port: 8000
     token:
-    supported_versions: ["2.4"]
+    supported_versions: ["2.8"]
     version_aliases:
-      current: "2.4"
-  rabbit_node:
+      current: "2.8"
+  rabbit_node_100:
+    template: rabbit_node_ng
     ip_route: 127.0.0.1
-    supported_versions: ["2.4"]
-    default_version: "2.4"
+    supported_versions: ["2.8"]
+    default_version: "2.8"
   serialization_data_server:
     upload_token:
     use_nginx: false
@@ -274,69 +288,121 @@ properties:
     enabled: false
   service_plans:
     mysql:
-      free:
+      "100":
+        description: "Shared server, shared VM, 1MB memory, 10MB storage, 10 connections"
+        free: true
         job_management:
-          high_water: 1400
+          high_water: 900
           low_water: 100
         configuration:
-          allow_over_provisioning: true
-          capacity: 200
-          max_db_size: 128
+          capacity: 500
+          max_db_size: 10
+          key_buffer: 512
+          innodb_buffer_pool_size: 512
+          max_allowed_packet: 16
+          thread_cache_size: 128
+          query_cache_size: 128
           max_long_query: 3
           max_long_tx: 30
-          max_clients: 20
+          max_clients: 10
+          max_connections: 1000
+          table_open_cache: 2000
+          innodb_tables_per_database: 50
+          connection_pool_size:
+            min: 5
+            max: 10
           backup:
             enable: true
+          lifecycle:
+            enable: true
+            serialization: enable
+            snapshot:
+              quota: 1
+          warden:
+            enable: false
     postgresql:
-      free:
+      "100":
+        description: "Shared server, shared VM, 1MB memory, 10MB storage, 10 connections"
+        free: true
         job_management:
-          high_water: 1400
+          high_water: 900
           low_water: 100
         configuration:
-          capacity: 200
-          max_db_size: 128
+          capacity: 500
+          max_db_size: 10
           max_long_query: 3
-          max_long_tx: 30
-          max_clients: 20
+          max_long_tx: 10
+          max_clients: 10
+          max_connections: 1000
+          shared_buffers: 320
+          effective_cache_size: 1142
+          shmmax: 397410304
+          checkpoint_segments: 16
+          checkpoint_segments_max: 50
+          maintenance_work_mem: 30
           backup:
             enable: true
+          lifecycle:
+            enable: true
+            serialization: enable
+            snapshot:
+              quota: 1
+          warden:
+            enable: false
     mongodb:
-      free:
+      "100":
+        description: "Dedicated server, shared VM, 250MB storage, 10 connections"
+        free: true
         job_management:
-          high_water: 3000
-          low_water: 100
+          high_water: 230
+          low_water: 20
         configuration:
-          allow_over_provisioning: true
-          capacity: 200
+          capacity: 125
+          max_clients: 10
           quota_files: 4
-          max_clients: 500
+          quota_data_size: 240
+          enable_journaling: true
           backup:
             enable: true
+          lifecycle:
+            enable: true
+            serialization: enable
+            snapshot:
+              quota: 1
     rabbit:
-      free:
+      "100":
+        description: "Dedicated server, shared VM, 1MB messages/day, 10 connections"
+        free: true
         job_management:
-          low_water: 100
-          high_water: 1400
+          high_water: 280
+          low_water: 20
         configuration:
-          max_memory_factor: 0.5
-          max_clients: 512
-          capacity: 200
+          capacity: 150
+          max_disk: 10
+          max_clients: 10
+          vm_memory_high_watermark: 0.00587
+          free_disk_low_water: 0.01832
+          bandwidth_quotas:
+            per_day: 1
+            per_second: 0.01
+          filesystem_quota: true
     redis:
-      free:
+      "100":
+        description: "Dedicated server, shared VM, 20MB memory, 50 connections"
+        free: true
         job_management:
-          high_water: 1400
-          low_water: 100
+          high_water: 410
+          low_water: 40
         configuration:
-          capacity: 200
-          max_memory: 16
-          max_swap: 32
-          max_clients: 500
+          capacity: 220
+          max_memory: 20
+          memory_overhead: 20
+          max_clients: 50
+          persistent: true
           backup:
             enable: true
-    vblob:
-      free:
-        job_management:
-          low_water: 100
-          high_water: 1400
-        configuration:
-          capacity: 200
+          lifecycle:
+            enable: true
+            serialization: enable
+            snapshot:
+              quota: 1
