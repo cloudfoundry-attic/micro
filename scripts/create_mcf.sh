@@ -114,4 +114,4 @@ CPI=vsphere
 MANIFEST=${MANIFEST:-$MICRO_DIR/deploy/manifest.yml}
 LATEST_RELEASE=`ls -t ${CF_RELEASE_DIR}/dev_releases/*.tgz | head -1`
 
-bundle exec rake stemcell:mcf[$CPI,$MANIFEST,$LATEST_RELEASE]
+bundle exec rake stemcell:mcf[$CPI,$MANIFEST,$LATEST_RELEASE,$MICRO_DIR]
