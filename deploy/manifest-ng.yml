@@ -16,16 +16,10 @@ jobs:
   - serialization_data_server
   - uaa
   - vcap_redis
-  - mongodb_node
-  - mongodb_gateway
-  - mysql_node
-  - mysql_gateway
-  - postgresql_node
-  - postgresql_gateway
-  - redis_node
-  - redis_gateway
-  - rabbit_node
-  - rabbit_gateway
+  - mysql_node_ng
+  - mysql_gateway_ng
+  - postgresql_node_ng
+  - postgresql_gateway_ng
 properties:
   micro: true
   domain: vcap.me
@@ -139,16 +133,18 @@ properties:
   mysql_gateway:
     ip_route: 127.0.0.1
     token:
-    supported_versions: ["5.1"]
+    supported_versions: ["5.5"]
     version_aliases:
-      current: "5.1"
+      current: "5.5"
+    default_plan: "100"
   mysql_node:
     ip_route: 127.0.0.1
     available_storage: 2048
     password:
     max_db_size: 256
-    supported_versions: ["5.1"]
-    default_version: "5.1"
+    supported_versions: ["5.5"]
+    default_version: "5.5"
+    max_tmp: 1024
   redis_gateway:
     ip_route: 127.0.0.1
     token:
@@ -177,9 +173,10 @@ properties:
     admin_user: psql_admin
     admin_passwd_hash:
     token:
-    supported_versions: ["9.0"]
+    supported_versions: ["9.1"]
     version_aliases:
-      current: "9.0"
+      current: "9.1"
+    default_plan: "100"
   postgresql_node:
     ip_route: 127.0.0.1
     admin_user: psql_admin
@@ -187,8 +184,8 @@ properties:
     available_storage: 2048
     max_db_size: 256
     max_long_tx: 30
-    supported_versions: ["9.0"]
-    default_version: "9.0"
+    supported_versions: ["9.1"]
+    default_version: "9.1"
   postgresql_server:
     max_connections: 30
     listen_address: 127.0.0.1
@@ -273,34 +270,72 @@ properties:
   db: ccdb_ng
   login:
     enabled: false
+  plan: "100"
   service_plans:
     mysql:
-      free:
+      "100":
+        description: "Shared server, shared VM, 1MB memory, 10MB storage, 10 connections"
+        free: true
         job_management:
-          high_water: 1400
-          low_water: 100
+          high_water: 450
+          low_water: 50
         configuration:
-          allow_over_provisioning: true
-          capacity: 200
-          max_db_size: 128
+          capacity: 500
+          max_db_size: 10
+          key_buffer: 512
+          innodb_buffer_pool_size: 512
+          max_allowed_packet: 16
+          thread_cache_size: 128
+          query_cache_size: 128
           max_long_query: 3
           max_long_tx: 30
-          max_clients: 20
+          max_clients: 10
+          max_connections: 1000
+          table_open_cache: 2000
+          innodb_tables_per_database: 50
+          connection_pool_size:
+            min: 5
+            max: 10
           backup:
             enable: true
+          lifecycle:
+            enable: true
+            serialization: enable
+            snapshot:
+              quota: 1
+            worker_count: 5
+          warden:
+            enable: false
     postgresql:
-      free:
+      "100":
+        description: "Shared server, shared VM, 1MB memory, 10MB storage, 10 connections"
+        free: true
         job_management:
-          high_water: 1400
-          low_water: 100
+          high_water: 450
+          low_water: 50
         configuration:
-          capacity: 200
-          max_db_size: 128
+          capacity: 500
+          max_db_size: 10
           max_long_query: 3
-          max_long_tx: 30
-          max_clients: 20
+          max_long_tx: 10
+          max_clients: 10
+          max_connections: 1000
+          shared_buffers: 312
+          effective_cache_size: 1115
+          shmmax: 390070272
+          checkpoint_segments: 16
+          checkpoint_segments_max: 50
+          maintenance_work_mem: 30
           backup:
             enable: true
+          lifecycle:
+            enable: true
+            serialization: enable
+            snapshot:
+              quota: 1
+            worker_count: 5
+          warden:
+            enable: false
     mongodb:
       free:
         job_management:
