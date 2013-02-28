@@ -254,6 +254,7 @@ properties:
         id: vmc
         redirect-uri: http://uaa.cloudfoundry.com/redirect/vmc,https://uaa.cloudfoundry.com/redirect/vmc
         access-token-validity: 604800
+    no_ssl: true
   uaadb:
     address: 127.0.0.1
     port: 2544
