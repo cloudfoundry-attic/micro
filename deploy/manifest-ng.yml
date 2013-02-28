@@ -16,15 +16,15 @@ jobs:
   - serialization_data_server
   - uaa
   - vcap_redis
-  - mongodb_node_ng
+  - mongodb_node_100
   - mongodb_gateway
-  - mysql_node_ng
+  - mysql_node_100
   - mysql_gateway
-  - postgresql_node_ng
+  - postgresql_node_100
   - postgresql_gateway
-  - redis_node_ng
+  - redis_node_100
   - redis_gateway
-  - rabbit_node_ng
+  - rabbit_node_100
   - rabbit_gateway
 properties:
   micro: true
