@@ -17,9 +17,9 @@ jobs:
   - uaa
   - vcap_redis
   - mysql_node_ng
-  - mysql_gateway_ng
+  - mysql_gateway
   - postgresql_node_ng
-  - postgresql_gateway_ng
+  - postgresql_gateway
 properties:
   micro: true
   domain: vcap.me
