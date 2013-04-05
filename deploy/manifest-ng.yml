@@ -20,6 +20,8 @@ jobs:
   - mysql_gateway
   - postgresql_node_ng
   - postgresql_gateway
+  - mongodb_gateway
+  - mongodb_node_ng
 properties:
   micro: true
   domain: vcap.me
@@ -166,8 +168,9 @@ properties:
   mongodb_node:
     ip_route: 127.0.0.1
     available_memory: 256
-    supported_versions: ["1.8", "2.0"]
-    default_version: "1.8"
+    supported_versions: ["2.2"]
+    default_version: "2.2"
+    max_tmp: 900
   postgresql_gateway:
     ip_route: 127.0.0.1
     admin_user: psql_admin
@@ -186,6 +189,7 @@ properties:
     max_long_tx: 30
     supported_versions: ["9.1"]
     default_version: "9.1"
+    password: secret
   postgresql_server:
     max_connections: 30
     listen_address: 127.0.0.1
@@ -253,6 +257,7 @@ properties:
         access-token-validity: 604800
     no_ssl: true
   uaadb:
+    db_scheme: postgresql
     address: 127.0.0.1
     port: 2544
     roles:
@@ -337,17 +342,28 @@ properties:
           warden:
             enable: false
     mongodb:
-      free:
+      "100":
+        description: "Dedicated server, shared VM, 250MB storage, 10 connections"
+        free: true
         job_management:
-          high_water: 3000
-          low_water: 100
+          high_water: 100
+          low_water: 20
         configuration:
-          allow_over_provisioning: true
-          capacity: 200
+          capacity: 125
+          max_clients: 10
           quota_files: 4
-          max_clients: 500
+          quota_data_size: 240
+          enable_journaling: true
           backup:
             enable: true
+          lifecycle:
+            enable: true
+            serialization: enable
+            snapshot:
+              quota: 1
+            worker_count: 5
+          warden:
+            enable: false
     rabbit:
       free:
         job_management:
