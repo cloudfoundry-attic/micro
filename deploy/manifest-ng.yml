@@ -54,7 +54,7 @@ properties:
   ccdb:
     template: postgres
     address: 127.0.0.1
-    port: 2544
+    port: 2545
     databases:
     - tag: cc
       name: appcloud
@@ -70,7 +70,7 @@ properties:
 
   ccdb_ng:
     address: 127.0.0.1
-    port: 2544
+    port: 2545
     pool_size: 10
     max_connections: 256
     databases:
@@ -266,7 +266,7 @@ properties:
   uaadb:
     db_scheme: postgresql
     address: 127.0.0.1
-    port: 2544
+    port: 2545
     roles:
     - tag: admin
       name: uaa
