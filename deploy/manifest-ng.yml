@@ -72,6 +72,7 @@ properties:
     address: 127.0.0.1
     port: 2544
     pool_size: 10
+    max_connections: 256
     databases:
     - tag: cc
       name: appcloud_ng
@@ -247,14 +248,20 @@ properties:
     scim:
       users:
         - micro@vcap.me|micro|scim.write,scim.read,openid
+    client:
+      autoapprove:
+        - cf
+        - my
+        - portal
+        - micro
+        - support-signon
+        - login
     clients:
-      vmc:
-        authorized-grant-types: implicit,password,refresh_token
-        scope: cloud_controller.read,cloud_controller.write,openid,password.write
+      cf:
+        override: true
+        authorized-grant-types: password,implicit
         authorities: uaa.none
-        id: vmc
-        redirect-uri: http://uaa.cloudfoundry.com/redirect/vmc,https://uaa.cloudfoundry.com/redirect/vmc
-        access-token-validity: 604800
+        scope: cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write
     no_ssl: true
   uaadb:
     db_scheme: postgresql
