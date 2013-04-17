@@ -36,7 +36,7 @@ GIT
       crack (~> 0.3.2)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     agent_client (0.1.1)
       httpclient
