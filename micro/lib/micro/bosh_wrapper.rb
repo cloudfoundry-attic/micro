@@ -101,7 +101,7 @@ module VCAP
 
       # Create an HTTP client for the Bosh agent.
       def agent_client
-        Bosh::Agent::Client.create('http://localhost:6969',
+        Bosh::Agent::Client.create('https://localhost:6969',
           'user' => 'vcap',
           'password' => 'vcap')
       end
