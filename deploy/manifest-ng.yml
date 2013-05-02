@@ -92,7 +92,7 @@ properties:
     shadow_mode: disable
     cc_partition: ng
 
-  cc:
+  cc: &cc
     description: "VMware's Micro Cloud Application Platform"
     srv_api_uri: http://api.vcap.me
     password:
@@ -121,12 +121,7 @@ properties:
       service_lifecycle:
         max_upload_size: 5
     use_nginx: true
-    db_encryption_key: "secret"
-
-  ccng:
     bootstrap_admin_email: micro@vcap.me
-    srv_api_uri: http://ccng.vcap.me
-    external_host: ccng
     uaa_resource_id: cloud_controller
     quota_definitions:
       free:
@@ -134,6 +129,10 @@ properties:
         free_memory_limit: 256
         paid_memory_limit: 1024
     admins:
+    db_encryption_key: "secret"
+
+  ccng: *cc
+
   mysql_gateway:
     ip_route: 127.0.0.1
     token:
