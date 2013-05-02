@@ -121,6 +121,7 @@ properties:
       service_lifecycle:
         max_upload_size: 5
     use_nginx: true
+    db_encryption_key: "secret"
 
   ccng:
     bootstrap_admin_email: micro@vcap.me
